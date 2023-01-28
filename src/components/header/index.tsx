@@ -7,6 +7,7 @@ import {
   Content,
   Logo,
   Text,
+  Tooltip,
   Title,
   ExtendedTitle,
   NarrowTitle,
@@ -23,6 +24,8 @@ type Theme = typeof Themes.LIGHT | typeof Themes.DARK;
 interface HeaderState {
   theme: Theme;
   emoji: keyof typeof emoji;
+  drankCoffees: number;
+  showTooltip: boolean;
 }
 
 export default component$(() => {
@@ -37,6 +40,8 @@ export default component$(() => {
   const store = useStore<HeaderState>({
     theme: Themes.DARK,
     emoji: 'HEART',
+    drankCoffees: 0,
+    showTooltip: false,
   });
 
   const toggleTheme = $(() => {
@@ -60,17 +65,41 @@ export default component$(() => {
 
         <ExtendedTitle>
           <Text
-            onMouseEnter$={() => store.emoji = 'COFFEE'}
+            onMouseEnter$={() => {
+              if (store.drankCoffees < 3) {
+                store.emoji = 'COFFEE';
+              }
+            }}
             onMouseLeave$={() => store.emoji = 'HEART'}
           >
             Made with
+
             <span
-              onClick$={() => store.emoji = 'HEART'}
+              onClick$={() => {
+                if (store.emoji === 'COFFEE') {
+                  store.emoji = 'HEART';
+                  store.drankCoffees += 1;
+                }
+              }}
+              onMouseEnter$={() => {
+                if (store.drankCoffees >= 3) {
+                  store.showTooltip = true;
+                }
+              }}
+              onMouseLeave$={() => store.showTooltip = false}
               class={emoji[store.emoji]}
             >
               {Emoji[store.emoji]}
+
+              {store.showTooltip && (
+                <Tooltip>
+                  A bit too much {Emoji.COFFEE} ?
+                </Tooltip>
+              )}
             </span>
+
             by
+
             <Link href='/' class={textLink}>
               <Title>{title}</Title>
             </Link>
