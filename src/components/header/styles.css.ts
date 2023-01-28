@@ -70,7 +70,6 @@ export const logoLink = style({
   background: 'linear-gradient(to bottom, transparent 50%, #22192c 50%) top',
   backgroundSize: '100% 200%',
   transition: '.25s ease-out',
-  marginLeft: 8,
 
   ':hover': {
     backgroundPosition: 'bottom',
@@ -111,10 +110,10 @@ export const textLink = style({
 });
 
 export const Buttons = styled.div({
-  margin: '0 20px 0 10px',
   display: 'flex',
   alignItems: 'center',
   gap: 15,
+  margin: '0 12px 0 10px',
 });
 
 export const Icon = styled.img({
