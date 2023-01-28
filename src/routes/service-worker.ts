@@ -11,8 +11,15 @@ import { setupServiceWorker } from '@builder.io/qwik-city/service-worker';
 
 setupServiceWorker();
 
-addEventListener('install', () => self.skipWaiting());
+addEventListener('install', () => {
 
-addEventListener('activate', () => self.clients.claim());
+  console.log('@@@@ install ');
+  self.skipWaiting()
+});
+
+addEventListener('activate', () => {
+  console.log('@@@@ activate ');
+  self.clients.claim()
+});
 
 declare const self: ServiceWorkerGlobalScope;

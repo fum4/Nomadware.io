@@ -1,4 +1,4 @@
-import { component$, useStyles$ } from '@builder.io/qwik';
+import { component$, useStyles$, useTask$ } from '@builder.io/qwik';
 import { QwikCityProvider, RouterOutlet, ServiceWorkerRegister } from '@builder.io/qwik-city';
 
 import { RouterHead } from './components/router-head/router-head';
@@ -13,6 +13,10 @@ export default component$(() => {
    * Dont remove the `<head>` and `<body>` elements.
    */
   useStyles$(globalStyles);
+
+  useTask$(() => {
+
+  })
 
   return (
     <QwikCityProvider>

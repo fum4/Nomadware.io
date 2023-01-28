@@ -1,13 +1,15 @@
 import { component$ } from '@builder.io/qwik';
-import type { DocumentHead } from '@builder.io/qwik-city';
+import type { DocumentHead, RequestHandler } from '@builder.io/qwik-city';
 
 import Rain from '~/components/rain';
 
-export default component$(() => (
-  <div class={'root'}>
-    <Rain />
-  </div>
-));
+export default component$(() => {
+  return (
+    <div class={'root'}>
+      <Rain />
+    </div>
+  )
+});
 
 export const head: DocumentHead = {
   title: 'Nomadware.io',

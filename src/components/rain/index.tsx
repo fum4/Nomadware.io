@@ -3,7 +3,7 @@ import { component$, useSignal, useStore, useClientEffect$, useOnWindow, $ } fro
 import { Root, Canvas } from './styles.css';
 
 interface RainCoordinates {
-  width: number; // TODO: ??
+  w: number; // TODO: ??
   x: number;
   y: number;
   z: number;
@@ -17,6 +17,7 @@ interface State {
   msTimer: number;
   width : number;
   height: number;
+  offsetLeft: number;
   isRaining: boolean;
   rainProgress: number;
 }
@@ -26,12 +27,13 @@ export default component$(() => {
 
   const store = useStore<State>({
     rainCoordinates: [] as RainCoordinates[],
-    lightningTimer: 8000,
+    lightningTimer: 10000,
     lightningAlpha: 0,
     rainSpeed: 2,
     msTimer: 0,
     width: 0,
     height: 0,
+    offsetLeft: 0,
     isRaining: false,
     rainProgress: 0,
   });
@@ -45,6 +47,7 @@ export default component$(() => {
 
       store.width = width;
       store.height = height;
+      store.offsetLeft = width / 2;
     }
   });
 
@@ -52,7 +55,7 @@ export default component$(() => {
     const ctx = canvasRef.value?.getContext('2d');
 
     if (ctx) {
-      ctx.fillStyle = '#202224';
+      ctx.fillStyle = '#11121a';
       ctx.fillRect(0, 520, store.width, store.height - 520);
     }
   });
@@ -61,29 +64,29 @@ export default component$(() => {
     const ctx = canvasRef.value?.getContext('2d');
 
     if (ctx) {
-      ctx.fillStyle = '#343A34';
+      ctx.fillStyle = '#2c3c4a';
       ctx.fillRect(0, 500, store.width, 10);
 
-      let gradient = ctx.createRadialGradient(250, 500, 0, 250, 500, 150);
+      let gradient = ctx.createRadialGradient(store.offsetLeft, 500, 0, store.offsetLeft, 500, 150);
 
-      gradient.addColorStop(0.0, 'rgba(32, 36, 38, .0)');
-      gradient.addColorStop(0.2, 'rgba(32, 36, 38, 0.1)');
-      gradient.addColorStop(0.6, 'rgba(32, 36, 38, 0.2)');
-      gradient.addColorStop(0.8, 'rgba(32, 36, 38, 0.6)');
-      gradient.addColorStop(1, 'rgba(32, 34, 38, .8)');
+      gradient.addColorStop(0.0, 'rgba(18,10,35, .0)');
+      gradient.addColorStop(0.2, 'rgba(18,10,35, 0.1)');
+      gradient.addColorStop(0.6, 'rgba(18,10,35, 0.2)');
+      gradient.addColorStop(0.8, 'rgba(18,10,35, 0.6)');
+      gradient.addColorStop(1, 'rgba(18,15,35, .8)');
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 500, store.width, 10);
 
-      ctx.fillStyle = '#343A34';
+      ctx.fillStyle = '#2c3c4a';
       ctx.fillRect(0, 510, store.width, 10);
 
-      gradient = ctx.createRadialGradient(250, 500, 0, 250, 500, 150);
+      gradient = ctx.createRadialGradient(store.offsetLeft, 500, 0, store.offsetLeft, 500, 150);
 
-      gradient.addColorStop(0.0, 'rgba(32, 36, 38, 0.7)');
-      gradient.addColorStop(0.2, 'rgba(32, 36, 38, 0.8)');
-      gradient.addColorStop(0.4, 'rgba(32, 36, 38, 0.85)');
-      gradient.addColorStop(1, 'rgba(32, 34, 38, .9)');
+      gradient.addColorStop(0.0, 'rgba(7,8,17, 0.7)');
+      gradient.addColorStop(0.2, 'rgba(7,8,17, 0.8)');
+      gradient.addColorStop(0.4, 'rgba(7,8,17, 0.85)');
+      gradient.addColorStop(1, 'rgba(7,5,17, .9)');
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 510, store.width, 10);
@@ -94,45 +97,45 @@ export default component$(() => {
     const ctx = canvasRef.value?.getContext('2d');
 
     if (ctx) {
-      const gradient = ctx.createLinearGradient(150, 210, 150, 500);
+      const gradient = ctx.createLinearGradient(store.offsetLeft, 210, store.offsetLeft, 500);
 
-      gradient.addColorStop(0.000, 'rgba(60, 60, 60, 1.000)');
-      gradient.addColorStop(0.2, 'rgba(80, 80, 80, 1.000)');
-      gradient.addColorStop(1, 'rgba(45, 45, 45, 1.000)');
+      gradient.addColorStop(0.000, 'rgba(30, 30, 60, 1.000)');
+      gradient.addColorStop(0.2, 'rgba(50, 50, 80, 1.000)');
+      gradient.addColorStop(1, 'rgba(15, 15, 45, 1.000)');
 
       ctx.fillStyle = gradient;
-      ctx.fillRect(247, 210, 6, 290);
+      ctx.fillRect(store.offsetLeft, 210, 6, 290);
 
-      const gradientOuterHigh = ctx.createLinearGradient(150, 210, 150, 500);
+      const gradientOuterHigh = ctx.createLinearGradient(store.offsetLeft, 210, store.offsetLeft, 500);
 
-      gradientOuterHigh.addColorStop(0.000, 'rgba(65, 65, 65, 1.000)');
-      gradientOuterHigh.addColorStop(0.2, 'rgba(95, 95, 95, 1.000)');
-      gradientOuterHigh.addColorStop(1, 'rgba(47, 47, 47, 1.000)');
+      gradientOuterHigh.addColorStop(0.000, 'rgba(35, 35, 75, 1.000)');
+      gradientOuterHigh.addColorStop(0.2, 'rgba(65, 65, 105, 1.000)');
+      gradientOuterHigh.addColorStop(1, 'rgba(17, 22, 57, 1.000)');
 
       ctx.fillStyle = gradientOuterHigh;
-      ctx.fillRect(246, 210, 1, 290);
+      ctx.fillRect(store.offsetLeft - 1, 210, 1, 290);
 
-      const gradientOuterLow = ctx.createLinearGradient(150, 210, 150, 500);
+      const gradientOuterLow = ctx.createLinearGradient(store.offsetLeft, 210, store.offsetLeft, 500);
 
-      gradientOuterLow.addColorStop(0.000, 'rgba(45, 45, 45, 1.000)');
-      gradientOuterLow.addColorStop(0.2, 'rgba(60, 60, 60, 1.000)');
-      gradientOuterLow.addColorStop(1, 'rgba(43, 43, 43, 1.000)');
+      gradientOuterLow.addColorStop(0.000, 'rgba(35, 35, 65, 1.000)');
+      gradientOuterLow.addColorStop(0.2, 'rgba(50, 50, 80, 1.000)');
+      gradientOuterLow.addColorStop(1, 'rgba(33, 33, 63, 1.000)');
 
       ctx.fillStyle = gradientOuterLow;
-      ctx.fillRect(253, 210, 1, 290);
+      ctx.fillRect(store.offsetLeft + 6, 210, 1, 290);
 
       // Modify glow based on passed time
       const sinGlowMod = 5 * Math.sin(store.msTimer / 200);
       const cosGlowMod = 5 * Math.cos((store.msTimer + 0.5 * sinGlowMod) / 200);
-      const gradientGlow = ctx.createRadialGradient(250, 200, 0, 247 + sinGlowMod, 400, 206 + cosGlowMod);
+      const gradientGlow = ctx.createRadialGradient(store.offsetLeft + 3, 200, 0, store.offsetLeft + sinGlowMod, 400, 206 + cosGlowMod);
 
-      gradientGlow.addColorStop(0.000, 'rgba(220, 240, 160, 1)');
-      gradientGlow.addColorStop(0.2, 'rgba(180, 240, 160, 0.4)');
-      gradientGlow.addColorStop(0.4, 'rgba(140, 240, 160, 0.2)');
-      gradientGlow.addColorStop(1, 'rgba(140, 240, 160, 0)');
+      gradientGlow.addColorStop(0.000, 'rgba(140, 180, 160, 1)');
+      gradientGlow.addColorStop(0.2, 'rgba(100, 180, 160, 0.4)');
+      gradientGlow.addColorStop(0.4, 'rgba(60, 180, 160, 0.2)');
+      gradientGlow.addColorStop(1, 'rgba(60, 140, 160, 0)');
 
       ctx.fillStyle = gradientGlow;
-      ctx.fillRect(0, 0, 500, 500);
+      ctx.fillRect(store.offsetLeft - 220, 0, 500, 500);
     }
   });
 
@@ -174,16 +177,16 @@ export default component$(() => {
           if (store.rainCoordinates[i].x < -10) {
             store.rainCoordinates[i].x += store.width;
           } else {
-            store.rainCoordinates[i].y += store.rainCoordinates[i].width * store.rainSpeed;
-            store.rainCoordinates[i].x -= 5 + Math.floor(store.rainCoordinates[i].y / 250) - store.rainCoordinates[i].width;
+            store.rainCoordinates[i].y += store.rainCoordinates[i].w * store.rainSpeed;
+            store.rainCoordinates[i].x -= 5 + Math.floor(store.rainCoordinates[i].y / 250); // - store.rainCoordinates[i].w;
           }
 
-          const gradient = ctx.createRadialGradient(250, 450, 140, 250, 300, 600);
+          const gradient = ctx.createRadialGradient(store.offsetLeft, 450, 140, store.offsetLeft, 300, 600);
 
-          gradient.addColorStop(0.000, 'rgba(100, 170, 160, 0.2)');
-          gradient.addColorStop(0.1, 'rgba(100, 160, 160, 0.12)');
-          gradient.addColorStop(0.2, 'rgba(100, 150, 150, 0.1)');
-          gradient.addColorStop(1, 'rgba(100, 140, 140, .08)');
+          gradient.addColorStop(0.000, 'rgba(100, 170, 160, 0.25)');
+          gradient.addColorStop(0.1, 'rgba(100, 160, 160, 0.17)');
+          gradient.addColorStop(0.2, 'rgba(100, 150, 150, 0.15)');
+          gradient.addColorStop(1, 'rgba(100, 140, 140, .13)');
 
           ctx.fillStyle = gradient;
           ctx.fillRect(store.rainCoordinates[i].x, store.rainCoordinates[i].y, store.rainCoordinates[i].z, 4);
@@ -223,7 +226,7 @@ export default component$(() => {
           store.rainCoordinates[j].x = Math.floor((Math.random() * 820) - 9);
           store.rainCoordinates[j].y = Math.floor((Math.random() * 520) - 9);
           store.rainCoordinates[j].z = Math.floor((Math.random() * 2) + 1);
-          store.rainCoordinates[j].width = Math.floor((Math.random() * 3) + 2);
+          store.rainCoordinates[j].w = Math.floor((Math.random() * 3) + 2);
         }
       };
 
@@ -236,7 +239,7 @@ export default component$(() => {
           store.lightningTimer -= 30;
         }
 
-        ctx.fillStyle = '#202426';
+        ctx.fillStyle = '#0e0f1a';
         ctx.fillRect(0,0, store.width, store.height);
 
         drawSidewalk();
@@ -257,13 +260,13 @@ export default component$(() => {
 
       setupRain();
 
-      setInterval(mainLoop, 30); // TODO: check if needs clean up
+      const mainLoopInterval = setInterval(mainLoop, 30);
 
-      setTimeout(() => {
+      const lightningTimerTimeout = setTimeout(() => {
         lightningTimer = 30000;
       }, lightningTimer * 2);
 
-      setTimeout(() => {
+      const rainingTimeout = setTimeout(() => {
         store.isRaining = true;
 
         const rainProgressInterval = setInterval(() => {
@@ -276,10 +279,20 @@ export default component$(() => {
           } else {
             clearInterval(rainProgressInterval);
 
-            setTimeout(() => store.rainSpeed = 4, 4500);
+            const rainSpeedTimeout = setTimeout(() => {
+              store.rainSpeed = 4;
+
+              clearTimeout(rainSpeedTimeout);
+            }, 6500);
           }
         }, 100);
       }, 1000);
+
+      return () => {
+        clearInterval(mainLoopInterval);
+        clearTimeout(lightningTimerTimeout);
+        clearTimeout(rainingTimeout);
+      };
     }
   });
 
