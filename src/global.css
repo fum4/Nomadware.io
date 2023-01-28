@@ -43,6 +43,7 @@ footer {
 a,
 a:hover,
 a:focus {
+  color: #90a4bb;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }

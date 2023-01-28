@@ -1,4 +1,5 @@
 import { styled, style } from 'styled-vanilla-extract/qwik';
+import { styleVariants } from '@vanilla-extract/css';
 
 export const Header = styled.header({
   backgroundColor: 'rgba(0, 0, 0, .15)',
@@ -29,7 +30,11 @@ export const Text = styled.span({
   color: '#90a4bb',
   fontWeight: 100,
   display: 'flex',
-  alignItems: 'center'
+  alignItems: 'center',
+
+  ':hover': {
+    cursor: 'default',
+  }
 });
 
 export const Title = styled.h4({
@@ -54,12 +59,29 @@ export const NarrowTitle = styled.span({
   }
 });
 
-export const Emoji = styled.span({
+export const baseEmojiStyle = style({
   width: 18,
   padding: 4,
   display: 'flex',
   justifyContent: 'center',
-})
+
+  ':hover': {
+    cursor: 'grab',
+  }
+});
+
+export const emoji = styleVariants({
+  HEART: [baseEmojiStyle, {
+    ':hover': {
+      cursor: 'default',
+    }
+  }],
+  COFFEE: [baseEmojiStyle, {
+    ':hover': {
+      cursor: 'grab',
+    }
+  }]
+});
 
 export const logoLink = style({
   textDecoration: 'none',

@@ -1,6 +1,6 @@
 import { createThemeContract } from '@vanilla-extract/css';
 
-export const Themes = {
+export const Themes: Record<'DARK' | 'LIGHT', 'dark' | 'light'> = {
   DARK: 'dark',
   LIGHT: 'light',
 }

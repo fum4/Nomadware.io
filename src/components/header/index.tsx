@@ -10,21 +10,33 @@ import {
   Title,
   ExtendedTitle,
   NarrowTitle,
-  Emoji,
   Icon,
   Buttons,
   Anchor,
   logoLink,
-  textLink
+  textLink,
+  emoji
 } from './styles.css';
 
-export default component$(() => {
-  const heartEmoji = '♡';
-  const coffeeEmoji = '☕';
+type Theme = typeof Themes.LIGHT | typeof Themes.DARK;
 
-  const store = useStore({
+interface HeaderState {
+  theme: Theme;
+  emoji: keyof typeof emoji;
+}
+
+export default component$(() => {
+  const githubUrl = 'https://github.com/fum4/Nomadware.io';
+  const title = 'Nomadware.io';
+
+  const Emoji = {
+    HEART: '♡',
+    COFFEE: '☕',
+  };
+
+  const store = useStore<HeaderState>({
     theme: Themes.DARK,
-    emoji: heartEmoji,
+    emoji: 'HEART',
   });
 
   const toggleTheme = $(() => {
@@ -33,7 +45,7 @@ export default component$(() => {
   });
 
   useClientEffect$(() => {
-    const localStorageTheme = localStorage.getItem('theme');
+    const localStorageTheme = localStorage.getItem('theme') as Theme;
     const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     store.theme = localStorageTheme || (isDarkTheme ? Themes.DARK : Themes.LIGHT);
@@ -43,24 +55,31 @@ export default component$(() => {
     <Header>
       <Content>
         <Link href='/' class={logoLink}>
-          <Logo alt='Nomadware.io logo' src='./logo.webp' />
+          <Logo alt={`${title} logo`} src='./logo.webp' />
         </Link>
 
         <ExtendedTitle>
           <Text
-            onMouseEnter$={() => store.emoji = coffeeEmoji}
-            onMouseLeave$={() => store.emoji = heartEmoji}
+            onMouseEnter$={() => store.emoji = 'COFFEE'}
+            onMouseLeave$={() => store.emoji = 'HEART'}
           >
-            Made with <Emoji>{store.emoji}</Emoji> by
+            Made with
+            <span
+              onClick$={() => store.emoji = 'HEART'}
+              class={emoji[store.emoji]}
+            >
+              {Emoji[store.emoji]}
+            </span>
+            by
             <Link href='/' class={textLink}>
-              <Title>Nomadware.io</Title>
+              <Title>{title}</Title>
             </Link>
           </Text>
         </ExtendedTitle>
 
         <NarrowTitle>
           <Link href='/' class={textLink}>
-            <Title>Nomadware.io</Title>
+            <Title>{title}</Title>
           </Link>
         </NarrowTitle>
 
@@ -70,7 +89,10 @@ export default component$(() => {
             src={`./${store.theme}-theme-icon.webp`}
             onClick$={toggleTheme}
           />
-          <Anchor href='https://github.com/fum4'>
+          <Anchor
+            href={githubUrl}
+            target='_blank'
+          >
             <Icon
               alt='GitHub logo'
               src='./github.svg'
