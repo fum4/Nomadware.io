@@ -56,7 +56,7 @@ export default component$(() => {
 
     if (ctx) {
       ctx.fillStyle = '#11121a';
-      ctx.fillRect(0, 520, store.width, store.height - 520);
+      ctx.fillRect(0, 515, store.width, store.height - 515);
     }
   });
 
@@ -65,7 +65,7 @@ export default component$(() => {
 
     if (ctx) {
       ctx.fillStyle = '#2c3c4a';
-      ctx.fillRect(0, 500, store.width, 10);
+      ctx.fillRect(0, 500, store.width, 5);
 
       let gradient = ctx.createRadialGradient(store.offsetLeft, 500, 0, store.offsetLeft, 500, 150);
 
@@ -79,7 +79,7 @@ export default component$(() => {
       ctx.fillRect(0, 500, store.width, 10);
 
       ctx.fillStyle = '#2c3c4a';
-      ctx.fillRect(0, 510, store.width, 10);
+      ctx.fillRect(0, 505, store.width, 10);
 
       gradient = ctx.createRadialGradient(store.offsetLeft, 500, 0, store.offsetLeft, 500, 150);
 
@@ -89,7 +89,7 @@ export default component$(() => {
       gradient.addColorStop(1, 'rgba(7,5,17, .9)');
 
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 510, store.width, 10);
+      ctx.fillRect(0, 505, store.width, 10);
     }
   });
 
