@@ -40,6 +40,22 @@ footer {
   margin: auto;
 }
 
+footer .made-with {
+  color: #90a4bb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+footer .made-with span {
+  margin-bottom: 6px;
+}
+
+footer svg {
+  height: 30px;
+}
+
 a,
 a:hover,
 a:focus {
