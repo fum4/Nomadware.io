@@ -117,6 +117,7 @@ export default component$(() => {
             alt={`Toggle ${store.theme} mode`}
             src={`./${store.theme}-theme-icon.webp`}
             onClick$={toggleTheme}
+            style={{ cursor: 'default', pointerEvents: 'none' }}
           />
           <Anchor
             href={githubUrl}
