@@ -2,13 +2,13 @@ import { component$ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 import Rain from '~/components/rain';
-import Report from '~/components/report';
+import Content from '~/components/content';
 
 export default component$(() => {
   return (
     <div class={'root'}>
       <Rain />
-      <Report />
+      <Content />
     </div>
   )
 });

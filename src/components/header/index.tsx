@@ -5,13 +5,13 @@ import { Themes } from '~/theme/index.css';
 import {
   Header,
   Content,
+  LogoBox,
   Logo,
   Text,
   Tooltip,
   Title,
-  ExtendedTitle,
-  NarrowTitle,
   Icon,
+  ButtonsBox,
   Buttons,
   Anchor,
   logoLink,
@@ -59,76 +59,72 @@ export default component$(() => {
   return (
     <Header>
       <Content>
-        <Link href='/' class={logoLink}>
-          <Logo alt={`${title} logo`} src='./logo.webp' />
-        </Link>
+        <LogoBox>
+          <Link href='/' class={logoLink}>
+            <Logo alt={`${title} logo`} src='./logo.webp' />
+          </Link>
+        </LogoBox>
 
-        <ExtendedTitle>
-          <Text
-            onMouseEnter$={() => {
-              if (store.drankCoffees < 3) {
-                store.emoji = 'COFFEE';
+        <Text
+          onMouseEnter$={() => {
+            if (store.drankCoffees < 3) {
+              store.emoji = 'COFFEE';
+            }
+          }}
+          onMouseLeave$={() => store.emoji = 'HEART'}
+        >
+          Made with
+
+          <span
+            onClick$={() => {
+              if (store.emoji === 'COFFEE') {
+                store.emoji = 'HEART';
+                store.drankCoffees += 1;
               }
             }}
-            onMouseLeave$={() => store.emoji = 'HEART'}
+            onMouseEnter$={() => {
+              if (store.drankCoffees >= 3) {
+                store.showTooltip = true;
+              }
+            }}
+            onMouseLeave$={() => store.showTooltip = false}
+            class={emoji[store.emoji]}
           >
-            Made with
+            {Emoji[store.emoji]}
 
-            <span
-              onClick$={() => {
-                if (store.emoji === 'COFFEE') {
-                  store.emoji = 'HEART';
-                  store.drankCoffees += 1;
-                }
-              }}
-              onMouseEnter$={() => {
-                if (store.drankCoffees >= 3) {
-                  store.showTooltip = true;
-                }
-              }}
-              onMouseLeave$={() => store.showTooltip = false}
-              class={emoji[store.emoji]}
-            >
-              {Emoji[store.emoji]}
+            {store.showTooltip && (
+              <Tooltip>
+                A bit too much {Emoji.COFFEE} ?
+              </Tooltip>
+            )}
+          </span>
 
-              {store.showTooltip && (
-                <Tooltip>
-                  A bit too much {Emoji.COFFEE} ?
-                </Tooltip>
-              )}
-            </span>
+          by
 
-            by
-
-            <Link href='/' class={textLink}>
-              <Title>{title}</Title>
-            </Link>
-          </Text>
-        </ExtendedTitle>
-
-        <NarrowTitle>
           <Link href='/' class={textLink}>
             <Title>{title}</Title>
           </Link>
-        </NarrowTitle>
+        </Text>
 
-        <Buttons>
-          <Icon
-            alt={`Toggle ${store.theme} mode`}
-            src={`./${store.theme}-theme-icon.webp`}
-            onClick$={toggleTheme}
-            style={{ cursor: 'default', pointerEvents: 'none' }}
-          />
-          <Anchor
-            href={githubUrl}
-            target='_blank'
-          >
+        <ButtonsBox>
+          <Buttons>
             <Icon
-              alt='GitHub logo'
-              src='./github.svg'
+              alt={`Toggle ${store.theme} mode`}
+              src={`./${store.theme}-theme-icon.webp`}
+              onClick$={toggleTheme}
+              style={{ cursor: 'default', pointerEvents: 'none' }}
             />
-          </Anchor>
-        </Buttons>
+            <Anchor
+              href={githubUrl}
+              target='_blank'
+            >
+              <Icon
+                alt='GitHub logo'
+                src='./github.svg'
+              />
+            </Anchor>
+          </Buttons>
+        </ButtonsBox>
       </Content>
     </Header>
   );

@@ -31,29 +31,8 @@ body {
   width: 100%;
 }
 
-footer {
-  padding: 15px;
-  text-align: center;
-  font-size: 0.8em;
-  position: absolute;
-  bottom: 0;
-  margin: auto;
-}
-
-footer .made-with {
-  color: #90a4bb;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-footer .made-with span {
-  margin-bottom: 6px;
-}
-
-footer svg {
-  height: 30px;
+p {
+  margin: 0;
 }
 
 a,

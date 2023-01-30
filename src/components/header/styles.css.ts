@@ -19,6 +19,10 @@ export const Content = styled.div({
   maxWidth: 1000,
 });
 
+export const LogoBox = styled.div({
+  width: 85,
+});
+
 export const Logo = styled.img({
   height: 33,
   width: 33,
@@ -41,22 +45,6 @@ export const Title = styled.h4({
   color: '#90a4bb',
   fontWeight: 300,
   margin: 0,
-});
-
-export const ExtendedTitle = styled.span({
-  '@media': {
-    '(max-width: 389px)': {
-      display: 'none',
-    }
-  }
-});
-
-export const NarrowTitle = styled.span({
-  '@media': {
-    '(min-width: 390px)': {
-      display: 'none',
-    }
-  }
 });
 
 export const Tooltip = styled.span({
@@ -145,11 +133,14 @@ export const textLink = style({
   }
 });
 
+export const ButtonsBox = styled.div({
+  padding: 10,
+});
+
 export const Buttons = styled.div({
   display: 'flex',
   alignItems: 'center',
   gap: 15,
-  margin: '0 12px 0 10px',
 });
 
 export const Icon = styled.img({
