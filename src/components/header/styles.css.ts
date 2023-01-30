@@ -94,6 +94,7 @@ export const logoLink = style({
   background: 'linear-gradient(to bottom, transparent 50%, #22192c 50%) top',
   backgroundSize: '100% 200%',
   transition: '.25s ease-out',
+  width: 'fit-content',
 
   ':hover': {
     backgroundPosition: 'bottom',
