@@ -139,7 +139,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
     <Report>
       <Metrics class={fadeInClass}>
         {store.metrics.map((metric) => (
-          <Metric>
+          <Metric key={metric.name}>
             <a
               style='--color:#0c6'
               title='Mobile perf score from PageSpeed Insights'
