@@ -13,6 +13,12 @@ const dotAnimation = keyframes({
   },
 });
 
+const fadeInAnimation = keyframes({
+  '100%': {
+    opacity: 1,
+  }
+});
+
 const fadeOutAnimation = keyframes({
   '0%': {
     opacity: 1,
@@ -22,10 +28,17 @@ const fadeOutAnimation = keyframes({
   }
 });
 
+export const fadeInClass = style({
+  opacity: 0,
+  animation: `${fadeInAnimation} 3s`,
+  animationDelay: '0s',
+  animationFillMode: 'forwards',
+});
+
 export const fadeOutClass = style({
   WebkitAnimation: `${fadeOutAnimation} 1s linear forwards`,
   animation: `${fadeOutAnimation} 1s linear forwards`,
-})
+});
 
 export const circleClass = style({
   stroke: '#063040',

@@ -19,6 +19,7 @@ import {
   firstDotClass,
   secondDotClass,
   thirdDotClass,
+  fadeInClass,
   fadeOutClass,
 } from './styles.css';
 
@@ -136,7 +137,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
 
   return (
     <Report>
-      <Metrics>
+      <Metrics class={fadeInClass}>
         {store.metrics.map((metric) => (
           <Metric>
             <a

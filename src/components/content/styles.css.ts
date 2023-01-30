@@ -29,13 +29,6 @@ export const fadeInAnimation = style({
   animationFillMode: 'forwards',
 });
 
-export const fadeInAnimationEager = style({
-  opacity: 0,
-  animation: `${fadeIn} 3s`,
-  animationDelay: '2s',
-  animationFillMode: 'forwards',
-});
-
 export const fadeInAnimationLate = style({
   opacity: 0,
   animation: `${fadeIn} 3s`,

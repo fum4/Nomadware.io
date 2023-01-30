@@ -9,7 +9,6 @@ import {
   ReportsBox,
   slideInAnimation,
   fadeInAnimation,
-  fadeInAnimationEager,
   fadeInAnimationLate,
 } from './styles.css';
 
@@ -28,7 +27,7 @@ export default component$(() => {
 
   return (
     <Root>
-      <ReportsBox class={fadeInAnimationEager}>
+      <ReportsBox>
         <Reports onReportsLoaded$={handleReportsLoaded} />
       </ReportsBox>
       {store.showText && (
