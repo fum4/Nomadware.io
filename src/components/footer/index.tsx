@@ -7,7 +7,10 @@ export default component$(() => (
   <Footer>
     <BuiltWith>
       <span>Built with</span>
-      <Anchor href='https://qwik.builder.io/'>
+      <Anchor
+        href='https://qwik.builder.io/'
+        title='Qwik logo'
+      >
         <QwikLogo />
       </Anchor>
     </BuiltWith>

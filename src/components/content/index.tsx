@@ -4,7 +4,7 @@ import Reports from '~/components/reports';
 import {
   Root,
   H1,
-  H3,
+  H2,
   TextBox,
   ReportsBox,
   slideInAnimation,
@@ -42,9 +42,9 @@ export default component$(() => {
             </H1>
           </TextBox>
           <TextBox>
-            <H3 class={fadeInAnimationLate}>
+            <H2 class={fadeInAnimationLate}>
               Don't waste any.
-            </H3>
+            </H2>
           </TextBox>
         </div>
       )}

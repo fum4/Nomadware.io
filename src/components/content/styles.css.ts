@@ -61,9 +61,10 @@ export const H1 = styled.h1({
   fontWeight: 100,
 });
 
-export const H3 = styled.h3({
+export const H2 = styled.h2({
   color: '#90a4bb',
   fontWeight: 300,
+  fontSize: 19,
 });
 
 export const TextBox = styled.div( {
