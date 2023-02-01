@@ -21,6 +21,13 @@ export const Content = styled.div({
 
 export const LogoBox = styled.div({
   width: 85,
+
+  // TODO: layout shift `fix` (not even working well)
+  '@media': {
+    'screen and (max-width: 870px)': {
+      width: 80,
+    }
+  }
 });
 
 export const Logo = styled.img({

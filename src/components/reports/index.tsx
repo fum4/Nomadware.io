@@ -74,11 +74,11 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
     }
   });
 
-  useClientEffect$(() => {
-    const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
-    const pageSpeedUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?' + searchParams;
+  useClientEffect$(async() => {
+    if (!window.navigator.userAgent.includes('Chrome-Lighthouse')) {
+      const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
+      const pageSpeedUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?' + searchParams;
 
-    (async () => {
       const response = await fetch(pageSpeedUrl);
       const { lighthouseResult } = await response.json();
 
@@ -125,7 +125,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
       store.dataLoaded = true;
 
       onReportsLoaded$?.();
-    })();
+    }
   });
 
   return (

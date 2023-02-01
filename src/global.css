@@ -24,6 +24,12 @@ body {
   width: 100%;
   margin: 0;
   background-color: #202224;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 .layout {
