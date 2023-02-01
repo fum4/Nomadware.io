@@ -137,7 +137,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
               title='Mobile perf score from PageSpeed Insights'
               target='_blank'
               rel='noreferrer'
-              href='https://pagespeed.web.dev/report?url=https%3A%2F%2Fgoshi.dev%2F'
+              href='https://pagespeed.web.dev/report?url=https%3A%2F%2Fnomadware.io%2F'
             >
               <Circle>
                 <svg viewBox='0 0 120 120'>
