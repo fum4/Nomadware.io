@@ -7,9 +7,10 @@ import {
   H2,
   TextBox,
   ReportsBox,
-  slideInAnimation,
-  fadeInAnimation,
-  fadeInAnimationLate,
+  slideInClass,
+  fadeInClass,
+  fadeInEagerClass,
+  fadeInLateClass,
 } from './styles.css';
 
 interface ContentState {
@@ -27,21 +28,21 @@ export default component$(() => {
 
   return (
     <Root>
-      <ReportsBox>
+      <ReportsBox class={fadeInEagerClass}>
         <Reports onReportsLoaded$={handleReportsLoaded} />
       </ReportsBox>
       {store.showText && (
         <div>
           <TextBox>
-            <H1 class={fadeInAnimation}>
+            <H1 class={fadeInClass}>
               Time is performance.
             </H1>
-            <H1 class={slideInAnimation}>
+            <H1 class={slideInClass}>
               It is the most valuable resource we have.
             </H1>
           </TextBox>
           <TextBox>
-            <H2 class={fadeInAnimationLate}>
+            <H2 class={fadeInLateClass}>
               Don't waste any.
             </H2>
           </TextBox>

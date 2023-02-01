@@ -1,37 +1,44 @@
 import { styled, style } from 'styled-vanilla-extract/qwik';
 import { keyframes } from '@vanilla-extract/css';
 
-const fadeIn = keyframes({
+const fadeInAnimation = keyframes({
   '100%': {
     opacity: 1,
   }
 });
 
-const slideIn = keyframes({
+const slideInAnimation = keyframes({
   '100%': {
     opacity: 1,
     marginLeft: 0,
   }
 });
 
-export const slideInAnimation = style({
+export const slideInClass = style({
   opacity: 0,
   marginLeft: -100,
-  animation: `${slideIn} 3s`,
+  animation: `${slideInAnimation} 3s`,
   animationDelay: '5.5s',
   animationFillMode: 'forwards',
 });
 
-export const fadeInAnimation = style({
+export const fadeInClass = style({
   opacity: 0,
-  animation: `${fadeIn} 3s`,
+  animation: `${fadeInAnimation} 3s`,
   animationDelay: '4s',
   animationFillMode: 'forwards',
 });
 
-export const fadeInAnimationLate = style({
+export const fadeInEagerClass = style({
   opacity: 0,
-  animation: `${fadeIn} 3s`,
+  animation: `${fadeInAnimation} 3s`,
+  animationDelay: '0s',
+  animationFillMode: 'forwards',
+});
+
+export const fadeInLateClass = style({
+  opacity: 0,
+  animation: `${fadeInAnimation} 3s`,
   animationDelay: '9s',
   animationFillMode: 'forwards',
 });

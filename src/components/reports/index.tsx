@@ -14,21 +14,18 @@ import {
   Score,
   ScoreText,
   LoadingText,
-  circleClass,
-  progressBarClass,
+  backgroundCircleClass,
+  foregroundCircleClass,
   firstDotClass,
   secondDotClass,
   thirdDotClass,
-  fadeInClass,
   fadeOutClass,
 } from './styles.css';
 
 interface MetricData {
-  name: string;
-  displayValue: string;
+  title: string;
   score: number;
   displayScore: number;
-  description?: string;
 }
 
 interface ReportState {
@@ -44,11 +41,10 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   const loadingTextRef = useSignal<HTMLDivElement>();
 
   const emptyMetrics = [
-    { name: 'Speed Index', displayValue: '0s', score: 0, displayScore: 0 },
-    { name: 'Boot time', displayValue: '0s', score: 0, displayScore: 0 },
-    { name: 'TBT', displayValue: '0s', score: 0, displayScore: 0 },
-    { name: 'FCP', displayValue: '0s', score: 0, displayScore: 0 },
-    { name: 'LCP', displayValue: '0s', score: 0, displayScore: 0 },
+    { title: 'Performance', score: 0, displayScore: 0 },
+    { title: 'Accessibility', score: 0, displayScore: 0 },
+    { title: 'Best practices', score: 0, displayScore: 0 },
+    { title: 'SEO', score: 0, displayScore: 0 },
   ];
 
   const store = useStore<ReportState>({
@@ -60,28 +56,26 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
     track(() => store.dataLoaded);
 
     if (store.dataLoaded) {
-      store.metrics.forEach((metric, index) => { // TODO: stale values?
-        const circle = document.querySelectorAll(`.${circleClass}.${progressBarClass}`)[index];
+      store.metrics.forEach((metric, index) => {
+        const circle = document.querySelectorAll(`.${foregroundCircleClass}`)[index];
 
-        const r = circle.getAttribute('r');
+        if (circle) {
+          const r = circle.getAttribute('r');
 
-        if (r) {
-          const c = Math.PI * (+r * 2);
-          const strokeDashoffset = metric.score * c;
+          if (r) {
+            const circumference = 2 * +r * Math.PI;
+            const strokeDasharray = metric.score * 100 * circumference / 100;
 
-          circle.setAttribute('stroke-dashoffset', `${strokeDashoffset}px`);
+            circle.setAttribute('stroke-dasharray', `${strokeDasharray} 999`);
+            circle.setAttribute('stroke-dashoffset', `0`);
+          }
         }
       });
     }
   });
 
   useClientEffect$(() => {
-    const searchParams = new URLSearchParams({
-      url: 'https://nomadware.io',
-      key: 'AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc',
-      category: 'performance',
-    });
-
+    const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
     const pageSpeedUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?' + searchParams;
 
     (async () => {
@@ -89,44 +83,43 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
       const { lighthouseResult } = await response.json();
 
       const {
-        'speed-index': speedIndex,
-        'bootup-time': bootupTime,
-        'total-blocking-time': totalBlockingTime,
-        'first-contentful-paint': firstContentfulPaint,
-        'largest-contentful-paint': largestContentfulPaint,
-      } = lighthouseResult.audits;
+        performance,
+        accessibility,
+        seo,
+        'best-practices': bestPractices,
+      } = lighthouseResult.categories;
 
       const metrics = [
-        speedIndex,
-        bootupTime,
-        totalBlockingTime,
-        firstContentfulPaint,
-        largestContentfulPaint
+        performance,
+        accessibility,
+        bestPractices,
+        seo,
       ];
 
-      metrics.forEach((metric, index) => {
+      metrics.forEach(({ score }, index) => {
         store.metrics[index] = {
           ...store.metrics[index],
-          displayValue: metric.displayValue,
-          score: metric.score,
+          score,
         };
       });
 
       metrics.forEach((metric, index) => {
         let displayScore = 0;
 
-        const interval = setInterval(() => {
-          if (displayScore / 100 < metric.score) {
-            displayScore += 1;
+        setTimeout(() => {
+          const interval = setInterval(() => {
+            if (displayScore / 100 < metric.score) {
+              displayScore += 1;
 
-            store.metrics[index] = {
-              ...store.metrics[index],
-              displayScore,
-            };
-          } else {
-            clearInterval(interval);
-          }
-        }, 30);
+              store.metrics[index] = {
+                ...store.metrics[index],
+                displayScore,
+              };
+            } else {
+              clearInterval(interval);
+            }
+          }, 20);
+        }, 1000);
       });
 
       store.dataLoaded = true;
@@ -137,11 +130,10 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
 
   return (
     <Report>
-      <Metrics class={fadeInClass}>
+      <Metrics>
         {store.metrics.map((metric) => (
-          <Metric key={metric.name}>
+          <Metric key={metric.title}>
             <a
-              style='--color:#0c6'
               title='Mobile perf score from PageSpeed Insights'
               target='_blank'
               rel='noreferrer'
@@ -149,9 +141,9 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
             >
               <Circle>
                 <svg viewBox='0 0 120 120'>
-                  <circle class={circleClass} r='50' cx='60' cy='60' fill='transparent' stroke-dasharray='565.48' stroke-dashoffset='0' />
+                  <circle class={backgroundCircleClass} r='50' cx='60' cy='60' fill='transparent' stroke-dasharray='565.48' stroke-dashoffset='0' />
                   <circle
-                    class={`${circleClass} ${progressBarClass}`}
+                    className={foregroundCircleClass}
                     r='50' cx='60' cy='60'
                     stroke-dasharray='565.48'
                     stroke-dashoffset='565.48px'
@@ -164,7 +156,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
               </Circle>
             </a>
             <p>
-              {metric.name}
+              {metric.title}
             </p>
           </Metric>
         ))}

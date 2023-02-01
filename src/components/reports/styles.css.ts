@@ -13,12 +13,6 @@ const dotAnimation = keyframes({
   },
 });
 
-const fadeInAnimation = keyframes({
-  '100%': {
-    opacity: 1,
-  }
-});
-
 const fadeOutAnimation = keyframes({
   '0%': {
     opacity: 1,
@@ -28,26 +22,23 @@ const fadeOutAnimation = keyframes({
   }
 });
 
-export const fadeInClass = style({
-  opacity: 0,
-  animation: `${fadeInAnimation} 3s`,
-  animationDelay: '0s',
-  animationFillMode: 'forwards',
-});
-
 export const fadeOutClass = style({
   WebkitAnimation: `${fadeOutAnimation} 1s linear forwards`,
   animation: `${fadeOutAnimation} 1s linear forwards`,
 });
 
-export const circleClass = style({
+export const backgroundCircleClass = style({
   stroke: '#063040',
   strokeWidth: '1em',
 });
 
-export const progressBarClass = style({
-  transition: 'stroke-dashoffset 2.5s ease-out',
+export const foregroundCircleClass = style({
+  transition: 'stroke-dashoffset',
+  transitionDuration: '3.3s',
+  transitionDelay: '0s',
+  transitionTimingFunction: 'ease-out',
   stroke: '#20a6d6',
+  strokeWidth: 2,
 });
 
 export const firstDotClass = style({
@@ -118,5 +109,6 @@ export const ScoreText = styled.p({
 });
 
 export const LoadingText = styled.p({
+  fontSize: 14,
   fontWeight: 100,
 });
