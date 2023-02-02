@@ -13,6 +13,15 @@ const dotAnimation = keyframes({
   },
 });
 
+const fadeInAnimation = keyframes({
+  '0%': {
+    opacity: 0,
+  },
+  '100%': {
+    opacity: 1,
+  }
+});
+
 const fadeOutAnimation = keyframes({
   '0%': {
     opacity: 1,
@@ -93,7 +102,7 @@ export const Circle = styled.div({
   width: 50,
 });
 
-export const Score = styled.div({
+export const MetricText = styled.div({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -104,11 +113,26 @@ export const Score = styled.div({
   height: '100%',
 });
 
-export const ScoreText = styled.p({
+export const DisplayScore = styled.p({
   fontSize: 10,
 });
 
+export const DisplayValue = styled.p({
+  animation: `${fadeInAnimation} 1s linear forwards`,
+  color: '#20a6d6',
+  fontSize: 18,
+});
+
+export const DisplayValuePlaceholder = styled.p({
+  fontSize: 18,
+});
+
+export const SecondaryMetricTitle = styled.p({
+  fontSize: 13,
+});
+
 export const LoadingText = styled.p({
+  marginTop: 50,
   fontSize: 14,
   fontWeight: 100,
 });

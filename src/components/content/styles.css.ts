@@ -57,6 +57,7 @@ export const Root = styled.div({
 });
 
 export const H1 = styled.h1({
+  marginTop: 0,
   color: '#90a4bb',
   fontWeight: 100,
 });

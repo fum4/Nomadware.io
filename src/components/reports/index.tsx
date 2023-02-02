@@ -11,8 +11,11 @@ import {
   Metric,
   Report,
   Circle,
-  Score,
-  ScoreText,
+  MetricText,
+  DisplayScore,
+  DisplayValue,
+  DisplayValuePlaceholder,
+  SecondaryMetricTitle,
   LoadingText,
   backgroundCircleClass,
   foregroundCircleClass,
@@ -22,14 +25,22 @@ import {
   fadeOutClass,
 } from './styles.css';
 
-interface MetricData {
+interface PrimaryMetric {
   title: string;
   score: number;
   displayScore: number;
 }
 
+interface SecondaryMetric {
+  title: string;
+  displayValue?: string;
+}
+
 interface ReportState {
-  metrics: MetricData[];
+  metrics: {
+    primary: PrimaryMetric[];
+    secondary: SecondaryMetric[];
+  };
   dataLoaded: boolean;
 }
 
@@ -40,12 +51,20 @@ interface ReportsProps {
 export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   const loadingTextRef = useSignal<HTMLDivElement>();
 
-  const emptyMetrics = [
-    { title: 'Performance', score: 0, displayScore: 0 },
-    { title: 'Accessibility', score: 0, displayScore: 0 },
-    { title: 'Best practices', score: 0, displayScore: 0 },
-    { title: 'SEO', score: 0, displayScore: 0 },
-  ];
+  const emptyMetrics = {
+    primary: [
+      { title: 'Performance', score: 0, displayScore: 0 },
+      { title: 'Accessibility', score: 0, displayScore: 0 },
+      { title: 'Best practices', score: 0, displayScore: 0 },
+      { title: 'SEO', score: 0, displayScore: 0 },
+    ],
+    secondary: [
+      { title: 'Speed index' },
+      { title: 'Boot-up' },
+      { title: 'LCP' },
+      { title: 'TBT' },
+    ]
+  };
 
   const store = useStore<ReportState>({
     metrics: emptyMetrics,
@@ -56,7 +75,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
     track(() => store.dataLoaded);
 
     if (store.dataLoaded) {
-      store.metrics.forEach((metric, index) => {
+      store.metrics.primary.forEach((metric, index) => {
         const circle = document.querySelectorAll(`.${foregroundCircleClass}`)[index];
 
         if (circle) {
@@ -89,21 +108,21 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
         'best-practices': bestPractices,
       } = lighthouseResult.categories;
 
-      const metrics = [
+      const primaryMetrics = [
         performance,
         accessibility,
         bestPractices,
         seo,
       ];
 
-      metrics.forEach(({ score }, index) => {
-        store.metrics[index] = {
-          ...store.metrics[index],
+      primaryMetrics.forEach(({ score }, index) => {
+        store.metrics.primary[index] = {
+          ...store.metrics.primary[index],
           score,
         };
       });
 
-      metrics.forEach((metric, index) => {
+      primaryMetrics.forEach((metric, index) => {
         let displayScore = 0;
 
         setTimeout(() => {
@@ -111,8 +130,8 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
             if (displayScore / 100 < metric.score) {
               displayScore += 1;
 
-              store.metrics[index] = {
-                ...store.metrics[index],
+              store.metrics.primary[index] = {
+                ...store.metrics.primary[index],
                 displayScore,
               };
             } else {
@@ -120,6 +139,27 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
             }
           }, 20);
         }, 1000);
+      });
+
+      const {
+        'speed-index': speedIndex,
+        'bootup-time': bootupTime,
+        'largest-contentful-paint': largestContentfulPaint,
+        'total-blocking-time': totalBlockingTime,
+      } = lighthouseResult.audits;
+
+      const secondaryMetrics = [
+        speedIndex,
+        bootupTime,
+        largestContentfulPaint,
+        totalBlockingTime,
+      ];
+
+      secondaryMetrics.forEach(({ displayValue }, index) => {
+        store.metrics.secondary[index] = {
+          ...store.metrics.secondary[index],
+          displayValue,
+        };
       });
 
       store.dataLoaded = true;
@@ -131,8 +171,8 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   return (
     <Report>
       <Metrics>
-        {store.metrics.map((metric) => (
-          <Metric key={metric.title}>
+        {store.metrics.primary.map((primaryMetric) => (
+          <Metric key={primaryMetric.title}>
             <a
               title='Mobile perf score from PageSpeed Insights'
               target='_blank'
@@ -143,21 +183,42 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
                 <svg viewBox='0 0 120 120'>
                   <circle class={backgroundCircleClass} r='50' cx='60' cy='60' fill='transparent' stroke-dasharray='565.48' stroke-dashoffset='0' />
                   <circle
-                    className={foregroundCircleClass}
+                    class={foregroundCircleClass}
                     r='50' cx='60' cy='60'
                     stroke-dasharray='565.48'
                     stroke-dashoffset='565.48px'
                     fill='transparent'
                   />
                 </svg>
-                <Score>
-                  <ScoreText>{metric.displayScore}%</ScoreText>
-                </Score>
+                <MetricText>
+                  <DisplayScore>{primaryMetric.displayScore}%</DisplayScore>
+                </MetricText>
               </Circle>
             </a>
             <p>
-              {metric.title}
+              {primaryMetric.title}
             </p>
+          </Metric>
+        ))}
+      </Metrics>
+      <Metrics>
+        {store.metrics.secondary.map((secondaryMetric) => (
+          <Metric key={secondaryMetric.title}>
+            <a
+              title='Mobile perf score from PageSpeed Insights'
+              target='_blank'
+              rel='noreferrer'
+              href='https://pagespeed.web.dev/report?url=https%3A%2F%2Fnomadware.io%2F'
+            >
+              {secondaryMetric.displayValue ? (
+                <DisplayValue>{secondaryMetric.displayValue}</DisplayValue>
+              ) : (
+                <DisplayValuePlaceholder>-</DisplayValuePlaceholder>
+              )}
+            </a>
+            <SecondaryMetricTitle>
+              {secondaryMetric.title}
+            </SecondaryMetricTitle>
           </Metric>
         ))}
       </Metrics>
