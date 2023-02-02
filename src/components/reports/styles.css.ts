@@ -93,13 +93,13 @@ export const Metric = styled.div({
   flexDirection: 'column',
   alignItems: 'center',
   gap: 8,
-  width: 100,
+  width: 110,
 });
 
 export const Circle = styled.div({
   position: 'relative',
-  height: 50,
-  width: 50,
+  height: 70,
+  width: 70,
 });
 
 export const MetricText = styled.div({
@@ -114,21 +114,25 @@ export const MetricText = styled.div({
 });
 
 export const DisplayScore = styled.p({
-  fontSize: 10,
+  fontSize: 14,
 });
 
 export const DisplayValue = styled.p({
   animation: `${fadeInAnimation} 1s linear forwards`,
   color: '#20a6d6',
-  fontSize: 18,
+  fontSize: 22,
 });
 
 export const DisplayValuePlaceholder = styled.p({
-  fontSize: 18,
+  fontSize: 22,
+});
+
+export const PrimaryMetricTitle = styled.p({
+  fontSize: 17,
 });
 
 export const SecondaryMetricTitle = styled.p({
-  fontSize: 13,
+  fontSize: 14,
 });
 
 export const LoadingText = styled.p({

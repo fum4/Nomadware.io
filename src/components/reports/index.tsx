@@ -15,6 +15,7 @@ import {
   DisplayScore,
   DisplayValue,
   DisplayValuePlaceholder,
+  PrimaryMetricTitle,
   SecondaryMetricTitle,
   LoadingText,
   backgroundCircleClass,
@@ -180,11 +181,11 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
               href='https://pagespeed.web.dev/report?url=https%3A%2F%2Fnomadware.io%2F'
             >
               <Circle>
-                <svg viewBox='0 0 120 120'>
-                  <circle class={backgroundCircleClass} r='50' cx='60' cy='60' fill='transparent' stroke-dasharray='565.48' stroke-dashoffset='0' />
+                <svg viewBox='0 0 150 150'>
+                  <circle class={backgroundCircleClass} r='60' cx='75' cy='75' fill='transparent' stroke-dasharray='565.48' stroke-dashoffset='0' />
                   <circle
                     class={foregroundCircleClass}
-                    r='50' cx='60' cy='60'
+                    r='60' cx='75' cy='75'
                     stroke-dasharray='565.48'
                     stroke-dashoffset='565.48px'
                     fill='transparent'
@@ -195,9 +196,9 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
                 </MetricText>
               </Circle>
             </a>
-            <p>
+            <PrimaryMetricTitle>
               {primaryMetric.title}
-            </p>
+            </PrimaryMetricTitle>
           </Metric>
         ))}
       </Metrics>
