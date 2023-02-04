@@ -5,6 +5,8 @@ import {
   Root,
   H1,
   H2,
+  Logo,
+  LogoBox,
   TextBox,
   ReportsBox,
   slideInClass,
@@ -38,14 +40,18 @@ export default component$(() => {
               Time is performance.
             </H1>
             <H1 class={slideInClass}>
-              It is the most valuable resource we have.
+              Don't waste any.
             </H1>
           </TextBox>
-          <TextBox>
-            <H2 class={fadeInLateClass}>
-              Don't waste any.
+          <LogoBox class={fadeInLateClass}>
+            <Logo
+              alt='Nomadware.io logo'
+              src='./logo.webp'
+            />
+            <H2>
+              Nomadware.io
             </H2>
-          </TextBox>
+          </LogoBox>
         </div>
       )}
     </Root>

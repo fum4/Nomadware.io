@@ -68,6 +68,19 @@ export const H2 = styled.h2({
   fontSize: 19,
 });
 
+export const Logo = styled.img({
+  height: 25,
+  width: 25,
+  borderRadius: '50%',
+  border: '1px solid #90a4bb',
+});
+
+export const LogoBox = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+});
+
 export const TextBox = styled.div( {
   display: 'flex',
   justifyContent: 'center',
