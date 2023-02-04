@@ -1,7 +1,7 @@
 import { styled } from 'styled-vanilla-extract/qwik';
 
 export const Root = styled.div({
-  position: 'fixed',
+  position: 'absolute',
   height: '100%',
   width: '100%',
   top: 0,

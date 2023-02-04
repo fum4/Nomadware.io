@@ -1,4 +1,11 @@
-import { component$, useSignal, useStore, useClientEffect$, useOnWindow, $ } from '@builder.io/qwik';
+import {
+  component$,
+  useSignal,
+  useStore,
+  useClientEffect$,
+  useOnWindow,
+  $
+} from '@builder.io/qwik';
 
 import { Root, Canvas } from './styles.css';
 

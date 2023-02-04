@@ -1,7 +1,7 @@
 import { styled } from 'styled-vanilla-extract/qwik';
 
 export const Footer = styled.footer({
-  position: 'fixed',
+  position: 'absolute',
   bottom: 0,
   padding: 15,
   textAlign: 'center',

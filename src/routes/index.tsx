@@ -1,15 +1,16 @@
 import { component$ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
-
-import Rain from '~/components/rain';
+import Hero from '~/components/hero';
 import Content from '~/components/content';
+
+import { Home } from './styles.css';
 
 export default component$(() => {
   return (
-    <div class={'root'}>
-      <Rain />
+    <Home>
+      <Hero />
       <Content />
-    </div>
+    </Home>
   )
 });
 
