@@ -1,4 +1,4 @@
-import { component$, useStore, $ } from '@builder.io/qwik';
+import { component$, useSignal, useStore, $ } from '@builder.io/qwik';
 import Reports from '~/components/reports';
 
 import {
@@ -20,12 +20,17 @@ interface ContentState {
 }
 
 export default component$(() => {
+  const scrollRef = useSignal<HTMLDivElement>();
   const store = useStore<ContentState>({
     showText: false,
   });
 
   const handleReportsLoaded = $(() => {
     store.showText = true;
+
+    // setTimeout(() => {
+    //   scrollRef.value?.scrollIntoView({ behavior: 'smooth' });
+    // }, 3600);
   });
 
   return (
@@ -34,7 +39,7 @@ export default component$(() => {
         <Reports onReportsLoaded$={handleReportsLoaded} />
       </ReportsBox>
       {store.showText && (
-        <div>
+        <div ref={scrollRef}>
           <TextBox>
             <H1 class={fadeInClass}>
               Time is performance.

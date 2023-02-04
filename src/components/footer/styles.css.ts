@@ -1,12 +1,11 @@
 import { styled } from 'styled-vanilla-extract/qwik';
 
 export const Footer = styled.footer({
-  position: 'absolute',
-  bottom: 0,
   padding: 15,
   textAlign: 'center',
   fontSize: '.8em',
   margin: 'auto',
+  marginTop: 60,
 });
 
 export const BuiltWith = styled.div({

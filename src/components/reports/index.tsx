@@ -7,7 +7,8 @@ import {
 } from '@builder.io/qwik';
 
 import {
-  Metrics,
+  PrimaryMetrics,
+  SecondaryMetrics,
   Metric,
   Report,
   Circle,
@@ -60,7 +61,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
       { title: 'SEO', score: 0, displayScore: 0 },
     ],
     secondary: [
-      { title: 'Speed index' },
+      { title: 'Speed' },
       { title: 'Boot-up' },
       { title: 'LCP' },
       { title: 'TBT' },
@@ -171,7 +172,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
 
   return (
     <Report>
-      <Metrics>
+      <PrimaryMetrics>
         {store.metrics.primary.map((primaryMetric) => (
           <Metric key={primaryMetric.title}>
             <a
@@ -201,8 +202,8 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
             </PrimaryMetricTitle>
           </Metric>
         ))}
-      </Metrics>
-      <Metrics>
+      </PrimaryMetrics>
+      <SecondaryMetrics>
         {store.metrics.secondary.map((secondaryMetric) => (
           <Metric key={secondaryMetric.title}>
             <a
@@ -222,7 +223,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
             </SecondaryMetricTitle>
           </Metric>
         ))}
-      </Metrics>
+      </SecondaryMetrics>
       <LoadingText
         ref={loadingTextRef}
         class={store.dataLoaded ? fadeOutClass : ''}

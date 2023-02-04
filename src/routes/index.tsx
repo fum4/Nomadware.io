@@ -3,14 +3,12 @@ import type { DocumentHead } from '@builder.io/qwik-city';
 import Hero from '~/components/hero';
 import Content from '~/components/content';
 
-import { Home } from './styles.css';
-
 export default component$(() => {
   return (
-    <Home>
+    <div>
       <Hero />
       <Content />
-    </Home>
+    </div>
   )
 });
 

@@ -83,17 +83,40 @@ export const Report = styled.div({
   fontWeight: 100,
 });
 
-export const Metrics = styled.div({
+const baseMetrics = style({
   display: 'flex',
-  gap: 20,
+  gap: 10,
+
+  '@media': {
+    'screen and (max-width: 870px)': {
+      display: 'grid',
+      gridTemplateColumns: '100px 100px',
+    }
+  },
 });
+
+export const PrimaryMetrics = styled.div([ baseMetrics, {
+  '@media': {
+    'screen and (max-width: 870px)': {
+      gridTemplateRows: '100px 100px',
+    }
+  },
+}]);
+
+export const SecondaryMetrics = styled.div([ baseMetrics, {
+  '@media': {
+    'screen and (max-width: 870px)': {
+      gridTemplateRows: '60px 60px',
+    }
+  },
+}]);
 
 export const Metric = styled.div({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   gap: 8,
-  width: 110,
+  width: 100,
 });
 
 export const Circle = styled.div({
@@ -128,7 +151,7 @@ export const DisplayValuePlaceholder = styled.p({
 });
 
 export const PrimaryMetricTitle = styled.p({
-  fontSize: 17,
+  fontSize: 15,
 });
 
 export const SecondaryMetricTitle = styled.p({
@@ -139,4 +162,10 @@ export const LoadingText = styled.p({
   marginTop: 50,
   fontSize: 14,
   fontWeight: 100,
+
+  '@media': {
+    'screen and (max-width: 870px)': {
+      marginTop: 0,
+    }
+  },
 });

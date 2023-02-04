@@ -1,6 +1,7 @@
 import { component$, useClientEffect$, useStore, $ } from '@builder.io/qwik';
 import { Link } from '@builder.io/qwik-city';
 import { Themes } from '~/theme/index.css';
+import Tooltip from '~/components/tooltip';
 
 import {
   Header,
@@ -8,7 +9,6 @@ import {
   LogoBox,
   Logo,
   Text,
-  Tooltip,
   Title,
   Icon,
   ButtonsBox,
@@ -25,7 +25,6 @@ interface HeaderState {
   theme: Theme;
   emoji: keyof typeof emoji;
   drankCoffees: number;
-  showTooltip: boolean;
 }
 
 export default component$(() => {
@@ -35,13 +34,13 @@ export default component$(() => {
   const Emoji = {
     HEART: '♡',
     COFFEE: '☕',
+    SUN: '☀️',
   };
 
   const store = useStore<HeaderState>({
     theme: Themes.DARK,
     emoji: 'HEART',
     drankCoffees: 0,
-    showTooltip: false,
   });
 
   const toggleTheme = $(() => {
@@ -66,38 +65,27 @@ export default component$(() => {
         </LogoBox>
 
         <Text
-          onMouseEnter$={() => {
-            if (store.drankCoffees < 3) {
-              store.emoji = 'COFFEE';
-            }
-          }}
+          onMouseEnter$={() => store.drankCoffees < 3 && (store.emoji = 'COFFEE')}
           onMouseLeave$={() => store.emoji = 'HEART'}
         >
           Made with
 
-          <span
-            onClick$={() => {
-              if (store.emoji === 'COFFEE') {
-                store.emoji = 'HEART';
-                store.drankCoffees += 1;
-              }
-            }}
-            onMouseEnter$={() => {
-              if (store.drankCoffees >= 3) {
-                store.showTooltip = true;
-              }
-            }}
-            onMouseLeave$={() => store.showTooltip = false}
-            class={emoji[store.emoji]}
+          <Tooltip
+            text={`A bit too much ${Emoji.COFFEE} ?`}
+            disabled={store.drankCoffees < 3}
           >
-            {Emoji[store.emoji]}
-
-            {store.showTooltip && (
-              <Tooltip>
-                A bit too much {Emoji.COFFEE} ?
-              </Tooltip>
-            )}
-          </span>
+            <span
+              class={emoji[store.emoji]}
+              onClick$={() => {
+                if (store.emoji === 'COFFEE') {
+                  store.emoji = 'HEART';
+                  store.drankCoffees += 1;
+                }
+              }}
+            >
+              {Emoji[store.emoji]}
+            </span>
+          </Tooltip>
 
           by
 
@@ -108,12 +96,14 @@ export default component$(() => {
 
         <ButtonsBox>
           <Buttons>
-            <Icon
-              alt={`Toggle ${store.theme} mode`}
-              src={`./${store.theme}-theme-icon.webp`}
-              onClick$={toggleTheme}
-              style={{ cursor: 'default', pointerEvents: 'none' }}
-            />
+            <Tooltip text={`${Emoji.SUN} Coming soon !`}>
+              <Icon
+                alt={`Toggle ${store.theme} mode`}
+                src={`./${store.theme}-theme-icon.webp`}
+                onClick$={toggleTheme}
+                style={{ cursor: 'default', pointerEvents: 'none' }}
+              />
+            </Tooltip>
             <Anchor
               href={githubUrl}
               target='_blank'

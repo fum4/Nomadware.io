@@ -54,19 +54,6 @@ export const Title = styled.h4({
   margin: 0,
 });
 
-export const Tooltip = styled.span({
-  width: 125,
-  backgroundColor: 'black',
-  color: '#fff',
-  textAlign: 'center',
-  padding: '5px 0',
-  borderRadius: 10,
-  position: 'absolute',
-  zIndex: 1,
-  fontSize: 12,
-  top: 30,
-});
-
 export const baseEmojiStyle = style({
   position: 'relative',
   width: 18,

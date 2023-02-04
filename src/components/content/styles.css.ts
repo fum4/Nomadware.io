@@ -44,14 +44,14 @@ export const fadeInLateClass = style({
 });
 
 export const Root = styled.div({
-  position: 'absolute',
-  top: 600,
   display: 'flex',
   flexDirection: 'column',
+  padding: '85px 0',
+  width: '100%',
 
   '@media': {
-    'screen and (min-width: 540px)': {
-      width: '100%',
+    'screen and (max-width: 870px)': {
+      padding: '40px 0',
     }
   },
 });
