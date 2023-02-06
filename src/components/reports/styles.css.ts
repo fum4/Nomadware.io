@@ -1,5 +1,6 @@
 import { styled, style } from 'styled-vanilla-extract/qwik';
 import { keyframes } from '@vanilla-extract/css';
+import { Breakpoints } from '~/constants';
 
 const dotAnimation = keyframes({
   '0%': {
@@ -88,7 +89,7 @@ const baseMetrics = style({
   gap: 10,
 
   '@media': {
-    'screen and (max-width: 870px)': {
+    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       display: 'grid',
       gridTemplateColumns: '100px 100px',
     }
@@ -97,7 +98,7 @@ const baseMetrics = style({
 
 export const PrimaryMetrics = styled.div([ baseMetrics, {
   '@media': {
-    'screen and (max-width: 870px)': {
+    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       gridTemplateRows: '100px 100px',
     }
   },
@@ -105,7 +106,7 @@ export const PrimaryMetrics = styled.div([ baseMetrics, {
 
 export const SecondaryMetrics = styled.div([ baseMetrics, {
   '@media': {
-    'screen and (max-width: 870px)': {
+    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       gridTemplateRows: '60px 60px',
     }
   },
@@ -164,7 +165,7 @@ export const LoadingText = styled.p({
   fontWeight: 100,
 
   '@media': {
-    'screen and (max-width: 870px)': {
+    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       marginTop: 0,
     }
   },

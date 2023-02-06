@@ -14,6 +14,7 @@ import {
   fadeInEagerClass,
   fadeInLateClass,
 } from './styles.css';
+import { Breakpoints } from '~/constants';
 
 interface ContentState {
   showText: boolean;
@@ -28,9 +29,12 @@ export default component$(() => {
   const handleReportsLoaded = $(() => {
     store.showText = true;
 
-    // setTimeout(() => {
-    //   scrollRef.value?.scrollIntoView({ behavior: 'smooth' });
-    // }, 3600);
+    // @ts-ignore
+    if (window.visualViewport?.width < Breakpoints.SM) {
+      setTimeout(() => {
+        scrollRef.value?.scrollIntoView({ behavior: 'smooth' });
+      }, 3600);
+    }
   });
 
   return (

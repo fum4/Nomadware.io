@@ -1,5 +1,6 @@
 import { styled, style } from 'styled-vanilla-extract/qwik';
 import { styleVariants } from '@vanilla-extract/css';
+import { Breakpoints } from '~/constants';
 
 export const Header = styled.header({
   backgroundColor: 'rgba(0, 0, 0, .15)',
@@ -24,7 +25,7 @@ export const LogoBox = styled.div({
 
   // TODO: layout shift `fix` (not even working well)
   '@media': {
-    'screen and (max-width: 870px)': {
+    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       width: 80,
     }
   }

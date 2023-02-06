@@ -1,5 +1,6 @@
 import { styled, style } from 'styled-vanilla-extract/qwik';
 import { keyframes } from '@vanilla-extract/css';
+import { Breakpoints } from '~/constants';
 
 const fadeInAnimation = keyframes({
   '100%': {
@@ -50,7 +51,7 @@ export const Root = styled.div({
   width: '100%',
 
   '@media': {
-    'screen and (max-width: 870px)': {
+    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       padding: '40px 0',
     }
   },
@@ -88,7 +89,7 @@ export const TextBox = styled.div( {
   gap: 15,
 
   '@media': {
-    'screen and (max-width: 870px)': {
+    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       flexDirection: 'column',
       gap: 0,
     }

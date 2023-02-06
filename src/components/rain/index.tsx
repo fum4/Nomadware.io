@@ -6,6 +6,7 @@ import {
   useOnWindow,
   $
 } from '@builder.io/qwik';
+import { Breakpoints } from '~/constants';
 
 interface RainCoordinates {
   w: number; // TODO: ??
@@ -37,16 +38,6 @@ export default component$(() => {
     width: 0,
     isRaining: false,
     rainProgress: 0,
-  });
-
-  const handleResize = $(() => {
-    if (canvasRef.value && window.visualViewport) {
-      const { width } = window.visualViewport;
-
-      canvasRef.value.width = width;
-
-      store.width = width;
-    }
   });
 
   const drawSidewalk = $(() => {
@@ -182,7 +173,21 @@ export default component$(() => {
     }
   });
 
-  useOnWindow('resize', handleResize);
+  const handleResize = $(() => {
+    if (canvasRef.value && window.visualViewport) {
+      const { width } = window.visualViewport;
+
+      canvasRef.value.width = width;
+      store.width = width;
+    }
+  });
+
+  useOnWindow('resize', $(() => {
+    // @ts-ignore
+    if (window.visualViewport?.width > Breakpoints.SM) {
+      handleResize();
+    }
+  }));
 
   useClientEffect$(() => {
     handleResize();
