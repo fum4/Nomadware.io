@@ -6,7 +6,6 @@ import {
   useOnWindow,
   $
 } from '@builder.io/qwik';
-import { Breakpoints } from '~/constants';
 
 interface RainCoordinates {
   w: number; // TODO: ??
@@ -28,6 +27,7 @@ interface State {
 
 export default component$(() => {
   const canvasRef = useSignal<HTMLCanvasElement>();
+  const screenWidthRef = useSignal<number>();
 
   const store = useStore<State>({
     rainCoordinates: [] as RainCoordinates[],
@@ -183,13 +183,20 @@ export default component$(() => {
   });
 
   useOnWindow('resize', $(() => {
-    // @ts-ignore
-    if (window.visualViewport?.width > Breakpoints.SM) {
+    const isDesktop = window.matchMedia('pointer: fine').matches;
+    const orientationChanged = !isDesktop && window.innerWidth !== screenWidthRef.value;
+
+    screenWidthRef.value = window.innerWidth;
+
+    if (isDesktop || orientationChanged) {
       handleResize();
     }
   }));
 
   useClientEffect$(() => {
+    // save this in order to detect orientation change on mobile
+    screenWidthRef.value = window.innerWidth;
+
     handleResize();
 
     let lightningTimer = 8000;

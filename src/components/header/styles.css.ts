@@ -61,10 +61,6 @@ export const baseEmojiStyle = style({
   padding: 4,
   display: 'flex',
   justifyContent: 'center',
-
-  ':hover': {
-    cursor: 'grab',
-  },
 });
 
 export const emoji = styleVariants({
