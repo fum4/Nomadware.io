@@ -51,7 +51,7 @@ export const Root = styled.div({
   width: '100%',
 
   '@media': {
-    [`screen and (max-width: ${Breakpoints.SM}px)`]: {
+    [`screen and (max-width: ${Breakpoints.MD}px)`]: {
       padding: '40px 0',
     }
   },
