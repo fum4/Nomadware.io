@@ -1,7 +1,7 @@
 import {
   type PropFunction,
   component$,
-  useClientEffect$,
+  useBrowserVisibleTask$,
   useStore,
   useSignal,
 } from '@builder.io/qwik';
@@ -71,9 +71,9 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   const store = useStore<ReportState>({
     metrics: emptyMetrics,
     reportsFetched: false,
-  }, { recursive: true });
+  }, { deep: true });
 
-  useClientEffect$(({ track }) => {
+  useBrowserVisibleTask$(({ track }) => {
     track(() => store.reportsFetched);
 
     if (store.reportsFetched) {
@@ -95,7 +95,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
     }
   });
 
-  useClientEffect$(() => {
+  useBrowserVisibleTask$(() => {
     (async() => {
       if (!window.navigator.userAgent.includes('Chrome-Lighthouse')) {
         const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';

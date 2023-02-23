@@ -2,7 +2,7 @@ import {
   component$,
   useSignal,
   useStore,
-  useClientEffect$,
+  useBrowserVisibleTask$,
   useOnWindow,
   $
 } from '@builder.io/qwik';
@@ -193,7 +193,7 @@ export default component$(() => {
     }
   }));
 
-  useClientEffect$(() => {
+  useBrowserVisibleTask$(() => {
     // save this in order to detect orientation change on mobile
     screenWidthRef.value = window.innerWidth;
 

@@ -1,4 +1,4 @@
-import { component$, useClientEffect$, useStore, $ } from '@builder.io/qwik';
+import { component$, useBrowserVisibleTask$, useStore, $ } from '@builder.io/qwik';
 import { Link } from '@builder.io/qwik-city';
 import { Themes } from '~/theme/index.css';
 import Tooltip from '~/components/tooltip';
@@ -28,7 +28,7 @@ interface HeaderState {
 }
 
 export default component$(() => {
-  const githubUrl = 'https://github.com/fum4/Nomadware.io';
+  const githubUrl = 'https://github.com/fum4';
   const title = 'Nomadware.io';
 
   const Emoji = {
@@ -48,7 +48,7 @@ export default component$(() => {
     localStorage.setItem('theme', store.theme);
   });
 
-  useClientEffect$(() => {
+  useBrowserVisibleTask$(() => {
     const localStorageTheme = localStorage.getItem('theme') as Theme;
     const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 

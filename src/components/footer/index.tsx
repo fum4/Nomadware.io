@@ -6,7 +6,7 @@ import { Footer, BuiltWith, Anchor } from './styles.css';
 export default component$(() => (
   <Footer>
     <BuiltWith>
-      <span>Built with</span>
+      <span>Powered by</span>
       <Anchor
         href='https://qwik.builder.io/'
         title='Qwik logo'
