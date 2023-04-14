@@ -12,7 +12,7 @@ export const RouterHead = component$(() => {
     <>
       <title>{head.title}</title>
 
-      <link rel="canonical" href={loc.href} />
+      <link rel="canonical" href={loc.url.href} />
       <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       <link rel="icon" type="image/svg+xml" href="/favicon.webp" />
 
