@@ -108,72 +108,76 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
 
   useBrowserVisibleTask$(() => {
     (async() => {
-      const lighthouseResult = await runAnalytics();
+      try {
+        const lighthouseResult = await runAnalytics();
 
-      const {
-        performance,
-        accessibility,
-        seo,
-        'best-practices': bestPractices,
-      } = lighthouseResult.categories;
+        const {
+          performance,
+          accessibility,
+          seo,
+          'best-practices': bestPractices,
+        } = lighthouseResult.categories;
 
-      const primaryMetrics = [
-        performance,
-        accessibility,
-        bestPractices,
-        seo,
-      ];
+        const primaryMetrics = [
+          performance,
+          accessibility,
+          bestPractices,
+          seo,
+        ];
 
-      primaryMetrics.forEach(({ score }, index) => {
-        store.metrics.primary[index] = {
-          ...store.metrics.primary[index],
-          score,
-        };
-      });
+        primaryMetrics.forEach(({ score }, index) => {
+          store.metrics.primary[index] = {
+            ...store.metrics.primary[index],
+            score,
+          };
+        });
 
-      primaryMetrics.forEach((metric, index) => {
-        let displayScore = 0;
+        primaryMetrics.forEach((metric, index) => {
+          let displayScore = 0;
 
-        setTimeout(() => {
-          const interval = setInterval(() => {
-            if (displayScore / 100 < metric.score) {
-              displayScore += 1;
+          setTimeout(() => {
+            const interval = setInterval(() => {
+              if (displayScore / 100 < metric.score) {
+                displayScore += 1;
 
-              store.metrics.primary[index] = {
-                ...store.metrics.primary[index],
-                displayScore,
-              };
-            } else {
-              clearInterval(interval);
-            }
-          }, 20);
-        }, 1000);
-      });
+                store.metrics.primary[index] = {
+                  ...store.metrics.primary[index],
+                  displayScore,
+                };
+              } else {
+                clearInterval(interval);
+              }
+            }, 20);
+          }, 1000);
+        });
 
-      const {
-        'speed-index': speedIndex,
-        'bootup-time': bootupTime,
-        'largest-contentful-paint': largestContentfulPaint,
-        'total-blocking-time': totalBlockingTime,
-      } = lighthouseResult.audits;
+        const {
+          'speed-index': speedIndex,
+          'bootup-time': bootupTime,
+          'largest-contentful-paint': largestContentfulPaint,
+          'total-blocking-time': totalBlockingTime,
+        } = lighthouseResult.audits;
 
-      const secondaryMetrics = [
-        speedIndex,
-        bootupTime,
-        largestContentfulPaint,
-        totalBlockingTime,
-      ];
+        const secondaryMetrics = [
+          speedIndex,
+          bootupTime,
+          largestContentfulPaint,
+          totalBlockingTime,
+        ];
 
-      secondaryMetrics.forEach(({ displayValue }, index) => {
-        store.metrics.secondary[index] = {
-          ...store.metrics.secondary[index],
-          displayValue,
-        };
-      });
+        secondaryMetrics.forEach(({ displayValue }, index) => {
+          store.metrics.secondary[index] = {
+            ...store.metrics.secondary[index],
+            displayValue,
+          };
+        });
 
-      store.reportsFetched = true;
+        store.reportsFetched = true;
 
-      onReportsLoaded$?.();
+        onReportsLoaded$?.();
+      } catch (err) {
+        console.log('@@@@ err', err);
+      }
     })();
   });
 
