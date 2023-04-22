@@ -5,7 +5,6 @@ import {
   useStore,
   useSignal
 } from '@builder.io/qwik';
-import { server$ } from '@builder.io/qwik-city';
 
 import {
   PrimaryMetrics,
@@ -50,22 +49,6 @@ interface ReportState {
 interface ReportsProps {
   onReportsLoaded$: PropFunction<() => void>;
 }
-
-export const runAnalytics = server$(async() => {
-  try {
-    const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
-    const pageSpeedUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${searchParams}`;
-
-    const response = await fetch(pageSpeedUrl);
-    const { lighthouseResult } = await response.json();
-
-    return lighthouseResult;
-  } catch (err) {
-    console.error('@@@ err', err);
-
-    return null;
-  }
-});
 
 export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   const loadingTextRef = useSignal<HTMLDivElement>();
@@ -114,77 +97,81 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
 
   useBrowserVisibleTask$(() => {
     (async() => {
-      try {
-        const lighthouseResult = await runAnalytics();
+      console.error('@@@@@@@ userAgent', JSON.parse(JSON.stringify(window.navigator.userAgent)));
+      console.error('@@@@@@@ navigator', window.navigator);
+      console.error('@@@@@@@ origin', window.origin);
+      console.error('@@@@@@@ location', window.location);
+      if (!window.navigator.userAgent.includes('Chrome-Lighthouse')) {
+        const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
+        const pageSpeedUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${searchParams}`;
 
-        if (lighthouseResult) {
-          const {
-            performance,
-            accessibility,
-            seo,
-            'best-practices': bestPractices,
-          } = lighthouseResult.categories;
+        const response = await fetch(pageSpeedUrl);
+        const { lighthouseResult } = await response.json();
 
-          const primaryMetrics = [
-            performance,
-            accessibility,
-            bestPractices,
-            seo,
-          ];
+        const {
+          performance,
+          accessibility,
+          seo,
+          'best-practices': bestPractices,
+        } = lighthouseResult.categories;
 
-          primaryMetrics.forEach(({ score }, index) => {
-            store.metrics.primary[index] = {
-              ...store.metrics.primary[index],
-              score,
-            };
-          });
+        const primaryMetrics = [
+          performance,
+          accessibility,
+          bestPractices,
+          seo,
+        ];
 
-          primaryMetrics.forEach((metric, index) => {
-            let displayScore = 0;
+        primaryMetrics.forEach(({ score }, index) => {
+          store.metrics.primary[index] = {
+            ...store.metrics.primary[index],
+            score,
+          };
+        });
 
-            setTimeout(() => {
-              const interval = setInterval(() => {
-                if (displayScore / 100 < metric.score) {
-                  displayScore += 1;
+        primaryMetrics.forEach((metric, index) => {
+          let displayScore = 0;
 
-                  store.metrics.primary[index] = {
-                    ...store.metrics.primary[index],
-                    displayScore,
-                  };
-                } else {
-                  clearInterval(interval);
-                }
-              }, 20);
-            }, 1000);
-          });
+          setTimeout(() => {
+            const interval = setInterval(() => {
+              if (displayScore / 100 < metric.score) {
+                displayScore += 1;
 
-          const {
-            'speed-index': speedIndex,
-            'bootup-time': bootupTime,
-            'largest-contentful-paint': largestContentfulPaint,
-            'total-blocking-time': totalBlockingTime,
-          } = lighthouseResult.audits;
+                store.metrics.primary[index] = {
+                  ...store.metrics.primary[index],
+                  displayScore,
+                };
+              } else {
+                clearInterval(interval);
+              }
+            }, 20);
+          }, 1000);
+        });
 
-          const secondaryMetrics = [
-            speedIndex,
-            bootupTime,
-            largestContentfulPaint,
-            totalBlockingTime,
-          ];
+        const {
+          'speed-index': speedIndex,
+          'bootup-time': bootupTime,
+          'largest-contentful-paint': largestContentfulPaint,
+          'total-blocking-time': totalBlockingTime,
+        } = lighthouseResult.audits;
 
-          secondaryMetrics.forEach(({ displayValue }, index) => {
-            store.metrics.secondary[index] = {
-              ...store.metrics.secondary[index],
-              displayValue,
-            };
-          });
+        const secondaryMetrics = [
+          speedIndex,
+          bootupTime,
+          largestContentfulPaint,
+          totalBlockingTime,
+        ];
 
-          store.reportsFetched = true;
+        secondaryMetrics.forEach(({ displayValue }, index) => {
+          store.metrics.secondary[index] = {
+            ...store.metrics.secondary[index],
+            displayValue,
+          };
+        });
 
-          onReportsLoaded$?.();
-        }
-      } catch (err) {
-        console.error('@@@@ browser err', err);
+        store.reportsFetched = true;
+
+        onReportsLoaded$?.();
       }
     })();
   });
