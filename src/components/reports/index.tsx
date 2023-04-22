@@ -100,7 +100,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
       console.error('@@@@@@@ userAgent', JSON.parse(JSON.stringify(window.navigator.userAgent)));
       console.error('@@@@@@@ navigator', window.navigator);
       console.error('@@@@@@@ origin', window.origin);
-      console.error('@@@@@@@ location', window.location);
+      console.error('@@@@@@@ href', window.location.href);
       if (!window.navigator.userAgent.includes('Chrome-Lighthouse')) {
         const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
         const pageSpeedUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${searchParams}`;
