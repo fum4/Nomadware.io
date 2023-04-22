@@ -98,7 +98,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   useBrowserVisibleTask$(() => {
     (async() => {
       console.error('@@@@@@@ userAgent', JSON.parse(JSON.stringify(window.navigator.userAgent)));
-      console.error('@@@@@@@ navigator', window.navigator);
+      console.error('@@@@@@@ refferr', document.referrer);
       console.error('@@@@@@@ origin', window.origin);
       console.error('@@@@@@@ href', window.location.href);
       if (!window.navigator.userAgent.includes('Chrome-Lighthouse')) {
