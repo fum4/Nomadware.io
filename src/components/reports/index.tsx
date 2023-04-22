@@ -98,6 +98,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   useBrowserVisibleTask$(() => {
     (async() => {
       console.error('@@@@@@@ devicePixelRatio', window.devicePixelRatio);
+      console.error('@@@@@@@ locationbar visible', window.locationbar.visible);
 
       if (!window.navigator.userAgent.includes('Chrome-Lighthouse')) {
         const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
