@@ -97,7 +97,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
 
   useBrowserVisibleTask$(() => {
     (async() => {
-      console.error('@@@@@@@ userAgent', window.navigator.userAgent);
+      console.error('@@@@@@@ userAgent', JSON.stringify(window.navigator.userAgent));
       console.error('@@@@@@@ navigator', window.navigator);
       if (!window.navigator.userAgent.includes('Chrome-Lighthouse')) {
         const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
