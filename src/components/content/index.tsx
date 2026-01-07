@@ -55,7 +55,7 @@ export default component$(() => {
           <LogoBox class={fadeInLateClass}>
             <Logo
               alt='Nomadware.io logo'
-              src='./logo.webp'
+              src='./logo.png'
             />
             <H2>
               Nomadware.io

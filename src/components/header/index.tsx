@@ -60,7 +60,7 @@ export default component$(() => {
       <Content>
         <LogoBox>
           <Link href='/' class={logoLink}>
-            <Logo alt={`${title} logo`} src='./logo.webp' />
+            <Logo alt={`${title} logo`} src='./logo.png' />
           </Link>
         </LogoBox>
 

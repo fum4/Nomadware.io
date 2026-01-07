@@ -14,7 +14,7 @@ export const RouterHead = component$(() => {
 
       <link rel="canonical" href={loc.url.href} />
       <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-      <link rel="icon" type="image/svg+xml" href="/favicon.webp" />
+      <link rel="icon" type="image/png" href="/logo.png" />
 
       {head.meta.map((m) => (
         <meta {...m} />

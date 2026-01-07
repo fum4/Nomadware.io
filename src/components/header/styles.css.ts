@@ -35,7 +35,6 @@ export const Logo = styled.img({
   height: 33,
   width: 33,
   borderRadius: '50%',
-  border: '2px solid #90a4bb',
 });
 
 export const Text = styled.span({
@@ -89,10 +88,6 @@ export const logoLink = style({
 
   ':hover': {
     backgroundPosition: 'bottom',
-
-    'img': {
-      border: 'none',
-    }
   }
 });
 
