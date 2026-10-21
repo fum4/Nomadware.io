@@ -11,6 +11,9 @@ The nomadware.io monorepo in the making (Linear project *Nomadware.io*, team NWA
 - Secrets only via `secrets/*.age` + `repo-secrets` (devbox `docs/repo-secrets.md`); ids like the Cloudflare account id are config (`terraform.auto.tfvars`).
 - Ledger (backlog, decisions, owner to-dos) lives in **Linear** (`LINEAR_TEAM=NWARE`), not in files.
 
+## Merging
+The agent has full merge ownership here (owner, 2026-10-21): PR → `mise run pre-push` green → squash-merge → for DNS, `mise run tf -- apply` from `master` right after.
+
 ## Routing
 | Occasion | Doc | Guardrail |
 |---|---|---|
