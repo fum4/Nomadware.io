@@ -11,7 +11,7 @@ locals {
     # Coolify control plane (fum4/ops)
     ops = { name = "ops.${local.zone}", type = "A", content = "77.42.125.36" }
 
-    # Stremio host's "Romanian (AI)" addon (fum4/stremio-companion). A LAN address on purpose: only
+    # Stremio host's "Romanian (AI)" addon (fum4/stremio-plus-plus, "stremio++"). A LAN address on purpose: only
     # the home network reaches it; the certificate comes from Let's Encrypt via DNS-01 (token
     # `stremio-companion-acme`). A new host IP means editing this one line.
     stremio = { name = "stremio.${local.zone}", type = "A", content = "192.168.1.132" }
