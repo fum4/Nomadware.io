@@ -1,0 +1,50 @@
+# Toolchain + operator tasks (devbox docs/dev-contract.md).
+
+[tools]
+terraform = "1.16.6"
+
+[env]
+# Linear binding: this repo's backlog, decisions and owner to-dos live in Linear (team NWARE).
+LINEAR_TEAM = "NWARE"
+
+[tasks.setup]
+description = "Lightweight, secret-free install"
+run = "pnpm install --frozen-lockfile"
+
+[tasks.tf]
+description = "terraform in infra/terraform with the repo's secrets in memory (mise run tf -- plan)"
+run = "repo-secrets exec secrets/terraform.env.age -- env -u AWS_PROFILE -u AWS_DEFAULT_PROFILE -u AWS_SESSION_TOKEN AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_CONFIG_FILE=/dev/null terraform -chdir=infra/terraform"
+
+[tasks.pre-push]
+description = "Static checks: terraform fmt + validate (own data dir: never touches the real backend or state)"
+env = { TF_DATA_DIR = ".terraform-validate" }
+run = [
+  "terraform -chdir=infra/terraform fmt -check -recursive",
+  "terraform -chdir=infra/terraform init -backend=false -input=false >/dev/null",
+  "terraform -chdir=infra/terraform validate",
+]
+
+# ── Secrets (repo-secrets engine; devbox docs/repo-secrets.md) ─────────────
+[tasks."secrets:decrypt"]
+description = "Materialize file/sshkey secrets, then render the generated env files (with <age>s: only those rows)"
+run = "repo-secrets decrypt"
+
+[tasks."secrets:clean"]
+description = "Remove materialized plaintext a .age restores (--render: also the generated env files; --all: also ~/.ssh keys)"
+run = "repo-secrets clean"
+
+[tasks."secrets:encrypt"]
+description = "Re-encrypt file/sshkey secrets from their plaintext (unchanged ones left alone)"
+run = "repo-secrets encrypt"
+
+[tasks."secrets:render"]
+description = "Regenerate every render-row env file from committed config + secrets"
+run = "repo-secrets render"
+
+[tasks."secrets:edit"]
+description = "Edit one secret in a tmpfs copy, re-encrypt, re-render (mise run secrets:edit <age>)"
+run = "repo-secrets edit"
+
+[tasks."secrets:check"]
+description = "Every manifest row has its sources (exit 1 otherwise)"
+run = "repo-secrets check"
