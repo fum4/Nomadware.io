@@ -21,7 +21,7 @@ locals {
     mx2   = { name = local.zone, type = "MX", content = "mx02.mail.icloud.com", priority = 10 }
     spf   = { name = local.zone, type = "TXT", content = "\"v=spf1 include:icloud.com ~all\"" }
     dkim  = { name = "sig1._domainkey.${local.zone}", type = "CNAME", content = "sig1.dkim.nomadware.io.at.icloudmailadmin.com" }
-    dmarc = { name = "_dmarc.${local.zone}", type = "TXT", content = "\"v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;\"" }
+    dmarc = { name = "_dmarc.${local.zone}", type = "TXT", content = "\"v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:ops@nomadware.io;\"" }
 
     # Domain verifications
     apple_verification  = { name = local.zone, type = "TXT", content = "\"apple-domain=8DvGyY7ccwCYYPd8\"" }

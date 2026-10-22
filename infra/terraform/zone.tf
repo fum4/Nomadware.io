@@ -5,6 +5,6 @@ resource "cloudflare_zone" "nomadware_io" {
 }
 
 output "name_servers" {
-  description = "Set these as the domain's nameservers at the registrar (GoDaddy)"
+  description = "The zone's Cloudflare nameservers (the registrar, Cloudflare Registrar, uses them automatically)"
   value       = cloudflare_zone.nomadware_io.name_servers
 }
