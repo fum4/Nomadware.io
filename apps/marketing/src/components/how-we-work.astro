@@ -67,7 +67,10 @@ const PRINCIPLES = [
     color: var(--soft);
   }
 
+  /* 1ch wider than the subtitle: the smallest step that sets each detail in three lines at
+     desktop widths (60.25ch would do, with ~2px to spare: too tight across font renderers). */
   .detail {
+    max-width: 61ch;
     margin-top: 10px;
     color: var(--subdued);
   }
