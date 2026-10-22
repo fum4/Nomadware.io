@@ -5,14 +5,14 @@ import { Breakpoints } from '~/constants';
 const fadeInAnimation = keyframes({
   '100%': {
     opacity: 1,
-  }
+  },
 });
 
 const slideInAnimation = keyframes({
   '100%': {
     opacity: 1,
     marginLeft: 0,
-  }
+  },
 });
 
 export const slideInClass = style({
@@ -53,7 +53,7 @@ export const Root = styled.div({
   '@media': {
     [`screen and (max-width: ${Breakpoints.MD}px)`]: {
       padding: '40px 0',
-    }
+    },
   },
 });
 
@@ -82,7 +82,7 @@ export const LogoBox = styled.div({
   alignItems: 'center',
 });
 
-export const TextBox = styled.div( {
+export const TextBox = styled.div({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -92,8 +92,8 @@ export const TextBox = styled.div( {
     [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       flexDirection: 'column',
       gap: 0,
-    }
-  }
+    },
+  },
 });
 
 export const ReportsBox = styled.div({

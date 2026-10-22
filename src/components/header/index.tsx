@@ -16,7 +16,7 @@ import {
   Anchor,
   logoLink,
   textLink,
-  emoji
+  emoji,
 } from './styles.css';
 
 type Theme = typeof Themes.LIGHT | typeof Themes.DARK;
@@ -59,21 +59,17 @@ export default component$(() => {
     <Header>
       <Content>
         <LogoBox>
-          <Link href='/' class={logoLink}>
-            <Logo alt={`${title} logo`} src='./logo.png' />
+          <Link href="/" class={logoLink}>
+            <Logo alt={`${title} logo`} src="./logo.png" />
           </Link>
         </LogoBox>
 
         <Text
           onMouseEnter$={() => store.drankCoffees < 3 && (store.emoji = 'COFFEE')}
-          onMouseLeave$={() => store.emoji = 'HEART'}
+          onMouseLeave$={() => (store.emoji = 'HEART')}
         >
           Made with
-
-          <Tooltip
-            text={`A bit too much ${Emoji.COFFEE} ?`}
-            disabled={store.drankCoffees < 3}
-          >
+          <Tooltip text={`A bit too much ${Emoji.COFFEE} ?`} disabled={store.drankCoffees < 3}>
             <span
               class={emoji[store.emoji]}
               onClick$={() => {
@@ -86,10 +82,8 @@ export default component$(() => {
               {Emoji[store.emoji]}
             </span>
           </Tooltip>
-
           by
-
-          <Link href='/' class={textLink}>
+          <Link href="/" class={textLink}>
             <Title>{title}</Title>
           </Link>
         </Text>
@@ -104,14 +98,8 @@ export default component$(() => {
                 style={{ cursor: 'default', pointerEvents: 'none' }}
               />
             </Tooltip>
-            <Anchor
-              href={githubUrl}
-              target='_blank'
-            >
-              <Icon
-                alt='GitHub logo'
-                src='./github.svg'
-              />
+            <Anchor href={githubUrl} target="_blank">
+              <Icon alt="GitHub logo" src="./github.svg" />
             </Anchor>
           </Buttons>
         </ButtonsBox>

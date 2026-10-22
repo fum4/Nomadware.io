@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "warn",
+    "style": "off",
+    "pedantic": "off",
+    "restriction": "off",
+    "nursery": "off"
+  },
+  "rules": {
+    "no-explicit-any": "error",
+    "no-non-null-assertion": "error",
+    "no-console": "error",
+    "consistent-type-imports": "error",
+    "no-unused-vars": "error"
+  },
+  "ignorePatterns": ["**/node_modules/**", "**/.vercel/**", "**/dist/**", "**/server/**"]
+}

@@ -15,13 +15,11 @@ export default component$(({ text, disabled = false }: TooltipProps) => {
   return (
     <Root
       onMouseEnter$={() => !disabled && (store.showTooltip = true)}
-      onMouseLeave$={() => store.showTooltip = false}
+      onMouseLeave$={() => (store.showTooltip = false)}
     >
       <Slot />
       {store.showTooltip && (
-        <Tooltip onMouseEnter$={() => store.showTooltip = false}>
-          {text}
-        </Tooltip>
+        <Tooltip onMouseEnter$={() => (store.showTooltip = false)}>{text}</Tooltip>
       )}
     </Root>
   );

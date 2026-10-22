@@ -3,7 +3,7 @@ import {
   component$,
   useBrowserVisibleTask$,
   useStore,
-  useSignal
+  useSignal,
 } from '@builder.io/qwik';
 
 import {
@@ -60,18 +60,16 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
       { title: 'Best practices', score: 0, displayScore: 0 },
       { title: 'SEO', score: 0, displayScore: 0 },
     ],
-    secondary: [
-      { title: 'Speed' },
-      { title: 'Boot-up' },
-      { title: 'LCP' },
-      { title: 'TBT' },
-    ]
+    secondary: [{ title: 'Speed' }, { title: 'Boot-up' }, { title: 'LCP' }, { title: 'TBT' }],
   };
 
-  const store = useStore<ReportState>({
-    metrics: emptyMetrics,
-    reportsFetched: false,
-  }, { deep: true });
+  const store = useStore<ReportState>(
+    {
+      metrics: emptyMetrics,
+      reportsFetched: false,
+    },
+    { deep: true },
+  );
 
   useBrowserVisibleTask$(({ track }) => {
     track(() => store.reportsFetched);
@@ -85,7 +83,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
 
           if (r) {
             const circumference = 2 * +r * Math.PI;
-            const strokeDasharray = metric.score * 100 * circumference / 100;
+            const strokeDasharray = (metric.score * 100 * circumference) / 100;
 
             circle.setAttribute('stroke-dasharray', `${strokeDasharray} 999`);
             circle.setAttribute('stroke-dashoffset', `0`);
@@ -96,9 +94,10 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
   });
 
   useBrowserVisibleTask$(() => {
-    (async() => {
+    (async () => {
       if (window.locationbar.visible) {
-        const searchParams = 'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
+        const searchParams =
+          'url=https://nomadware.io&key=AIzaSyB18ptJgrd47t1_tuc4mKfxzeCMMS2xXXc&category=performance&category=accessibility&category=best-practices&category=seo';
         const pageSpeedUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${searchParams}`;
 
         const response = await fetch(pageSpeedUrl);
@@ -111,12 +110,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
           'best-practices': bestPractices,
         } = lighthouseResult.categories;
 
-        const primaryMetrics = [
-          performance,
-          accessibility,
-          bestPractices,
-          seo,
-        ];
+        const primaryMetrics = [performance, accessibility, bestPractices, seo];
 
         primaryMetrics.forEach(({ score }, index) => {
           store.metrics.primary[index] = {
@@ -178,20 +172,30 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
         {store.metrics.primary.map((primaryMetric) => (
           <Metric key={primaryMetric.title}>
             <a
-              title='Mobile perf score from PageSpeed Insights'
-              target='_blank'
-              rel='noreferrer'
-              href='https://pagespeed.web.dev/report?url=https%3A%2F%2Fnomadware.io%2F'
+              title="Mobile perf score from PageSpeed Insights"
+              target="_blank"
+              rel="noreferrer"
+              href="https://pagespeed.web.dev/report?url=https%3A%2F%2Fnomadware.io%2F"
             >
               <Circle>
-                <svg viewBox='0 0 150 150'>
-                  <circle class={backgroundCircleClass} r='60' cx='75' cy='75' fill='transparent' stroke-dasharray='565.48' stroke-dashoffset='0' />
+                <svg viewBox="0 0 150 150">
+                  <circle
+                    class={backgroundCircleClass}
+                    r="60"
+                    cx="75"
+                    cy="75"
+                    fill="transparent"
+                    stroke-dasharray="565.48"
+                    stroke-dashoffset="0"
+                  />
                   <circle
                     class={foregroundCircleClass}
-                    r='60' cx='75' cy='75'
-                    stroke-dasharray='565.48'
-                    stroke-dashoffset='565.48px'
-                    fill='transparent'
+                    r="60"
+                    cx="75"
+                    cy="75"
+                    stroke-dasharray="565.48"
+                    stroke-dashoffset="565.48px"
+                    fill="transparent"
                   />
                 </svg>
                 <MetricText>
@@ -199,9 +203,7 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
                 </MetricText>
               </Circle>
             </a>
-            <PrimaryMetricTitle>
-              {primaryMetric.title}
-            </PrimaryMetricTitle>
+            <PrimaryMetricTitle>{primaryMetric.title}</PrimaryMetricTitle>
           </Metric>
         ))}
       </PrimaryMetrics>
@@ -209,10 +211,10 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
         {store.metrics.secondary.map((secondaryMetric) => (
           <Metric key={secondaryMetric.title}>
             <a
-              title='Mobile perf score from PageSpeed Insights'
-              target='_blank'
-              rel='noreferrer'
-              href='https://pagespeed.web.dev/report?url=https%3A%2F%2Fnomadware.io%2F'
+              title="Mobile perf score from PageSpeed Insights"
+              target="_blank"
+              rel="noreferrer"
+              href="https://pagespeed.web.dev/report?url=https%3A%2F%2Fnomadware.io%2F"
             >
               {secondaryMetric.displayValue ? (
                 <DisplayValue>{secondaryMetric.displayValue}</DisplayValue>
@@ -220,16 +222,11 @@ export default component$(({ onReportsLoaded$ }: ReportsProps) => {
                 <DisplayValuePlaceholder>-</DisplayValuePlaceholder>
               )}
             </a>
-            <SecondaryMetricTitle>
-              {secondaryMetric.title}
-            </SecondaryMetricTitle>
+            <SecondaryMetricTitle>{secondaryMetric.title}</SecondaryMetricTitle>
           </Metric>
         ))}
       </SecondaryMetrics>
-      <LoadingText
-        ref={loadingTextRef}
-        class={store.reportsFetched ? fadeOutClass : ''}
-      >
+      <LoadingText ref={loadingTextRef} class={store.reportsFetched ? fadeOutClass : ''}>
         Analyzing page speed
         <span class={firstDotClass}>.</span>
         <span class={secondDotClass}>.</span>

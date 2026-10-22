@@ -15,7 +15,7 @@ export const BuiltWith = styled.div({
   alignItems: 'center',
   gap: 8,
   fontSize: 14,
-  cursor: 'default'
+  cursor: 'default',
 });
 
 export const Anchor = styled.a({
