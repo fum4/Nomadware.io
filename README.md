@@ -1,109 +1,25 @@
-# Qwik City App ⚡️
+# Nomadware.io
 
-- [Qwik Docs](https://qwik.builder.io/)
-- [Discord](https://qwik.builder.io/chat)
-- [Qwik GitHub](https://github.com/BuilderIO/qwik)
-- [@QwikDev](https://twitter.com/QwikDev)
-- [Vite](https://vitejs.dev/)
+The hub for everything under `nomadware.io`: each app that serves a `*.nomadware.io` hostname, and the domain itself as code.
 
----
+| Path | What | Deploys to |
+|---|---|---|
+| [`apps/marketing/`](apps/marketing/README.md) | the marketing site (`nomadware.io`, `www`) | Vercel |
+| [`infra/terraform/`](infra/terraform/README.md) | the `nomadware.io` zone, every DNS record, the Vercel project | Cloudflare, Vercel (`mise run tf -- apply`) |
+| [`secrets/`](secrets/README.md) | Terraform credentials, age-encrypted | — |
 
-## Project Structure
+Lives elsewhere, DNS only here: `ops.nomadware.io` (Coolify control plane, [fum4/ops](https://github.com/fum4/ops)), `stremio.nomadware.io` ([fum4/stremio-plus-plus](https://github.com/fum4/stremio-plus-plus)).
 
-This project is using Qwik with [QwikCity](https://qwik.builder.io/qwikcity/overview/). QwikCity is just a extra set of tools on top of Qwik to make it easier to build a full site, including directory-based routing, layouts, and more.
+## Working on it
 
-Inside your project, you'll see the following directory structure:
-
-```
-├── public/
-│   └── ...
-└── src/
-    ├── components/
-    │   └── ...
-    └── routes/
-        └── ...
+```bash
+mise install && mise run setup   # toolchain (node, pnpm, terraform) + workspace install
+mise run marketing:dev           # marketing site dev server
+mise run tf -- plan              # DNS / Vercel changes (needs the repo's age key)
 ```
 
-- `src/routes`: Provides the directory based routing, which can include a hierarchy of `layout.tsx` layout files, and an `index.tsx` file as the page. Additionally, `index.ts` files are endpoints. Please see the [routing docs](https://qwik.builder.io/qwikcity/routing/overview/) for more info.
+`mise tasks` lists everything. Gates: `pre-push` (oxfmt, oxlint, terraform fmt + validate) and `pre-merge` (every app's build).
 
-- `src/components`: Recommended directory for components.
+## Adding an app
 
-- `public`: Any static assets, like images, can be placed in the public directory. Please see the [Vite public directory](https://vitejs.dev/guide/assets.html#the-public-directory) for more info.
-
-## Add Integrations and deployment
-
-Use the `npm run qwik add` command to add additional integrations. Some examples of integrations include: Cloudflare, Netlify or Express server, and the [Static Site Generator (SSG)](https://qwik.builder.io/qwikcity/static-site-generation/static-site-config/).
-
-```shell
-npm run qwik add # or `yarn qwik add`
-```
-
-## Development
-
-Development mode uses [Vite's development server](https://vitejs.dev/). During development, the `dev` command will server-side render (SSR) the output.
-
-```shell
-npm start # or `yarn start`
-```
-
-> Note: during dev mode, Vite may request a significant number of `.js` files. This does not represent a Qwik production build.
-
-## Preview
-
-The preview command will create a production build of the client modules, a production build of `src/entry.preview.tsx`, and run a local server. The preview server is only for convenience to locally preview a production build, and it should not be used as a production server.
-
-```shell
-npm run preview # or `yarn preview`
-```
-
-## Production
-
-The production build will generate client and server modules by running both client and server build commands. Additionally, the build command will use Typescript to run a type check on the source code.
-
-```shell
-npm run build # or `yarn build`
-```
-
-## Vercel Edge
-
-This starter site is configured to deploy to [Vercel Edge Functions](https://vercel.com/docs/concepts/functions/edge-functions), which means it will be rendered at an edge location near to your users.
-
-## Installation
-
-The adaptor will add a new `vite.config.ts` within the `adaptors/` directory, and a new entry file will be created, such as:
-
-```
-└── adaptors/
-    └── vercel-edge/
-        └── vite.config.ts
-└── src/
-    └── entry.vercel-edge.tsx
-```
-
-Additionally, within the `package.json`, the `build.server` script will be updated with the Vercel Edge build.
-
-## Production build
-
-To build the application for production, use the `build` command, this command will automatically run `npm run build.server` and `npm run build.client`:
-
-```shell
-npm run build
-```
-
-[Read the full guide here](https://github.com/BuilderIO/qwik/blob/main/starters/adaptors/vercel-edge/README.md)
-
-## Dev deploy
-
-To deploy the application for development:
-
-```shell
-npm run deploy
-```
-
-Notice that you might need a [Vercel account](https://docs.Vercel.com/get-started/) in order to complete this step!
-
-## Production deploy
-
-The project is ready to be deployed to Vercel. However, you will need to create a git repository and push the code to it.
-
-You can [deploy your site to Vercel](https://vercel.com/docs/concepts/deployments/overview) either via a Git provider integration or through the Vercel CLI.
+`apps/<name>/` with its own `package.json` (`@nomadware/<name>`) and `README.md`, `mise` tasks `<name>:dev|build`, its build added to `pre-merge`, and its hostname as one entry in `infra/terraform/records.tf`.
