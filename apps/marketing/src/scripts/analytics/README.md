@@ -2,7 +2,7 @@
 
 **What:** product analytics for the site (PostHog EU cloud, org Nomadware, project 316793) and the consent banner that decides how much of it runs.
 
-**Depends on:** `posthog-js` (imported dynamically, after `load` + idle, so it never competes with first paint), `config/analytics.ts` (token, hosts, `enabled` = production builds only), the `/ingest/*` rewrites in `apps/marketing/vercel.json`, `components/consent-banner.astro` (markup + styles, mounted by the base layout) and the footer's `data-consent-open` button.
+**Depends on:** `posthog-js` (imported dynamically on the first interaction or 3 s after `load`, then on idle: evaluating it is one ~100 ms task that must stay out of start-up and Lighthouse's blocking time), `config/analytics.ts` (token, hosts, `enabled` = production builds only), the `/ingest/*` rewrites in `apps/marketing/vercel.json`, `components/consent-banner.astro` (markup + styles, mounted by the base layout) and the footer's `data-consent-open` button.
 
 **Consent model** (owner-approved, NWARE-82):
 

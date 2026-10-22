@@ -5,7 +5,7 @@ import { whenIdle } from '../motion';
 import { clearTrackingStorage } from './clear-tracking-storage';
 import type { Consent } from './consent-store';
 import { readConsent } from './consent-store';
-import { PRIVATE_SELECTOR } from './constants';
+import { ANALYTICS_LOAD_DELAY_MS, ANALYTICS_LOAD_TRIGGERS, PRIVATE_SELECTOR } from './constants';
 import { connectTrack } from './track';
 
 // What everyone gets, choice or not: anonymous page views, clicks, web vitals and errors, with
@@ -55,17 +55,35 @@ function init(posthog: PostHog): void {
   });
 }
 
-const start = (): void =>
+function importWhenIdle(): void {
   whenIdle(() => {
     void import('posthog-js').then(({ default: posthog }) => init(posthog));
   });
+}
 
-/** Load posthog-js once the page has loaded and the main thread is idle (never before paint). */
+/**
+ * Load posthog-js on the visitor's first interaction, or ANALYTICS_LOAD_DELAY_MS after `load`,
+ * whichever comes first — then on idle. Evaluating the SDK is one ~100 ms task; this keeps it out
+ * of the page's start-up (and out of Lighthouse's blocking time). Events tracked before then queue.
+ */
 export function loadAnalytics(): void {
   if (!ANALYTICS.enabled || requested) return;
   requested = true;
-  if (document.readyState === 'complete') start();
-  else window.addEventListener('load', start, { once: true });
+  let timer = 0;
+  let started = false;
+  const start = (): void => {
+    if (started) return;
+    started = true;
+    clearTimeout(timer);
+    ANALYTICS_LOAD_TRIGGERS.forEach((type) => window.removeEventListener(type, start));
+    importWhenIdle();
+  };
+  ANALYTICS_LOAD_TRIGGERS.forEach((type) =>
+    window.addEventListener(type, start, { once: true, passive: true }),
+  );
+  const arm = (): void => void (timer = window.setTimeout(start, ANALYTICS_LOAD_DELAY_MS));
+  if (document.readyState === 'complete') arm();
+  else window.addEventListener('load', arm, { once: true });
 }
 
 /** Apply a choice made on this page. "no thanks" also forgets this visitor and wipes storage. */

@@ -6,6 +6,10 @@ export const CONSENT_STORAGE_KEY = 'nw-consent';
 /** The banner shows this long after load, or on the first scroll, whichever comes first. */
 export const BANNER_DELAY_MS = 2000;
 
+/** posthog-js loads on the first of these, or this long after `load` (see posthog-client.ts). */
+export const ANALYTICS_LOAD_DELAY_MS = 3000;
+export const ANALYTICS_LOAD_TRIGGERS = ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const;
+
 /** Events tracked before posthog-js has loaded wait here; beyond this, the oldest are dropped. */
 export const TRACK_QUEUE_LIMIT = 50;
 
