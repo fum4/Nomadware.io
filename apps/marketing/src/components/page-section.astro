@@ -31,6 +31,9 @@ const { id, title, band = false } = Astro.props;
   .section {
     --section-gap: calc(var(--grid) * 3);
     --band-pad: var(--grid);
+    /* A band runs one more grid cell past its content than above it, so the text never crowds
+       its bottom edge. A whole cell, so the snap (scripts/grid-band.ts) still lands on a line. */
+    --band-pad-end: calc(var(--band-pad) + var(--grid));
 
     display: grid;
     grid-template-columns: 160px 1fr;
@@ -47,7 +50,7 @@ const { id, title, band = false } = Astro.props;
   .section.is-band {
     position: relative;
     margin-top: calc(var(--section-gap) - var(--band-pad));
-    padding-block: var(--band-pad);
+    padding-block: var(--band-pad) var(--band-pad-end);
   }
 
   .section.is-band::before {
