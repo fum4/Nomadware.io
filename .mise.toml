@@ -27,6 +27,11 @@ run = [
   "terraform -chdir=infra/terraform validate",
 ]
 
+[tasks.pre-merge]
+description = "Site gate: install from the lockfile, then qwik build (types + lint + client/SSR bundles)"
+depends = ["setup"]
+run = "pnpm build"
+
 # ── Secrets (repo-secrets engine; devbox docs/repo-secrets.md) ─────────────
 [tasks."secrets:decrypt"]
 description = "Materialize file/sshkey secrets, then render the generated env files (with <age>s: only those rows)"
