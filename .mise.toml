@@ -31,25 +31,31 @@ run = [
 ]
 
 [tasks.pre-merge]
-description = "Every app's build: marketing = astro check (types) + astro build"
-depends = ["marketing:build"]
+description = "Every app's tests + build: marketing = vitest, then astro check (types) + astro build"
+depends = ["marketing:test", "marketing:build"]
 
 # ── apps/marketing (@nomadware/marketing, Astro on Vercel) ────────────────
+# Each renders apps/marketing/.env first (dev config; secrets/manifest), which the build needs.
 # Astro backgrounds its servers when it detects an agent; --ignore-lock (package.json) keeps
 # them in the foreground so devstack / process-compose own the process.
 [tasks."marketing:dev"]
 description = "Marketing site dev server (astro dev, :4321)"
-depends = ["setup"]
+depends = ["setup", "secrets:render"]
 run = "pnpm --filter @nomadware/marketing dev"
 
 [tasks."marketing:build"]
 description = "Marketing site production build: astro check + astro build (what Vercel runs)"
-depends = ["setup"]
+depends = ["setup", "secrets:render"]
 run = "pnpm --filter @nomadware/marketing build"
+
+[tasks."marketing:test"]
+description = "Marketing site unit tests (vitest, hermetic: no network)"
+depends = ["setup"]
+run = "pnpm --filter @nomadware/marketing test"
 
 [tasks."marketing:preview"]
 description = "Build, then serve the static output locally (astro preview, :4321)"
-depends = ["setup"]
+depends = ["setup", "secrets:render"]
 run = "pnpm --filter @nomadware/marketing preview"
 
 # ── Secrets (repo-secrets engine; devbox docs/repo-secrets.md) ─────────────

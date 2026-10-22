@@ -50,6 +50,40 @@ export const CONTACT = {
   /** Form auto-focuses "name" once this share of it is on screen (desktop only). */
   autoFocusThreshold: 0.6,
   typingIdleMs: 500,
+  /** Field limits, enforced by the client (maxlength, readiness) and the endpoint alike. */
+  maxNameLength: 120,
+  /** RFC 5321's practical ceiling for a whole address. */
+  maxEmailLength: 254,
   minBriefLength: 4,
+  maxBriefLength: 4000,
   subjectPrefix: 'New project — ',
+  /** The on-demand route the form posts to (src/pages/api/contact.ts). */
+  endpoint: '/api/contact',
+  /** How long "send" waits for the Turnstile token before giving up. */
+  challengeTimeoutMs: 15_000,
+} as const;
+
+/** The contact endpoint's server-side tunables (src/contact/, src/pages/api/contact.ts). */
+export const CONTACT_API = {
+  /** Requests above this are refused before parsing; 4000 chars of brief fit many times over. */
+  maxBodyBytes: 32_768,
+  /** Per-IP budget, per warm function instance (src/contact/rate-limiter.ts). */
+  rateLimitMax: 5,
+  rateLimitWindowMs: 60 * 60 * 1000,
+  /** Cap on IPs tracked per instance, so a flood can't grow memory without bound. */
+  rateLimitMaxTracked: 10_000,
+  upstreamTimeoutMs: 8000,
+  /** Cloudflare's documented maximum token length. */
+  maxTokenLength: 2048,
+  turnstileVerifyUrl: 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+  resendSendUrl: 'https://api.resend.com/emails',
+  from: 'Nomadware site <contact-form@send.nomadware.io>',
+} as const;
+
+/** Cloudflare Turnstile in the browser (src/scripts/contact/turnstile.ts). */
+export const TURNSTILE = {
+  scriptUrl: 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
+  /** Shows UI only when Cloudflare needs an interaction; otherwise invisible. */
+  appearance: 'interaction-only',
+  action: 'contact',
 } as const;
