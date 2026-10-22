@@ -6,8 +6,10 @@ The `nomadware.io` zone and every record in it. Both registration (Cloudflare Re
 |---|---|
 | `zone.tf` | the zone (+ `name_servers` output) |
 | `records.tf` | all records, one map entry each (site, `ops`, iCloud Mail, verifications) |
-| `vercel.tf` | the Vercel project `nomadware-io` (team `nware`) that builds the marketing site, its env vars, and its domains (apex serves; `www` 308s to the apex) |
+| `vercel.tf` | the Vercel project `nomadware-io` (team `nware`) that builds the marketing site, its env vars (incl. the contact form's Turnstile + Resend values), and its domains (apex serves; `www` 308s to the apex) |
+| `turnstile.tf` | the contact form's Cloudflare Turnstile widget (its site key and secret flow straight into `vercel.tf`) |
 | `backend.tf` | state in R2 bucket `nomadware-io-backup` (created by hand: bootstrap exception) |
+| `variables.tf` | inputs: ids come from `terraform.auto.tfvars`; `resend_api_key` from `TF_VAR_resend_api_key` in `secrets/terraform.env.age` (optional: unset, the Vercel var isn't created) |
 | `versions.tf` | Terraform + provider pins (bump deliberately to the latest release) |
 
 **Vercel:** every project setting the dashboard used to own lives in `vercel.tf`; change it here, never in the dashboard. Token `nomadware-io-terraform` (`VERCEL_API_TOKEN`), scoped to team `nware`; the team id is config (`vercel_team_id`).
