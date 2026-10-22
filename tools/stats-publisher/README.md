@@ -10,7 +10,7 @@
 |---|---|
 | `mise run stats:compute` | update the store, print the snapshot JSON (no upload) |
 | `mise run stats:compute -- --dry-run` | the same without saving the store |
-| `mise run stats:publish` | update the store, upload (R2 write credential from `secrets/site-stats-publisher.env.age`) |
+| `mise run stats:publish` | update the store, upload (S3 keys of R2 token `nomadware-io-site-stats-write` from `secrets/site-stats-publisher.env.age`) |
 
 Each run logs one logfmt line per source and a `run done` line with `duration_ms`, `cpu_ms`, `max_rss_mb` and `store_kb` to stderr — `journalctl --user -u nomadware-site-stats` for the timer's runs (systemd adds its own "Consumed … CPU time, … memory peak" line).
 
