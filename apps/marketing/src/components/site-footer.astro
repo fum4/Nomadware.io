@@ -11,7 +11,7 @@ const { renderedAt } = Astro.props;
 
 <footer class="footer">
   <p class="studio">
-    <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no office · no overhead · just software</span>
+    <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no overhead · just software</span>
   </p>
   <p>
     last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={renderedAt} /> · <span
@@ -64,20 +64,24 @@ const { renderedAt } = Astro.props;
   }
 
   @media (max-width: 640px) {
-    /* Three rows: owner / tagline / deploy. */
-    .footer,
-    .studio {
-      display: flex;
+    /* Two rows: owner · tagline / deploy. */
+    .footer {
       flex-direction: column;
       gap: 6px;
-    }
-
-    .footer {
       margin-top: 36px;
     }
 
-    .sep {
-      display: none;
+    .studio {
+      white-space: nowrap;
+    }
+  }
+
+  /* The first row is 322px at 11px, which needs a 362px screen; below 370px it steps down
+     (283px) so it stays on one line down to a 330px screen. */
+  @media (max-width: 370px) {
+    .footer {
+      font-size: 10px;
+      letter-spacing: -0.02em;
     }
   }
 </style>
