@@ -1,0 +1,5 @@
+autoInstallPeers: false
+allowBuilds:
+  deasync: false
+  esbuild: true
+  vercel: false
