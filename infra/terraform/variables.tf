@@ -14,3 +14,19 @@ variable "resend_api_key" {
   sensitive   = true
   default     = null
 }
+
+# R2 read-only S3 keys for the live stats (token `nomadware-io-site-stats-read`: Object Read on
+# nomadware-io-site-stats only). Secret pair: TF_VAR_* lines in secrets/terraform.env.age.
+variable "site_stats_reader_access_key_id" {
+  description = "R2 access key id of the site's read-only stats token. Unset: the Vercel env vars aren't created."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "site_stats_reader_secret_access_key" {
+  description = "R2 secret access key of the site's read-only stats token"
+  type        = string
+  sensitive   = true
+  default     = null
+}
