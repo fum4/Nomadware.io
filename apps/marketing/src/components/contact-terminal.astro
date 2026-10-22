@@ -4,17 +4,14 @@ import { SITE } from '../config/site';
 import ContactField from './contact-field.astro';
 import PageSection from './page-section.astro';
 
-// Until the form endpoint exists, "send" opens a pre-filled email (and so does the plain HTML
-// form without JS, via its mailto: action).
+// Until the form endpoint exists, "send" opens a pre-filled email. No mailto: form action (an
+// insecure form target to browsers); without JS the form points at the address instead.
 ---
 
 <PageSection id="contact" title="Contact">
   <form
     class="term is-idle"
     data-contact
-    action={`mailto:${SITE.email}`}
-    method="post"
-    enctype="text/plain"
     aria-labelledby="contact-heading"
   >
     <div class="term-bar">
@@ -34,6 +31,9 @@ import PageSection from './page-section.astro';
       <ContactField name="brief" multiline placeholder="what you're building, where it hurts" />
     </div>
     <p class="term-out" role="status" data-output></p>
+    <p class="term-nojs">
+      JavaScript is off: write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+    </p>
     <div class="term-run">
       <span class="term-hints" aria-hidden="true"
         ><kbd>⏎</kbd> next field · <kbd>↑↓</kbd> move · <kbd>⌘ ⏎</kbd> send</span

@@ -17,7 +17,7 @@
   justify-content: space-between;
   padding: 10px 16px;
   border-bottom: 1px solid var(--line);
-  font: 400 11px var(--mono);
+  font: 400 11px/var(--leading) var(--mono);
   color: var(--faint);
 }
 
@@ -42,7 +42,7 @@
 .term-heading {
   margin: 0 0 16px;
   color: var(--fg);
-  font: 500 24px var(--sans);
+  font: 500 24px/var(--leading) var(--sans);
   letter-spacing: -0.02em;
 }
 
@@ -52,7 +52,7 @@
   padding: 0 20px;
   overflow: hidden;
   color: var(--dim);
-  font: 400 13px var(--mono);
+  font: 400 13px/var(--leading) var(--mono);
   transition: max-height 0.4s;
 }
 
@@ -69,13 +69,29 @@
   color: var(--warm);
 }
 
+.term-nojs {
+  display: none;
+  margin: 0;
+  padding: 0 20px 14px;
+  color: var(--dim);
+  font: 400 13px/var(--leading) var(--mono);
+}
+
+html:not(.js) .term-nojs {
+  display: block;
+}
+
+html:not(.js) .term-send {
+  display: none;
+}
+
 .term-run {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
   border-top: 1px solid var(--line);
-  font: 400 11px var(--mono);
+  font: 400 11px/var(--leading) var(--mono);
   color: var(--faint);
 }
 
@@ -93,7 +109,7 @@
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--dim);
-  font: 500 12px var(--mono);
+  font: 500 12px/var(--leading) var(--mono);
   cursor: pointer;
   transition:
     border-color 0.15s,
