@@ -69,6 +69,20 @@
   color: var(--warm);
 }
 
+/* Honeypot: off-screen rather than display:none, which bots skip. */
+.term-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Turnstile's mount: zero height unless Cloudflare shows an interactive check. */
+.term-challenge {
+  padding: 0 20px;
+}
+
 .term-nojs {
   display: none;
   margin: 0;
@@ -132,6 +146,15 @@ html:not(.js) .term-send {
 .term.is-ready .term-send:hover {
   background: transparent;
   color: var(--sig);
+}
+
+/* Sending: the label reads "sending…" and the button holds still until the answer is in. */
+.term .term-send:disabled {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--dim);
+  cursor: progress;
+  animation: none;
 }
 
 @keyframes term-surge {
