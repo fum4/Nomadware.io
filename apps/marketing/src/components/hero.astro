@@ -16,9 +16,9 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
 
 <script>
   import { initDotField } from '../scripts/dot-field';
-  import { initHeadlineScramble } from '../scripts/headline-scramble';
+  import { scrambleHeadline } from '../scripts/headline-scramble';
   import { whenIdle } from '../scripts/motion';
-  initHeadlineScramble();
+  void scrambleHeadline();
   whenIdle(initDotField);
 </script>
 
@@ -79,23 +79,30 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
     display: block;
   }
 
-  /* Built by scripts/headline-scramble.ts: the real letter keeps its space, a glyph covers it.
-     Per-letter spans lose kerning, so no wrapping meanwhile (it would push the subline down). */
+  /* Built by scripts/headline-scramble.ts: the real text stays laid out (painted only up to the
+     reveal point by an inline background clipped to it), glyphs cover the rest from an overlay. */
   .headline:global(.is-scrambling) {
-    white-space: nowrap;
-  }
-
-  .headline :global(.scrambled) {
     position: relative;
     color: transparent;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
   }
 
-  .headline :global(.scrambled)::after {
-    content: attr(data-glyph);
+  .headline :global(.scramble-glyphs) {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
     color: var(--sig);
+  }
+
+  .headline :global(.scramble-glyphs > span) {
+    position: absolute;
+  }
+
+  .headline :global(.scramble-glyphs > span)::after {
+    content: attr(data-glyph);
   }
 
   @media (max-width: 640px) {
