@@ -71,8 +71,8 @@ a {
   min-height: 100vh;
   background-image:
     radial-gradient(1200px 400px at 85% -10%, var(--glow), transparent 60%),
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    linear-gradient(var(--line) var(--grid-line), transparent var(--grid-line)),
+    linear-gradient(90deg, var(--line) var(--grid-line), transparent var(--grid-line));
   background-size:
     auto,
     var(--grid) var(--grid),

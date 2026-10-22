@@ -1,26 +1,69 @@
 ---
 // A titled band: small mono label in the left column, content on the right (stacked on phones).
+// `band`: a full-bleed darker background whose edges sit on the page's grid lines
+// (scripts/grid-band.ts snaps them; without JS the band is drawn unsnapped).
 interface Props {
   id: string;
   title: string;
+  band?: boolean;
 }
-const { id, title } = Astro.props;
+const { id, title, band = false } = Astro.props;
 ---
 
-<section class="section" id={id} aria-labelledby={`${id}-title`}>
+<section
+  class:list={['section', { 'is-band': band }]}
+  id={id}
+  aria-labelledby={`${id}-title`}
+  data-grid-band={band ? '' : undefined}
+>
   <h2 class="title" id={`${id}-title`}>{title}</h2>
   <div><slot /></div>
 </section>
 
+<script>
+  import { snapGridBands } from '../scripts/grid-band';
+  snapGridBands();
+</script>
+
 <style>
+  /* Sections are separated by space alone (the grid paper draws the lines): three grid cells
+     from the previous section to this one's title, two on phones. */
   .section {
+    --section-gap: calc(var(--grid) * 3);
+    --band-pad: var(--grid);
+
     display: grid;
     grid-template-columns: 160px 1fr;
     gap: 24px;
-    margin-top: 48px;
-    padding: 48px 0 8px;
-    border-top: 1px solid var(--line);
+    margin-top: var(--section-gap);
+    padding-bottom: 8px;
     scroll-margin-top: 24px;
+  }
+
+  /* The band's padding sits inside the same gap, so its title lands where any section's would.
+     The band itself is painted by ::before: full-bleed via a spread shadow clipped to its own
+     height (no 100vw, so no horizontal scrollbar), and moved onto grid lines by
+     scripts/grid-band.ts with a transform only, which never shifts layout (zero CLS). */
+  .section.is-band {
+    position: relative;
+    margin-top: calc(var(--section-gap) - var(--band-pad));
+    padding-block: var(--band-pad);
+  }
+
+  .section.is-band::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--band);
+    box-shadow: 0 0 0 100vmax var(--band);
+    clip-path: inset(0 -100vmax);
+    transform-origin: top;
+    transform: translateY(var(--band-shift, 0px)) scaleY(var(--band-scale, 1));
+  }
+
+  .section.is-band + .section {
+    margin-top: calc(var(--section-gap) - var(--band-pad));
   }
 
   .title {
@@ -33,10 +76,11 @@ const { id, title } = Astro.props;
 
   @media (max-width: 640px) {
     .section {
+      --section-gap: calc(var(--grid) * 2);
+
       grid-template-columns: 1fr;
       gap: 16px;
-      margin-top: 36px;
-      padding: 36px 0 4px;
+      padding-bottom: 4px;
     }
   }
 </style>
