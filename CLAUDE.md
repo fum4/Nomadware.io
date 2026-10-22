@@ -20,4 +20,5 @@ The agent has full merge ownership here (owner, 2026-10-21): PR → `wt pre-merg
 | Change DNS / add a subdomain | [infra/terraform/README.md](infra/terraform/README.md) | plan before apply; plan clean after |
 | Add an app | [README.md](README.md) § Adding an app | `@nomadware/<name>`, `<name>:*` mise tasks, build in `pre-merge` |
 | Work on the marketing site | [apps/marketing/README.md](apps/marketing/README.md) | `mise run marketing:build` green before push |
+| Work on the live stats pipeline | [tools/stats-publisher/README.md](tools/stats-publisher/README.md) | aggregates only — never a repo, session, unit or tool name in the published JSON; shape changes go through `packages/site-stats` |
 | Add a secret | devbox `docs/repo-secrets.md` | `mise run secrets:edit secrets/<x>.age`; never plaintext |
