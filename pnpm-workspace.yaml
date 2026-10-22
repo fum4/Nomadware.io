@@ -1,3 +1,5 @@
+packages:
+  - apps/*
 autoInstallPeers: false
 allowBuilds:
   deasync: false
