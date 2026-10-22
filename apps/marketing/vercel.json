@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    { "source": "/sitemap.xml", "destination": "/sitemap-index.xml", "statusCode": 308 }
+  ],
+  "rewrites": [
+    {
+      "source": "/ingest/static/:path(.*)",
+      "destination": "https://eu-assets.i.posthog.com/static/:path"
+    },
+    {
+      "source": "/ingest/array/:path(.*)",
+      "destination": "https://eu-assets.i.posthog.com/array/:path"
+    },
+    { "source": "/ingest/:path(.*)", "destination": "https://eu.i.posthog.com/:path" }
+  ]
+}
