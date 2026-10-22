@@ -41,5 +41,6 @@
     "vercel": "^28.4.17",
     "vite": "4.0.3",
     "vite-tsconfig-paths": "3.5.0"
-  }
+  },
+  "packageManager": "pnpm@12.14.0"
 }
