@@ -1,0 +1,14 @@
+{
+  "name": "@nomadware/vercel-preview",
+  "private": true,
+  "description": "Serves an app's `vercel build` output locally: static files, functions and vercel.json routes (run by Node directly, no build)",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "node --test 'src/**/*.test.ts'"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3"
+  }
+}
