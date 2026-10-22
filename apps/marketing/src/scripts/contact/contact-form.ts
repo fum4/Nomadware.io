@@ -2,11 +2,13 @@ import { CONTACT } from '../../constants';
 import { SITE } from '../../config/site';
 import { isComplete, isEmail } from '../../contact/validation';
 import type { ContactDraft } from '../../contact/validation';
+import { track } from '../analytics/track';
 import { hasFinePointer, isMobileViewport, onceVisible } from '../motion';
 import { caretOnFirstLine } from './caret-edge';
 import type { ContactLine } from './contact-line';
 import { readLines } from './contact-line';
 import { paintLine } from './paint-line';
+import type { PostResult } from './post-contact';
 import { postContact } from './post-contact';
 import { createChallenge } from './turnstile';
 
@@ -33,6 +35,15 @@ export function initContactForm(): void {
   const buttonLabel = button.textContent ?? '';
   let typingTimer = 0;
   let sending = false;
+  // Analytics: the desktop auto-focus below is not the visitor engaging, so it doesn't count.
+  let autoFocusing = false;
+  let engaged = false;
+  let started = false;
+  const markEngaged = (): void => {
+    if (engaged) return;
+    engaged = true;
+    track('contact_form_focused');
+  };
 
   const draft = (): ContactDraft => {
     const [name = '', email = '', brief = ''] = lines.map((line) => line.control.value);
@@ -72,24 +83,32 @@ export function initContactForm(): void {
     if (sending) return;
     const current = draft();
     if (!isComplete(current)) {
+      track('contact_form_failed', { reason: 'validation' });
       say('is-bad', '✗', 'name, a valid email and a few words about the project, please');
       return;
     }
     setSending(true);
-    let sent = false;
+    // No token (script blocked, challenge failed, timed out) stays this: the same failure line.
+    let result: PostResult | { sent: false; reason: 'turnstile' } = {
+      sent: false,
+      reason: 'turnstile',
+    };
     try {
       const token = await challenge.token(CONTACT.challengeTimeoutMs);
-      sent = await postContact({ ...current, website: trap.value, token });
+      track('contact_form_submitted');
+      result = await postContact({ ...current, website: trap.value, token });
     } catch {
-      // No token (script blocked, challenge failed, timed out): the same failure line.
+      // Only challenge.token() throws; postContact never does.
     } finally {
       challenge.reset();
       setSending(false);
     }
-    if (sent) {
+    if (result.sent) {
+      track('contact_form_succeeded');
       say('is-ok', '✓', `sent. we'll reply to ${current.email.trim()} shortly.`);
       clearFields();
     } else {
+      track('contact_form_failed', { reason: result.reason });
       say('is-bad', '✗', `couldn't send — try again or write to ${SITE.email}`);
     }
   };
@@ -109,6 +128,7 @@ export function initContactForm(): void {
     paint(line);
 
     control.addEventListener('focus', () => {
+      if (!autoFocusing) markEngaged();
       form.classList.remove(STATE.idle);
       lines.forEach((other) => {
         other.root.classList.toggle('is-active', other === line);
@@ -122,6 +142,8 @@ export function initContactForm(): void {
       if (isEmailLine) setFieldError(line, control.value.length > 0 && !isEmail(control.value));
     });
     control.addEventListener('input', () => {
+      if (!started) track('contact_form_started');
+      started = true;
       form.classList.add(STATE.typing);
       clearTimeout(typingTimer);
       typingTimer = window.setTimeout(
@@ -159,6 +181,10 @@ export function initContactForm(): void {
     });
   });
 
+  // After an auto-focus, the first click or key in the form is the visitor's own focus.
+  form.addEventListener('pointerdown', markEngaged);
+  form.addEventListener('keydown', markEngaged);
+
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     void send();
@@ -171,7 +197,9 @@ export function initContactForm(): void {
   if (hasFinePointer() && !isMobileViewport()) {
     onceVisible(form, CONTACT.autoFocusThreshold, () => {
       if (document.activeElement && document.activeElement !== document.body) return;
+      autoFocusing = true;
       lines[0]?.control.focus({ preventScroll: true });
+      autoFocusing = false;
     });
   }
 }

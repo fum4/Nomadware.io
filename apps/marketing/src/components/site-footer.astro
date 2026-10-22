@@ -11,7 +11,7 @@ import RelativeTime from './relative-time.astro';
   <p>
     last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={BUILD_INFO.builtAt} /> · <span
       class="sha">{BUILD_INFO.sha}</span
-    >
+    ><span class="privacy"> · <button type="button" data-consent-open>privacy</button></span>
   </p>
 </footer>
 
@@ -34,6 +34,28 @@ import RelativeTime from './relative-time.astro';
   .owner,
   .sha {
     color: var(--fg);
+  }
+
+  /* Reopens the consent banner; looks like the footer's text, not a button. */
+  .privacy button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .privacy button:hover {
+    color: var(--fg);
+  }
+
+  /* No JS, no analytics: nothing to reopen. */
+  :global(html:not(.js)) .privacy {
+    display: none;
   }
 
   @media (max-width: 640px) {

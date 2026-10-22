@@ -1,6 +1,7 @@
 ---
 import { Font } from 'astro:assets';
 
+import ConsentBanner from '../components/consent-banner.astro';
 import JsonLd from '../components/json-ld.astro';
 import SeoHead from '../components/seo-head.astro';
 import '../styles/global.css';
@@ -27,5 +28,6 @@ import '../styles/global.css';
         <slot />
       </div>
     </div>
+    <ConsentBanner />
   </body>
 </html>

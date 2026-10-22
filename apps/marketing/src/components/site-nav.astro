@@ -9,9 +9,16 @@ import Wordmark from './wordmark.astro';
       <LogoMark />
       <Wordmark />
     </a>
-    <a class="link" href="#contact">contact</a>
+    <a class="link" href="#contact" data-contact-nav>contact</a>
   </nav>
 </header>
+
+<script>
+  import { track } from '../scripts/analytics/track';
+  document
+    .querySelector('[data-contact-nav]')
+    ?.addEventListener('click', () => track('contact_nav_clicked'));
+</script>
 
 <style>
   nav {

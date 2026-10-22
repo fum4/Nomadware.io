@@ -18,6 +18,11 @@
   /* A section band (page-section.astro): a touch darker than --ink, grid lines still show through. */
   --band: rgba(0, 0, 0, 0.28);
 
+  /* Floating cards over the page (the consent banner). */
+  --overlay: rgba(19, 18, 28, 0.92);
+  --overlay-line: rgba(255, 255, 255, 0.09);
+  --overlay-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+
   --logo-bg: #000;
   --logo-border: rgba(255, 255, 255, 0.14);
   --logo-bar: #e6e6e6;

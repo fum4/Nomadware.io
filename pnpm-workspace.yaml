@@ -2,6 +2,7 @@ packages:
   - apps/*
 autoInstallPeers: false
 allowBuilds:
+  core-js: false
   deasync: false
   esbuild: true
   vercel: false
