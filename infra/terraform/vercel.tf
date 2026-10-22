@@ -6,10 +6,11 @@ import {
 }
 
 resource "vercel_project" "marketing" {
-  team_id      = var.vercel_team_id
-  name         = "nomadware-io"
-  framework    = "vite"
-  node_version = "24.x"
+  team_id        = var.vercel_team_id
+  name           = "nomadware-io"
+  framework      = "vite"
+  node_version   = "24.x"
+  root_directory = "apps/marketing"
 
   # Unpinned, this would detach the repo and stop every deploy.
   git_repository = {
@@ -21,9 +22,8 @@ resource "vercel_project" "marketing" {
   auto_assign_custom_domains = false
   build_machine_type         = "basic"
   resource_config = {
-    fluid                     = false
-    function_default_cpu_type = "standard_legacy"
-    function_default_regions  = ["fra1"]
+    fluid                    = false
+    function_default_regions = ["fra1"]
   }
 }
 

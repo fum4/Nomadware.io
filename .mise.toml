@@ -24,16 +24,31 @@ depends = ["setup"]
 env = { TF_DATA_DIR = ".terraform-validate" }
 run = [
   "pnpm check:format",
-  "pnpm lint",
+  "pnpm check:lint",
   "terraform -chdir=infra/terraform fmt -check -recursive",
   "terraform -chdir=infra/terraform init -backend=false -input=false >/dev/null",
   "terraform -chdir=infra/terraform validate",
 ]
 
 [tasks.pre-merge]
-description = "Site gate: install from the lockfile, then qwik build (types + lint + client/SSR bundles)"
+description = "Every app's build: marketing = qwik build (types + lint + client/SSR bundles)"
+depends = ["marketing:build"]
+
+# ── apps/marketing (@nomadware/marketing, Qwik on Vercel) ─────────────────
+[tasks."marketing:dev"]
+description = "Marketing site dev server (vite, SSR mode)"
 depends = ["setup"]
-run = "pnpm build"
+run = "pnpm --filter @nomadware/marketing dev"
+
+[tasks."marketing:build"]
+description = "Marketing site production build (what Vercel runs)"
+depends = ["setup"]
+run = "pnpm --filter @nomadware/marketing build"
+
+[tasks."marketing:preview"]
+description = "Build, then serve the production bundle locally"
+depends = ["setup"]
+run = "pnpm --filter @nomadware/marketing preview"
 
 # ── Secrets (repo-secrets engine; devbox docs/repo-secrets.md) ─────────────
 [tasks."secrets:decrypt"]
