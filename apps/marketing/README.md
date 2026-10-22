@@ -18,7 +18,7 @@
 | `src/contact/` | the contact form's rules and server logic: `validation.ts` (shared with the browser), `contact-api.ts` (wire contract), `handle-contact.ts` (parse → rate limit → honeypot → validate → Turnstile → Resend), one module per step, `*.test.ts` beside each |
 | `src/log/` | `log-event.ts`, the server's one log sink (JSON lines; never names, addresses, IPs or messages) |
 | `src/styles/` | `tokens.css` (every colour/font/radius), `global.css`, the contact terminal's global CSS (its spans are painted by script) |
-| `src/config/` | `site.ts` (name, URL, SEO copy, email) · `build-info.ts` (commit SHA + build time for "last deploy") · `contact.ts` (the contact form's env) · `analytics.ts` (PostHog token + hosts, public) · `stats-source.ts` (the live stats' R2 read credential) |
+| `src/config/` | `site.ts` (name, URL, SEO copy, email) · `build-info.ts` (build time for the footer's "last deploy"; commit SHA on its `data-commit`, not shown) · `contact.ts` (the contact form's env) · `analytics.ts` (PostHog token + hosts, public) · `stats-source.ts` (the live stats' R2 read credential) |
 | `src/data/` | `load-stats.ts` (the live snapshot from R2, or the fallback) · `stats-snapshot.ts` (the bundled fallback snapshot, the default range) |
 | `src/format/` | formatting shared by server render and client (stat numbers, "4m ago") |
 | `src/constants.ts` | tunables: breakpoints, animation timings, dot field, form, contact endpoint |

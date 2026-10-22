@@ -9,14 +9,15 @@ interface Props {
 const { renderedAt } = Astro.props;
 ---
 
-<footer class="footer">
+<!-- data-commit: the deployed commit, for debugging only (not shown; "dev" off Vercel). -->
+<footer class="footer" data-commit={BUILD_INFO.sha}>
   <p class="studio">
     <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no overhead · just software</span>
   </p>
   <p>
-    last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={renderedAt} /> · <span
-      class="sha">{BUILD_INFO.sha}</span
-    ><span class="privacy"> · <button type="button" data-consent-open>privacy</button></span>
+    last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={renderedAt} /><span class="privacy"
+      > · <button type="button" data-consent-open>privacy</button></span
+    >
   </p>
 </footer>
 
@@ -36,12 +37,12 @@ const { renderedAt } = Astro.props;
     margin: 0;
   }
 
-  .owner,
-  .sha {
+  .owner {
     color: var(--fg);
   }
 
-  /* Reopens the consent banner; looks like the footer's text, not a button. */
+  /* Reopens the consent banner (withdrawing consent must be as easy as giving it); looks like
+     the footer's text, not a button. */
   .privacy button {
     padding: 0;
     border: 0;
@@ -64,10 +65,10 @@ const { renderedAt } = Astro.props;
   }
 
   @media (max-width: 640px) {
-    /* Two rows: owner · tagline / deploy. */
+    /* Two rows: owner · tagline / deploy · privacy. */
     .footer {
       flex-direction: column;
-      gap: 6px;
+      gap: 14px;
       margin-top: 36px;
     }
 
