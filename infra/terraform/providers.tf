@@ -1,4 +1,5 @@
-# Token: CLOUDFLARE_API_TOKEN from secrets/terraform.env.age (account token `nomadware-io-dns`).
+# Token: CLOUDFLARE_API_TOKEN from secrets/terraform.env.age (account token `nomadware-io-dns`:
+# Zone + DNS edit for the zone, Workers R2 Storage edit for r2.tf).
 provider "cloudflare" {}
 
 # Token: VERCEL_API_TOKEN from secrets/terraform.env.age (token `nomadware-io-terraform`, scope: team nware).
