@@ -19,7 +19,9 @@ resource "vercel_project" "marketing" {
     production_branch = "master"
   }
 
-  auto_assign_custom_domains = false
+  # false (Vercel flips it on an Instant Rollback) pins the domains to one old deployment: every
+  # later production build goes live only on *.vercel.app.
+  auto_assign_custom_domains = true
   build_machine_type         = "basic"
   resource_config = {
     fluid                    = false
