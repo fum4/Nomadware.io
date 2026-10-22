@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev --ignore-lock",
     "build": "astro check && astro build",
-    "preview": "astro build && astro preview --ignore-lock",
+    "preview": "node ../../tools/vercel-preview/src/main.ts --framework astro",
     "check": "astro check",
     "test": "vitest run"
   },
