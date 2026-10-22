@@ -23,6 +23,12 @@ locals {
     dkim  = { name = "sig1._domainkey.${local.zone}", type = "CNAME", content = "sig1.dkim.nomadware.io.at.icloudmailadmin.com" }
     dmarc = { name = "_dmarc.${local.zone}", type = "TXT", content = "\"v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:ops@nomadware.io;\"" }
 
+    # Resend: the marketing site's contact form sends from `send.` so its reputation stays apart from iCloud mail
+    # on the apex. Custom return-path `bounce`; sending only, receiving off. Relaxed DMARC alignment covers it.
+    resend_dkim    = { name = "resend._domainkey.send.${local.zone}", type = "TXT", content = "\"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5yooVC4SYHuGCKqO6Rgp8UdbyXmJvjAb0y6cbToAk24du15nMxujds8fEIycptf06k9ksT3JcVnt8hB2xk3CVjtg9FhtIp50SNkGIo2noG+SmO/rA49nwfTukFXTbpGTBDTiAibMNeFivV7dKeV4MPsQnfv7SA5v23GZZn1Nd9QIDAQAB\"" }
+    resend_rbounce = { name = "rbounce.send.${local.zone}", type = "CNAME", content = "rsend-euw1.forge.rmta.net" }
+    resend_bounce  = { name = "bounce.send.${local.zone}", type = "CNAME", content = "send.forge.rmta.net" }
+
     # Domain verifications
     apple_verification  = { name = local.zone, type = "TXT", content = "\"apple-domain=8DvGyY7ccwCYYPd8\"" }
     google_verification = { name = local.zone, type = "TXT", content = "\"google-site-verification=pFOHYHBe8aRjWy6vCLoryygoelWtzJup8mcgPavtEkA\"" }
