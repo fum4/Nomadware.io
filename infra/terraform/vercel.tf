@@ -6,10 +6,11 @@ import {
 }
 
 resource "vercel_project" "marketing" {
-  team_id      = var.vercel_team_id
-  name         = "nomadware-io"
-  framework    = "vite"
-  node_version = "24.x"
+  team_id        = var.vercel_team_id
+  name           = "nomadware-io"
+  framework      = "vite"
+  node_version   = "24.x"
+  root_directory = "apps/marketing"
 
   # Unpinned, this would detach the repo and stop every deploy.
   git_repository = {
