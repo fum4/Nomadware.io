@@ -146,8 +146,9 @@ export function initContactForm(): void {
         event.preventDefault();
         void send();
       } else if (event.key === 'Enter' && control instanceof HTMLInputElement) {
+        // Plain Enter on a one-line field does nothing: no accidental submit, no field hop
+        // (↑↓ and Tab move). In the brief it inserts a newline as usual.
         event.preventDefault();
-        goTo(index + 1);
       } else if (event.key === 'ArrowUp' && index > 0 && caretOnFirstLine(line)) {
         event.preventDefault();
         goTo(index - 1);
