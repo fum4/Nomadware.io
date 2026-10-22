@@ -27,6 +27,7 @@
 
 **Conventions:**
 - Server renders final content; scripts only enhance (no-JS gets every number, the full wordmark, and the contact address in place of the form). Everything animated respects `prefers-reduced-motion`.
+- Background layers, bottom → top: ink + grid paper (`--grid-color`) → the **column halo** (an ink veil, `--halo-column`, down the content column at full height with soft sides; `.frame` in `global.css`) → violet glow → the hero dot field and the section bands → the **text halo** behind the hero copy (`--halo-text`, two intersected linear masks, `hero.astro`) → content. Both halos are gradients painted once: no blur, no layout, no CLS. A new busy background behind text gets a halo the same way, not text shadows.
 - Colours only through `tokens.css`. `--faint` is the dimmest text colour that still passes 4.5:1 on `--ink`; go dimmer only for non-text.
 - Fonts: Geist + Geist Mono, self-hosted from `@fontsource-variable/*` via Astro's font API (`astro.config.ts`), latin subset, `font-display: swap`, Geist preloaded.
 - Env goes through `astro:env` (`astro.config.ts` schema) and is read only in `src/config/` (`build-info.ts`, `contact.ts`, `stats-source.ts`). Off Vercel the SHA reads `dev`. Vercel's values are Terraform (`infra/terraform/vercel.tf`); local ones are rendered (above), your overrides go in `apps/marketing/.env.local`. The build time is a build constant (`import.meta.env.BUILT_AT`, `vite.define`), never the request clock.

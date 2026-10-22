@@ -5,13 +5,15 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
 
 <section class="hero" aria-labelledby="hero-title">
   <canvas class="dots" data-dot-field aria-hidden="true"></canvas>
-  <p class="eyebrow">Small studio · large output</p>
-  <h1 id="hero-title">
-    <span class="headline" data-scramble>{HEADLINE}</span>{' '}
-    <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
-    <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
-  </h1>
-  <p class="tags" data-tags>{TAGS.map((tag, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span data-tag>{tag}</span></>)}</p>
+  <div class="copy">
+    <p class="eyebrow">Small studio · large output</p>
+    <h1 id="hero-title">
+      <span class="headline" data-scramble>{HEADLINE}</span>{' '}
+      <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
+      <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
+    </h1>
+    <p class="tags" data-tags>{TAGS.map((tag, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span data-tag>{tag}</span></>)}</p>
+  </div>
 </section>
 
 <script>
@@ -32,6 +34,32 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
     z-index: -1;
     width: 100%;
     height: 100%;
+  }
+
+  /* The text halo: an ink veil hugging the copy (fit-content: the widest line, so the text sets
+     exactly as without it), fading out over --halo-fade beyond it, so the dots drawn underneath
+     recede behind the words. Two intersected linear masks make a soft-cornered rectangle with
+     no edge anywhere; painted once, no blur, no layout. */
+  .copy {
+    --halo-fade: 140px;
+
+    position: relative;
+    width: fit-content;
+  }
+
+  .copy::before {
+    content: '';
+    position: absolute;
+    inset: calc(var(--halo-fade) * -1);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--halo-text);
+    --halo-ramp: transparent, rgba(0, 0, 0, 0.2) calc(var(--halo-fade) * 0.35),
+      rgba(0, 0, 0, 0.6) calc(var(--halo-fade) * 0.65), #000 var(--halo-fade),
+      #000 calc(100% - var(--halo-fade)), rgba(0, 0, 0, 0.6) calc(100% - var(--halo-fade) * 0.65),
+      rgba(0, 0, 0, 0.2) calc(100% - var(--halo-fade) * 0.35), transparent;
+    mask-image: linear-gradient(90deg, var(--halo-ramp)), linear-gradient(var(--halo-ramp));
+    mask-composite: intersect;
   }
 
   .eyebrow,
@@ -126,6 +154,10 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
     h1 {
       margin: 14px 0 18px;
       font-size: 42px;
+    }
+
+    .copy {
+      --halo-fade: 72px;
     }
 
     .slash {

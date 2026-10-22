@@ -2,6 +2,8 @@
 :root {
   --ink: #0c0b12;
   --line: rgba(255, 255, 255, 0.07);
+  /* The page's grid paper (global.css .frame); borders keep --line. */
+  --grid-color: rgba(255, 255, 255, 0.07);
   --fg: #ecebf3;
   /* Between --fg and --dim: a lead line under a --fg heading (how-we-work subtitles). */
   --soft: #b9b7c8;
@@ -21,6 +23,10 @@
   --chip: rgba(255, 255, 255, 0.08);
   /* A section band (page-section.astro): a touch darker than --ink, grid lines still show through. */
   --band: rgba(0, 0, 0, 0.28);
+  /* Ink veils that keep the background quiet behind text: the column the content sits in (over
+     the grid paper, global.css .frame) and the hero copy (over the dot field, hero.astro). */
+  --halo-column: rgba(12, 11, 18, 0.6);
+  --halo-text: rgba(12, 11, 18, 0.82);
 
   /* Floating cards over the page (the consent banner). */
   --overlay: rgba(19, 18, 28, 0.92);
@@ -46,6 +52,8 @@
 
   --radius: 12px;
   --radius-sm: 6px;
+  /* The content column (.wrap, padding included); the column halo is centred on it. */
+  --content-width: 1100px;
   --grid: 64px;
   --grid-line: 1px;
 
