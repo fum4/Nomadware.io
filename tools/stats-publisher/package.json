@@ -1,0 +1,17 @@
+{
+  "name": "@nomadware/stats-publisher",
+  "private": true,
+  "description": "Computes the site's live stats on the devbox and publishes them to R2 (run by Node directly, no build)",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "node --test 'src/**/*.test.ts'"
+  },
+  "dependencies": {
+    "@nomadware/site-stats": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3"
+  }
+}

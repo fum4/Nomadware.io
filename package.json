@@ -5,7 +5,9 @@
     "check:format": "oxfmt --check .",
     "fix:format": "oxfmt --write .",
     "check:lint": "oxlint",
-    "fix:lint": "oxlint --fix"
+    "fix:lint": "oxlint --fix",
+    "check:types": "pnpm -r --if-present run typecheck",
+    "test": "pnpm -r --if-present run test"
   },
   "devDependencies": {
     "oxfmt": "^0.74.0",

@@ -19,20 +19,32 @@ description = "terraform in infra/terraform with the repo's secrets in memory (m
 run = "repo-secrets exec secrets/terraform.env.age -- env -u AWS_PROFILE -u AWS_DEFAULT_PROFILE -u AWS_SESSION_TOKEN AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_CONFIG_FILE=/dev/null terraform -chdir=infra/terraform"
 
 [tasks.pre-push]
-description = "Static checks: oxfmt + oxlint, terraform fmt + validate (own data dir: never touches the real backend or state)"
+description = "Static checks: oxfmt + oxlint, workspace typecheck (packages/, tools/), terraform fmt + validate (own data dir: never touches the real backend or state)"
 depends = ["setup"]
 env = { TF_DATA_DIR = ".terraform-validate" }
 run = [
   "pnpm check:format",
   "pnpm check:lint",
+  "pnpm check:types",
   "terraform -chdir=infra/terraform fmt -check -recursive",
   "terraform -chdir=infra/terraform init -backend=false -input=false >/dev/null",
   "terraform -chdir=infra/terraform validate",
 ]
 
 [tasks.pre-merge]
-description = "Every app's tests + build: marketing = vitest, then astro check (types) + astro build"
-depends = ["marketing:test", "marketing:build"]
+description = "Every workspace package's tests (marketing: vitest; packages/, tools/: node --test), then every app's build: marketing = astro check (types) + astro build"
+depends = ["test", "marketing:build"]
+
+[tasks.test]
+description = "Unit tests of every workspace package that has them (hermetic)"
+depends = ["setup"]
+run = "pnpm test"
+
+# wt merge runs this in the main checkout: the stats timer runs from there, so a merged dependency
+# change must be installed before its next run.
+[tasks.post-merge]
+description = "After a merge, in the main checkout: install the workspace"
+depends = ["setup"]
 
 # ── apps/marketing (@nomadware/marketing, Astro on Vercel) ────────────────
 # Each renders apps/marketing/.env first (dev config; secrets/manifest), which the build needs.
@@ -57,6 +69,16 @@ run = "pnpm --filter @nomadware/marketing test"
 description = "Build, then serve the static output locally (astro preview, :4321)"
 depends = ["setup", "secrets:render"]
 run = "pnpm --filter @nomadware/marketing preview"
+
+# ── tools/stats-publisher (@nomadware/stats-publisher, the site's live stats) ──
+# Node runs the TypeScript directly; no setup dependency, so the 5-minute timer never installs.
+[tasks."stats:compute"]
+description = "Update the stats store and print the snapshot JSON, no upload (-- --dry-run: leave the store untouched)"
+run = "node tools/stats-publisher/src/main.ts compute"
+
+[tasks."stats:publish"]
+description = "Update the stats store and upload the snapshot to R2 (what the devbox timer runs every 5 min)"
+run = "repo-secrets exec secrets/site-stats-publisher.env.age -- node tools/stats-publisher/src/main.ts publish"
 
 # ── Secrets (repo-secrets engine; devbox docs/repo-secrets.md) ─────────────
 [tasks."secrets:decrypt"]

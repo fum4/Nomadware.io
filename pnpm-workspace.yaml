@@ -1,5 +1,7 @@
 packages:
   - apps/*
+  - packages/*
+  - tools/*
 autoInstallPeers: false
 allowBuilds:
   core-js: false
