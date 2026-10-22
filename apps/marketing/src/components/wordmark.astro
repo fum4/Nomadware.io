@@ -1,16 +1,12 @@
 ---
-// "nware" that unfolds into "nomadware" once on load (scripts/wordmark-expand.ts). The full word
-// is always in the DOM, so readers and crawlers get "nomadware" whatever the animation does.
+// "nware" that unfolds into "nomadware" once on load (scripts/wordmark-expand.ts, timed by
+// scripts/intro-sequence.ts). The full word is always in the DOM, so readers and crawlers get
+// "nomadware" whatever the animation does.
 const HIDDEN = 'omad';
 ---
 
 <!-- One line on purpose: any whitespace here would render as a gap inside the word. -->
 <span class="wordmark">n<span class="unfold" data-wordmark-unfold>{[...HIDDEN].map((letter) => <i>{letter}</i>)}</span>ware</span>
-
-<script>
-  import { initWordmark } from '../scripts/wordmark-expand';
-  initWordmark();
-</script>
 
 <style>
   .wordmark {

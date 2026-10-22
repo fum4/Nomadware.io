@@ -2,47 +2,79 @@ import { SCRAMBLE_GLYPHS, SCRAMBLE_STEP_MS } from '../constants';
 import { prefersReducedMotion } from './motion';
 
 const SCRAMBLING = 'is-scrambling';
+const OVERLAY = 'scramble-glyphs';
 
 const randomGlyph = (): string =>
   SCRAMBLE_GLYPHS[Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)] ?? '';
 
 /**
- * Decode the headline left to right, once. Each pending letter keeps its own width (transparent)
- * under a glyph overlay, so the line never reflows; screen readers get the plain text throughout.
+ * Decode the headline left to right, once; resolves when the text has settled. The real text node
+ * is never touched, so its glyphs sit exactly where they will stay: it is painted only up to the
+ * reveal point (a background clipped to the text), and the pending letters are covered by glyphs
+ * in an aria-hidden overlay, positioned from the text's own character boxes. Readers, crawlers and
+ * `textContent` only ever see the real text.
  */
-export function initHeadlineScramble(): void {
+export function scrambleHeadline(): Promise<void> {
   const target = document.querySelector<HTMLElement>('[data-scramble]');
-  if (!target || prefersReducedMotion()) return;
-  const text = target.textContent ?? '';
+  const text = target?.firstChild;
+  if (!target || !(text instanceof Text) || prefersReducedMotion()) return Promise.resolve();
 
-  const spoken = document.createElement('span');
-  spoken.className = 'sr-only';
-  spoken.textContent = text;
-  const shown = document.createElement('span');
-  shown.setAttribute('aria-hidden', 'true');
-  const letters = [...text].map((char) => {
-    const letter = document.createElement('span');
-    letter.textContent = char;
-    return letter;
-  });
-  shown.append(...letters);
-  target.classList.add(SCRAMBLING);
-  target.replaceChildren(spoken, shown);
-
-  let revealed = 0;
-  const step = (): void => {
-    letters.forEach((letter, index) => {
-      const pending = index >= revealed && letter.textContent !== ' ';
-      letter.classList.toggle('scrambled', pending);
-      if (pending) letter.dataset.glyph = randomGlyph();
-    });
-    revealed += 1;
-    if (revealed > letters.length) {
-      clearInterval(timer);
-      target.textContent = text;
-      target.classList.remove(SCRAMBLING);
-    }
+  const ink = getComputedStyle(target).color;
+  const range = document.createRange();
+  const boxesOf = (start: number, end: number): DOMRect[] => {
+    range.setStart(text, start);
+    range.setEnd(text, end);
+    return [...range.getClientRects()];
   };
-  const timer = setInterval(step, SCRAMBLE_STEP_MS);
-  step();
+  const overlay = document.createElement('span');
+  overlay.className = OVERLAY;
+  overlay.setAttribute('aria-hidden', 'true');
+  const glyphs = [...text.data].map((char) => {
+    if (/\s/.test(char)) return null;
+    const glyph = document.createElement('span');
+    overlay.append(glyph);
+    return glyph;
+  });
+  target.classList.add(SCRAMBLING);
+  target.append(overlay);
+
+  // Re-measured every step: a web font swapping in mid-decode moves the boxes.
+  const paint = (revealed: number): void => {
+    const origin = target.getBoundingClientRect();
+    const shown = revealed > 0 ? boxesOf(0, revealed) : [];
+    target.style.backgroundImage =
+      shown.map(() => `linear-gradient(${ink}, ${ink})`).join(', ') || 'none';
+    target.style.backgroundSize = shown.map((box) => `${box.width}px ${box.height}px`).join(', ');
+    target.style.backgroundPosition = shown
+      .map((box) => `${box.left - origin.left}px ${box.top - origin.top}px`)
+      .join(', ');
+    glyphs.forEach((glyph, index) => {
+      if (!glyph) return;
+      const box = boxesOf(index, index + 1)[0];
+      glyph.hidden = index < revealed || !box;
+      if (!box || glyph.hidden) return;
+      glyph.dataset.glyph = randomGlyph();
+      glyph.style.left = `${box.left - origin.left}px`;
+      glyph.style.top = `${box.top - origin.top}px`;
+      glyph.style.lineHeight = `${box.height}px`;
+    });
+  };
+
+  return new Promise((resolve) => {
+    let revealed = 0;
+    const step = (): void => {
+      if (revealed > text.length) {
+        clearInterval(timer);
+        overlay.remove();
+        target.removeAttribute('style');
+        target.classList.remove(SCRAMBLING);
+        resolve();
+        return;
+      }
+      paint(revealed);
+      revealed += 1;
+    };
+    const timer = setInterval(step, SCRAMBLE_STEP_MS);
+    step();
+  });
 }

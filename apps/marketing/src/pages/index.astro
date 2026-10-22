@@ -19,3 +19,9 @@ import BaseLayout from '../layouts/base-layout.astro';
   </main>
   <SiteFooter />
 </BaseLayout>
+
+<script>
+  // Headline, stats and wordmark animate in one order (scripts/intro-sequence.ts).
+  import { playIntro } from '../scripts/intro-sequence';
+  void playIntro();
+</script>
