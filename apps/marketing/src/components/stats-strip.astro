@@ -89,7 +89,6 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
       </dd>
     </div>
   </dl>
-  <p class="foot">across <StatValue stat="repos" snapshot={snapshot} /> codebases</p>
 </section>
 
 <style>
@@ -250,14 +249,6 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
     font-weight: 500;
   }
 
-  .foot {
-    margin: 0;
-    padding: 10px 18px;
-    border-top: 1px solid var(--line);
-    font: 400 11px/var(--leading) var(--mono);
-    color: var(--dim);
-  }
-
   @media (max-width: 640px) {
     .head {
       padding: 11px 14px;
@@ -304,10 +295,6 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
 
     .lab b {
       display: block;
-    }
-
-    .foot {
-      padding: 10px 14px;
     }
   }
 </style>
