@@ -4,26 +4,33 @@ import PageSection from './page-section.astro';
 const PRINCIPLES = [
   {
     title: 'Product mindset',
-    text: 'We build for your users, not for the ticket, we ship what moves the needle.',
+    subtitle: 'We build for your users, not for the ticket, we ship what moves the needle.',
+    detail:
+      "Before we write code, we ask who it's for and what should change for them. If a feature won't make a difference, we'll tell you, and suggest something that will.",
   },
   {
     title: 'Always in motion',
-    text: 'Agents work around the clock. You wake up to progress, not questions.',
+    subtitle: 'Agents work around the clock. You wake up to progress, not questions.',
+    detail:
+      'While you sleep, agents write code, run tests and prepare changes. In the morning an engineer reviews every one of them, and only the good ones ship.',
   },
   {
     title: 'Zero friction',
-    text: 'No calls, no tickets to babysit. New builds show up on your phone as they land.',
+    subtitle: 'No calls, no tickets to babysit. New builds show up on your phone as they land.',
+    detail:
+      "You don't have to chase anyone or sit in meetings. Every change comes with a link you can open and try. Leave a comment, and the next build has the fix.",
   },
 ];
 ---
 
-<PageSection id="how-we-work" title="How we work">
+<PageSection id="how-we-work" title="How we work" band>
   <ul class="rows">
     {
-      PRINCIPLES.map(({ title, text }) => (
+      PRINCIPLES.map(({ title, subtitle, detail }) => (
         <li>
           <h3>{title}</h3>
-          <p>{text}</p>
+          <p class="subtitle">{subtitle}</p>
+          <p class="detail">{detail}</p>
         </li>
       ))
     }
@@ -31,37 +38,46 @@ const PRINCIPLES = [
 </PageSection>
 
 <style>
+  /* Title → one-liner → the longer why, each a step quieter; rows separated by space alone. */
   .rows {
+    display: grid;
+    gap: 48px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  li {
-    padding: 18px 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  li:first-child {
-    padding-top: 0;
-  }
-
-  li:last-child {
-    padding-bottom: 0;
-    border-bottom: 0;
-  }
-
   h3 {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     font-weight: 500;
-    font-size: 17px;
-    letter-spacing: -0.015em;
+    font-size: 24px;
+    line-height: var(--leading);
+    letter-spacing: -0.02em;
   }
 
   p {
+    max-width: 60ch;
     margin: 0;
-    color: var(--dim);
     font-size: 14px;
     line-height: 1.55;
+  }
+
+  .subtitle {
+    color: var(--dim);
+  }
+
+  .detail {
+    margin-top: 10px;
+    color: var(--faint);
+  }
+
+  @media (max-width: 640px) {
+    .rows {
+      gap: 36px;
+    }
+
+    h3 {
+      font-size: 20px;
+    }
   }
 </style>
