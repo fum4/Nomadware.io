@@ -1,6 +1,10 @@
 import type { StatKey } from '../data/stats-snapshot';
 
-const COMPACT_KEYS: ReadonlySet<StatKey> = new Set<StatKey>(['actions', 'linesAdded', 'linesDeleted']);
+const COMPACT_KEYS: ReadonlySet<StatKey> = new Set<StatKey>([
+  'actions',
+  'linesAdded',
+  'linesDeleted',
+]);
 const THOUSAND = 1_000;
 const WHOLE_THOUSANDS_FROM = 100_000;
 
