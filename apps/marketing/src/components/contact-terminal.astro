@@ -1,42 +1,67 @@
 ---
 import '../styles/contact-terminal.css';
+import { CONTACT_SITE_KEY } from '../config/contact';
 import { SITE } from '../config/site';
+import { CONTACT } from '../constants';
 import ContactField from './contact-field.astro';
 import PageSection from './page-section.astro';
 
-// Until the form endpoint exists, "send" opens a pre-filled email. No mailto: form action (an
-// insecure form target to browsers); without JS the form points at the address instead.
+// "send" posts to /api/contact (src/pages/api/contact.ts). No form action: without JS the form
+// can't pass Turnstile, so it points at the address instead (.term-nojs).
 ---
 
 <PageSection id="contact" title="Contact">
   <form
     class="term is-idle"
     data-contact
+    data-sitekey={CONTACT_SITE_KEY}
     aria-labelledby="contact-heading"
   >
     <div class="term-bar">
-      <span class="term-path">~/nomadware</span>
+      <span class="term-title">
+        {/* Decorative macOS window buttons. */}
+        <span class="term-lights" aria-hidden="true"><span /><span /><span /></span>
+        <span class="term-path">~/nomadware</span>
+      </span>
       <a class="term-mail" href={`mailto:${SITE.email}`}>{SITE.email}</a>
     </div>
     <div class="term-body">
       <h3 class="term-heading" id="contact-heading">Tell us what you're building.</h3>
-      <ContactField name="name" placeholder="your name" autocomplete="name" />
+      <ContactField
+        name="name"
+        placeholder="your name"
+        autocomplete="name"
+        maxlength={CONTACT.maxNameLength}
+      />
       <ContactField
         name="email"
         inputmode="email"
         placeholder="you@company.com"
         autocomplete="email"
+        maxlength={CONTACT.maxEmailLength}
         error="that address doesn't look right"
       />
-      <ContactField name="brief" multiline placeholder="what you're building, where it hurts" />
+      <ContactField
+        name="brief"
+        multiline
+        placeholder="what you're building, where it hurts"
+        maxlength={CONTACT.maxBriefLength}
+      />
+      {/* Honeypot: off-screen and out of the tab order, so only bots fill it in. */}
+      <div class="term-trap" aria-hidden="true">
+        <label for="contact-website">website</label>
+        <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
     </div>
+    {/* Turnstile mounts here; it only takes space when Cloudflare asks for an interaction. */}
+    <div class="term-challenge" data-challenge></div>
     <p class="term-out" role="status" data-output></p>
     <p class="term-nojs">
       JavaScript is off: write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
     </p>
     <div class="term-run">
       <span class="term-hints" aria-hidden="true"
-        ><kbd>⏎</kbd> next field · <kbd>↑↓</kbd> move · <kbd>⌘ ⏎</kbd> send</span
+        ><kbd>↑↓</kbd> move · <kbd>tab</kbd> next · <kbd>⌘ ⏎</kbd> send</span
       >
       <button class="term-send" type="submit">send</button>
     </div>

@@ -1,13 +1,14 @@
 import { CONTACT } from '../../constants';
 import { SITE } from '../../config/site';
+import { isComplete, isEmail } from '../../contact/validation';
+import type { ContactDraft } from '../../contact/validation';
 import { hasFinePointer, isMobileViewport, onceVisible } from '../motion';
 import { caretOnFirstLine } from './caret-edge';
 import type { ContactLine } from './contact-line';
 import { readLines } from './contact-line';
-import { mailtoUrl } from './mailto';
 import { paintLine } from './paint-line';
-import { isComplete, isEmail } from './validation';
-import type { ContactDraft } from './validation';
+import { postContact } from './post-contact';
+import { createChallenge } from './turnstile';
 
 const STATE = { idle: 'is-idle', typing: 'is-typing', ready: 'is-ready' } as const;
 
@@ -21,10 +22,17 @@ function setFieldError(line: ContactLine, on: boolean): void {
 export function initContactForm(): void {
   const form = document.querySelector<HTMLFormElement>('[data-contact]');
   const output = form?.querySelector<HTMLElement>('[data-output]');
-  if (!form || !output) return;
+  const button = form?.querySelector<HTMLButtonElement>('.term-send');
+  const trap = form?.querySelector<HTMLInputElement>('input[name="website"]');
+  const challengeMount = form?.querySelector<HTMLElement>('[data-challenge]');
+  const sitekey = form?.dataset.sitekey;
+  if (!form || !output || !button || !trap || !challengeMount || !sitekey) return;
   form.noValidate = true;
   const lines = readLines(form);
+  const challenge = createChallenge(challengeMount, sitekey);
+  const buttonLabel = button.textContent ?? '';
   let typingTimer = 0;
+  let sending = false;
 
   const draft = (): ContactDraft => {
     const [name = '', email = '', brief = ''] = lines.map((line) => line.control.value);
@@ -44,14 +52,46 @@ export function initContactForm(): void {
     output.classList.add('is-on');
   };
 
-  const send = (): void => {
+  const setSending = (on: boolean): void => {
+    sending = on;
+    button.disabled = on;
+    button.textContent = on ? 'sending…' : buttonLabel;
+    form.setAttribute('aria-busy', String(on));
+  };
+
+  const clearFields = (): void => {
+    lines.forEach((line) => {
+      line.control.value = '';
+      line.root.classList.remove('is-done');
+      paint(line);
+    });
+    form.classList.remove(STATE.ready);
+  };
+
+  const send = async (): Promise<void> => {
+    if (sending) return;
     const current = draft();
     if (!isComplete(current)) {
       say('is-bad', '✗', 'name, a valid email and a few words about the project, please');
       return;
     }
-    window.location.href = mailtoUrl(SITE.email, current);
-    say('is-ok', '✓', `opening your mail app with a draft to ${SITE.email}. hit send there.`);
+    setSending(true);
+    let sent = false;
+    try {
+      const token = await challenge.token(CONTACT.challengeTimeoutMs);
+      sent = await postContact({ ...current, website: trap.value, token });
+    } catch {
+      // No token (script blocked, challenge failed, timed out): the same failure line.
+    } finally {
+      challenge.reset();
+      setSending(false);
+    }
+    if (sent) {
+      say('is-ok', '✓', `sent. we'll reply to ${current.email.trim()} shortly.`);
+      clearFields();
+    } else {
+      say('is-bad', '✗', `couldn't send — try again or write to ${SITE.email}`);
+    }
   };
 
   const goTo = (index: number): void => {
@@ -104,10 +144,11 @@ export function initContactForm(): void {
       if (!(event instanceof KeyboardEvent)) return;
       if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
-        send();
+        void send();
       } else if (event.key === 'Enter' && control instanceof HTMLInputElement) {
+        // Plain Enter on a one-line field does nothing: no accidental submit, no field hop
+        // (↑↓ and Tab move). In the brief it inserts a newline as usual.
         event.preventDefault();
-        goTo(index + 1);
       } else if (event.key === 'ArrowUp' && index > 0 && caretOnFirstLine(line)) {
         event.preventDefault();
         goTo(index - 1);
@@ -120,8 +161,10 @@ export function initContactForm(): void {
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    send();
+    void send();
   });
+  // Turnstile loads on first contact with the form, never with the page (Lighthouse stays clean).
+  form.addEventListener('focusin', () => challenge.warm(), { once: true });
 
   // Desktop: type straight away once the form is in view. Phones: never (the keyboard would
   // cover the page); the idle caret on "name" still shows where to start.

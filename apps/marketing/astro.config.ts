@@ -2,8 +2,8 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import { defineConfig, envField, fontProviders } from 'astro/config';
 
-// Static by default: every page is prerendered. Later on-demand routes (live stats, the contact
-// endpoint) opt out per route with `export const prerender = false`.
+// Static by default: every page is prerendered. On-demand routes (the contact endpoint, later
+// live stats) opt out per route with `export const prerender = false`.
 export default defineConfig({
   site: 'https://nomadware.io',
   adapter: vercel(),
@@ -18,6 +18,15 @@ export default defineConfig({
         access: 'public',
         optional: true,
       }),
+      // Contact form (read only in src/config/contact.ts). Vercel: infra/terraform/vercel.tf.
+      // Locally: apps/marketing/.env, rendered from infra/env/marketing.dev.env.
+      // Public site key: required, so a build without it fails instead of shipping a dead form.
+      TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public' }),
+      // Server values: optional to Astro so the endpoint can answer `unconfigured` (and log the
+      // missing names) instead of crashing; src/config/contact.ts refuses to run without them.
+      TURNSTILE_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
+      TURNSTILE_HOSTNAME: envField.string({ context: 'server', access: 'public', optional: true }),
+      RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
   fonts: [

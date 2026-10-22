@@ -20,6 +20,12 @@
   --logo-border: rgba(255, 255, 255, 0.14);
   --logo-bar: #e6e6e6;
 
+  /* The contact terminal's macOS window buttons (decorative). */
+  --light-close: #ff5f57;
+  --light-min: #febc2e;
+  --light-max: #28c840;
+  --light-ring: rgba(0, 0, 0, 0.2);
+
   --sans: var(--font-geist), system-ui, sans-serif;
   --mono: var(--font-geist-mono), ui-monospace, monospace;
 

@@ -1,13 +1,14 @@
 {
   "name": "@nomadware/marketing",
   "private": true,
-  "description": "The nomadware.io marketing site (Astro, static on Vercel)",
+  "description": "The nomadware.io marketing site (Astro on Vercel: static pages + the contact endpoint)",
   "type": "module",
   "scripts": {
     "dev": "astro dev --ignore-lock",
     "build": "astro check && astro build",
     "preview": "astro build && astro preview --ignore-lock",
-    "check": "astro check"
+    "check": "astro check",
+    "test": "vitest run"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
@@ -18,7 +19,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
   },
   "engines": {
     "node": "24.x"

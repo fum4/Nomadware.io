@@ -1,5 +1,6 @@
 ---
 import '../styles/contact-field.css';
+import { CONTACT } from '../constants';
 
 // One prompt line of the contact terminal. The real <input>/<textarea> sits invisibly on top of
 // a painted copy (.term-vis) so the caret and fresh-character glow can be custom; it keeps focus,
@@ -11,6 +12,8 @@ interface Props {
   /** Keyboard hint. Always type="text": email inputs have no selection API, and the caret needs it. */
   inputmode?: 'text' | 'email';
   multiline?: boolean;
+  /** Same limit the endpoint enforces (CONTACT in constants.ts). */
+  maxlength: number;
   error?: string;
 }
 const {
@@ -19,6 +22,7 @@ const {
   autocomplete = 'off',
   inputmode = 'text',
   multiline = false,
+  maxlength,
   error,
 } = Astro.props;
 const id = `contact-${name}`;
@@ -32,7 +36,15 @@ const errorId = `${id}-error`;
     <div class="term-vis" aria-hidden="true"><span class="term-ph">{placeholder}</span></div>
     {
       multiline ? (
-        <textarea id={id} name={name} rows="3" required minlength="4" data-placeholder={placeholder} />
+        <textarea
+          id={id}
+          name={name}
+          rows="3"
+          required
+          minlength={CONTACT.minBriefLength}
+          maxlength={maxlength}
+          data-placeholder={placeholder}
+        />
       ) : (
         <input
           id={id}
@@ -40,6 +52,7 @@ const errorId = `${id}-error`;
           type="text"
           inputmode={inputmode}
           autocomplete={autocomplete}
+          maxlength={maxlength}
           spellcheck={inputmode === 'email' ? 'false' : undefined}
           autocapitalize={inputmode === 'email' ? 'off' : undefined}
           required
