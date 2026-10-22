@@ -8,6 +8,8 @@ const SLOTS = HERO_TAGS.pools.map((pool) => ({
   chars: Math.max(...pool.map((word) => word.length)),
 }));
 const STATIC_LINE = SLOTS.map((slot) => slot.word).join(' / ');
+// Two pairs, so a narrow phone can set them as two rows (slots 1–2 / 3–4).
+const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -21,7 +23,7 @@ const STATIC_LINE = SLOTS.map((slot) => slot.word).join(' / ');
     </h1>
     <!-- The visible line rotates; readers get the server-rendered words once, never each swap. -->
     <p class="tags">
-      <span class="sr-only">{STATIC_LINE}</span><span aria-hidden="true" data-tags>{SLOTS.map((slot, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span class="slot" data-tag style={`--slot-chars: ${slot.chars}`}>{slot.word}</span></>)}</span>
+      <span class="sr-only">{STATIC_LINE}</span><span aria-hidden="true" data-tags>{PAIRS.map((pair, pairIndex) => <>{pairIndex > 0 && <span class="slash between" data-slash>/</span>}<span class="pair">{pair.map((slot, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span class="slot" data-tag style={`--slot-chars: ${slot.chars}`}>{slot.word}</span></>)}</span></>)}</span>
     </p>
   </div>
 </section>
@@ -86,25 +88,34 @@ const STATIC_LINE = SLOTS.map((slot) => slot.word).join(' / ');
 
   .tags {
     --tags-tracking: 0.14em;
+    --slash-gap: 2ch;
 
     letter-spacing: var(--tags-tracking);
     white-space: nowrap;
   }
 
-  /* Mono: every character advances 1ch plus the tracking, so this is the longest word's width. */
+  /* Mono: every character advances 1ch plus the tracking, so this is the longest word's width.
+     Centred, so a shorter word's leftover splits evenly around it instead of piling up before
+     the next slash; a row's first slot starts flush, on the copy's left edge. */
   .slot {
     display: inline-block;
     width: calc(var(--slot-chars) * (1ch + var(--tags-tracking)));
+    text-align: center;
   }
 
+  .pair:first-child > .slot:first-child {
+    text-align: start;
+  }
+
+  /* Wide enough that the up-to-2ch leftover inside a slot reads as small beside it. */
   .slash {
-    margin: 0 8px;
+    margin: 0 var(--slash-gap);
     color: var(--sig);
   }
 
   /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline
      (only with JS); the failsafe lights them anyway if the intro never runs. */
-  :global(html.js) [data-tags] > span {
+  :global(html.js) [data-tags] :is([data-tag], [data-slash]) {
     opacity: 0;
     animation: tags-failsafe 0s 4s forwards;
   }
@@ -177,8 +188,25 @@ const STATIC_LINE = SLOTS.map((slot) => slot.word).join(' / ');
       --halo-fade: 72px;
     }
 
-    .slash {
-      margin: 0 5px;
+    /* 1.5ch on phones: the one-row line (337px) then fits a 390px screen. */
+    .tags {
+      --slash-gap: 1.5ch;
+    }
+
+  }
+
+  /* The four slots don't fit one row on a narrow phone: two rows, slots 1–2 / 3–4. */
+  @media (max-width: 380px) {
+    .pair {
+      display: block;
+    }
+
+    .between {
+      display: none;
+    }
+
+    .pair > .slot:first-child {
+      text-align: start;
     }
   }
 </style>
