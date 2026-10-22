@@ -11,7 +11,7 @@
 | no choice yet / "no thanks" | `persistence: 'memory'` (nothing on the device), page views + page leave, click autocapture, web vitals, exceptions. No replay, no heatmaps, never `identify`. |
 | "sure" | `localStorage+cookie` persistence, session replay (all inputs masked), heatmaps — switched on in place with `set_config`. |
 
-The choice lives in `localStorage['nw-consent']` (`granted` / `denied`). "no thanks" after a "sure" switches back to memory, `reset()`s the visitor and deletes every `ph_*` / `__ph*` cookie and storage key. Anything showing what the visitor typed carries `data-private` (masked in replay, ignored by autocapture) — the contact terminal's painted copy does.
+The choice lives in `localStorage['nw-consent']` (`granted` / `denied`). "no thanks" after a "sure" switches back to memory, `reset()`s the visitor and deletes every `ph_*` / `__ph*` cookie and storage key. Anything showing what the visitor typed carries `data-private` (masked in replay, ignored by autocapture); third-party widgets get `ph-no-capture` (blocked).
 
 **Public API:**
 - `track(event, props?)` from `track.ts` — typed by `events.ts`; safe before PostHog loads (queues, flushes on connect); no-op in dev. Never put PII or form contents in a property.
@@ -26,8 +26,10 @@ The choice lives in `localStorage['nw-consent']` (`granted` / `denied`). "no tha
 | `contact_nav_clicked` | `site-nav.astro` |
 | `contact_form_focused` | `contact-form.ts`, first focus / click / key in the form (the desktop auto-focus doesn't count) |
 | `contact_form_started` | `contact-form.ts`, first character typed |
-| `contact_form_submitted` / `_succeeded` / `_failed` {reason} | `contact-form.ts` `send()` — see below |
+| `contact_form_submitted` / `_succeeded` / `_failed` {reason} | `contact-form.ts` `send()` — see Form outcomes |
 
-**Hooking the form backend:** `send()` fires `contact_form_failed {reason: 'incomplete'}` when validation stops it, then `contact_form_submitted` when a valid draft leaves. With the `mailto:` hand-off, `contact_form_succeeded` fires right after it; once the form posts to an endpoint, move `succeeded` to the 2xx response and fire `failed` with a short machine reason (`'network'`, `'rate_limited'`, `'server'`, …) on every other outcome.
+**Form outcomes:** `send()` fires `contact_form_failed {reason: 'validation'}` when client validation stops it; `contact_form_submitted` once a Turnstile token is in hand and the POST starts; then `contact_form_succeeded` on a 2xx, or `contact_form_failed {reason}` otherwise. Reasons (`ContactFailReason` in `events.ts`): `validation`, `turnstile` (no token: script blocked, challenge failed or timed out), `network` (fetch rejected), `server` (non-2xx without a known code), or the endpoint's own `ContactCode` (`rate_limited`, `invalid`, `challenge_failed`, `send_failed`, `unconfigured`, … from `src/contact/contact-api.ts`). Never form contents.
+
+**Replay privacy in the form:** the painted typed-text copy and the status line (it repeats the visitor's email) are `data-private`; the Turnstile mount is `ph-no-capture` (blocked entirely). Inputs are masked by `maskAllInputs`.
 
 **Extend:** a new event = a key in `AnalyticsEvents` (props or `null`) + a `track()` call; tell whoever owns the dashboards. A new consent-gated feature = a field in `consentConfig` in `posthog-client.ts`, and a line in the banner's "what we track".

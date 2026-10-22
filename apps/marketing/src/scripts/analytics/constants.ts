@@ -17,7 +17,8 @@ export const TRACK_QUEUE_LIMIT = 50;
 export const STATS_VIEWED_THRESHOLD = 0.5;
 
 /**
- * Marks DOM whose text is something the visitor typed (the contact terminal's painted copy):
+ * Marks DOM whose text is something the visitor typed (the contact terminal's painted copy, its
+ * status line):
  * masked in session replay and ignored by autocapture. Inputs themselves are always masked.
  */
 export const PRIVATE_SELECTOR = '[data-private]';
