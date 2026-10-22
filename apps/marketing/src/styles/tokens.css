@@ -23,6 +23,10 @@
   --sans: var(--font-geist), system-ui, sans-serif;
   --mono: var(--font-geist-mono), ui-monospace, monospace;
 
+  /* Geist's own "normal" line height, pinned: with a fallback font "normal" differs, and the swap
+     would shift the layout (CLS). Every font shorthand carries it; body passes it down. */
+  --leading: 1.28;
+
   --radius: 12px;
   --radius-sm: 6px;
   --grid: 64px;

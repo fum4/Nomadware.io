@@ -47,7 +47,8 @@ function show(stats: StatElement[], range: StatWindow, animate: boolean): void {
   const step = (now: number): void => {
     const progress = Math.min(1, (now - start) / COUNT_UP_DURATION_MS);
     stats.forEach((stat, index) => {
-      stat.element.textContent = formatStat(stat.key, (finals[index] ?? 0) * easeOutExpo(progress));
+      const final = finals[index] ?? 0;
+      stat.element.textContent = formatStat(stat.key, final * easeOutExpo(progress), final);
     });
     if (progress < 1) requestAnimationFrame(step);
   };

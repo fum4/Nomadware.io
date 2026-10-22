@@ -15,6 +15,7 @@ html {
 
 body {
   margin: 0;
+  line-height: var(--leading);
   min-height: 100vh;
 }
 
@@ -55,7 +56,7 @@ a {
   border-radius: var(--radius-sm);
   background: var(--sig);
   color: var(--ink);
-  font: 500 13px var(--mono);
+  font: 500 13px/var(--leading) var(--mono);
   text-decoration: none;
   transform: translateY(-200%);
 }
