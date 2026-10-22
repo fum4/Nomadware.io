@@ -11,7 +11,7 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
     <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
     <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
   </h1>
-  <p class="tags">{TAGS.map((tag, index) => <>{index > 0 && <span class="slash">/</span>}{tag}</>)}</p>
+  <p class="tags" data-tags>{TAGS.map((tag, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span data-tag>{tag}</span></>)}</p>
 </section>
 
 <script>
@@ -53,6 +53,21 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
   .slash {
     margin: 0 8px;
     color: var(--sig);
+  }
+
+  /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline.
+     Only with JS and motion; the failsafe lights them anyway if the intro never runs. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .tags > span {
+      opacity: 0;
+      animation: tags-failsafe 0s 4s forwards;
+    }
+  }
+
+  @keyframes tags-failsafe {
+    to {
+      opacity: 1;
+    }
   }
 
   h1 {
