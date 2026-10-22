@@ -1,4 +1,8 @@
 import type { StatWindow } from '../../data/stats-snapshot';
+import type { PostFailure } from '../contact/post-contact';
+
+/** Why a send didn't go through: blocked client-side, no Turnstile token, or the post's failure. */
+export type ContactFailReason = 'validation' | 'turnstile' | PostFailure;
 
 /**
  * Every custom event the site sends, with its properties (`null` = none). The names are a
@@ -13,7 +17,7 @@ export interface AnalyticsEvents {
   contact_form_started: null;
   contact_form_submitted: null;
   contact_form_succeeded: null;
-  contact_form_failed: { reason: string };
+  contact_form_failed: { reason: ContactFailReason };
 }
 
 export type AnalyticsEvent = keyof AnalyticsEvents;
