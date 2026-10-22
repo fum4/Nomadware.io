@@ -1,6 +1,13 @@
 ---
+import { HERO_TAGS } from '../constants';
+
 const HEADLINE = 'We build software.';
-const TAGS = ['web', 'mobile', 'backend', 'infra'];
+// Each slot shows its pool's first word and reserves its longest (scripts/tags-rotate.ts).
+const SLOTS = HERO_TAGS.pools.map((pool) => ({
+  word: pool[0],
+  chars: Math.max(...pool.map((word) => word.length)),
+}));
+const STATIC_LINE = SLOTS.map((slot) => slot.word).join(' / ');
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -12,7 +19,10 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
       <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
       <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
     </h1>
-    <p class="tags" data-tags>{TAGS.map((tag, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span data-tag>{tag}</span></>)}</p>
+    <!-- The visible line rotates; readers get the server-rendered words once, never each swap. -->
+    <p class="tags">
+      <span class="sr-only">{STATIC_LINE}</span><span aria-hidden="true" data-tags>{SLOTS.map((slot, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span class="slot" data-tag style={`--slot-chars: ${slot.chars}`}>{slot.word}</span></>)}</span>
+    </p>
   </div>
 </section>
 
@@ -75,7 +85,16 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
   }
 
   .tags {
-    letter-spacing: 0.14em;
+    --tags-tracking: 0.14em;
+
+    letter-spacing: var(--tags-tracking);
+    white-space: nowrap;
+  }
+
+  /* Mono: every character advances 1ch plus the tracking, so this is the longest word's width. */
+  .slot {
+    display: inline-block;
+    width: calc(var(--slot-chars) * (1ch + var(--tags-tracking)));
   }
 
   .slash {
@@ -84,17 +103,10 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
   }
 
   /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline
-     (only with JS); the failsafe lights them anyway if the intro never runs. `is-fading`: the
-     reduced-motion stand-in for the flicker, a plain fade (scripts/motion-policy.ts). */
-  :global(html.js) .tags > span {
+     (only with JS); the failsafe lights them anyway if the intro never runs. */
+  :global(html.js) [data-tags] > span {
     opacity: 0;
     animation: tags-failsafe 0s 4s forwards;
-  }
-
-  :global(html.js) .tags:global(.is-fading) > span {
-    opacity: 1;
-    animation: none;
-    transition: opacity var(--flash-fallback-fade) ease-out;
   }
 
   @keyframes tags-failsafe {

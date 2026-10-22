@@ -1,5 +1,5 @@
-// Tunables shared by components and client scripts. Copy lives in the components; identity in
-// config/site.ts; data in data/.
+// Tunables shared by components and client scripts. Copy lives in the components (except copy a
+// script also cycles through, like HERO_TAGS); identity in config/site.ts; data in data/.
 
 /** Same breakpoint as the CSS `@media (max-width: 640px)` in styles/. */
 export const MOBILE_QUERY = '(max-width: 640px)';
@@ -38,6 +38,22 @@ export const TAGS_FLICKER = {
   stepsMin: 4,
   stepsMax: 6,
   budgetMs: INTRO_GAP_MS - 20,
+} as const;
+
+/**
+ * The hero's rotating tags (scripts/tags-rotate.ts): one pool per slot, shown in order, the first
+ * word of each is the server-rendered line. Once the intro is done, every `intervalMs` one slot
+ * (random, never the same twice running) powers on its next word. Each slot is as wide as its
+ * longest word, so nothing moves.
+ */
+export const HERO_TAGS = {
+  pools: [
+    ['web app', 'mobile', 'desktop', 'native', 'browser'],
+    ['backend', 'realtime', 'payments', 'identity', 'webhooks'],
+    ['agents', 'llm apps', 'copilots', 'chatbots', 'insights', 'ml ops'],
+    ['infra', 'cloud', 'devops', 'ci/cd', 'uptime', 'scale'],
+  ],
+  intervalMs: 2_500,
 } as const;
 
 export const WORDMARK_LETTER_DELAY_S = 0.25;
