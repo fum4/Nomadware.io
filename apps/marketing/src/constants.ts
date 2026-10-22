@@ -18,6 +18,27 @@ export const INTRO_GAP_MS = 500;
  */
 export const INTRO_WORDMARK_MAX_WAIT_MS = 4_000;
 
+/**
+ * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), played inside the gap after the
+ * headline, so the sequence timing never moves. Each tag starts a random stagger after the last
+ * and flickers on over a random duration; a slash lights a random lag after the tag that follows it.
+ * The whole run is scaled down if needed so it always ends `budgetMs` after it starts.
+ */
+export const TAGS_FLICKER = {
+  staggerMinMs: 70,
+  staggerMaxMs: 100,
+  durationMinMs: 200,
+  durationMaxMs: 260,
+  slashLagMinMs: 20,
+  slashLagMaxMs: 60,
+  /** Slashes are one glyph: they settle quicker than a word. */
+  slashDurationShare: 0.7,
+  /** Irregular on/off steps per element before it settles at full brightness. */
+  stepsMin: 4,
+  stepsMax: 6,
+  budgetMs: INTRO_GAP_MS - 20,
+} as const;
+
 export const WORDMARK_LETTER_DELAY_S = 0.25;
 export const WORDMARK_LETTER_STAGGER_S = 0.08;
 

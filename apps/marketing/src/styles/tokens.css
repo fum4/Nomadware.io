@@ -15,6 +15,8 @@
   --panel: rgba(19, 18, 28, 0.72);
   --term: rgba(8, 8, 13, 0.88);
   --chip: rgba(255, 255, 255, 0.08);
+  /* A section band (page-section.astro): a touch darker than --ink, grid lines still show through. */
+  --band: rgba(0, 0, 0, 0.28);
 
   --logo-bg: #000;
   --logo-border: rgba(255, 255, 255, 0.14);
@@ -36,6 +38,7 @@
   --radius: 12px;
   --radius-sm: 6px;
   --grid: 64px;
+  --grid-line: 1px;
 
   color-scheme: dark;
 }

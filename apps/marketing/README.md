@@ -13,7 +13,7 @@
 | `src/pages/index.astro` | the page: nav, hero, stats, how we work, contact, footer |
 | `src/layouts/base-layout.astro` | `<html>`, fonts (preloaded), SEO head, JSON-LD, skip link, page frame |
 | `src/components/` | one `.astro` component per file, styles scoped inside it |
-| `src/scripts/` | client behaviour (wordmark, headline scramble, dot field, stats count-up, relative times); `intro-sequence.ts` = the load choreography (scramble → stats → wordmark, each started by the previous one finishing); `scripts/contact/` = the terminal form (+ lazy Turnstile, the POST) |
+| `src/scripts/` | client behaviour (wordmark, headline scramble, hero tags flicker, dot field, stats count-up, relative times, `grid-band.ts` = snaps a `PageSection band` onto the grid lines); `intro-sequence.ts` = the load choreography (scramble → stats → wordmark, each started by the previous one finishing; the tags flicker inside the first gap); `scripts/contact/` = the terminal form (+ lazy Turnstile, the POST) |
 | `src/pages/api/contact.ts` | the contact endpoint: size check, config, rate limiter, logging; the logic is `src/contact/` |
 | `src/contact/` | the contact form's rules and server logic: `validation.ts` (shared with the browser), `contact-api.ts` (wire contract), `handle-contact.ts` (parse → rate limit → honeypot → validate → Turnstile → Resend), one module per step, `*.test.ts` beside each |
 | `src/log/` | `log-event.ts`, the server's one log sink (JSON lines; never names, addresses, IPs or messages) |

@@ -2,6 +2,7 @@ import { INTRO_GAP_MS, INTRO_WORDMARK_MAX_WAIT_MS } from '../constants';
 import { scrambleHeadline } from './headline-scramble';
 import { prefersReducedMotion } from './motion';
 import { initStats } from './stats-strip';
+import { flickerTags } from './tags-flicker';
 import { expandWordmark } from './wordmark-expand';
 
 const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -11,9 +12,10 @@ const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
 
 /**
  * The page-load choreography, each step started by the previous one finishing: headline scramble
- * → gap → stats count-up (once the strip is in view) → gap → nav wordmark. The wordmark never
- * waits on a strip nobody scrolls to: it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at
- * the latest. Reduced motion: everything final at once.
+ * → gap (the hero tags flicker on inside it, never lengthening it) → stats count-up (once the
+ * strip is in view) → gap → nav wordmark. The wordmark never waits on a strip nobody scrolls to:
+ * it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at the latest. Reduced motion:
+ * everything final at once.
  */
 export async function playIntro(): Promise<void> {
   const countUp = initStats();
@@ -26,6 +28,8 @@ export async function playIntro(): Promise<void> {
   await scrambleHeadline();
   mark('headline-end');
   const wordmarkDeadline = wait(INTRO_WORDMARK_MAX_WAIT_MS);
+  mark('tags-start');
+  void flickerTags().then(() => mark('tags-end'));
   await wait(INTRO_GAP_MS);
 
   const stats = countUp().then(() => {
