@@ -118,3 +118,29 @@ resource "vercel_project_environment_variable" "marketing_resend_api_key" {
   target     = ["production"]
   sensitive  = true
 }
+
+# ── Live stats (NWARE-82): apps/marketing/src/config/stats-source.ts ──
+# The R2 read credential, created once the TF_VAR_site_stats_reader_* pair is in
+# secrets/terraform.env.age; until then the page shows the bundled snapshot. Env reaches a
+# deployment when it is built, so a change here needs a redeploy.
+resource "vercel_project_environment_variable" "marketing_stats_access_key_id" {
+  count = nonsensitive(var.site_stats_reader_access_key_id != null) ? 1 : 0
+
+  team_id    = var.vercel_team_id
+  project_id = vercel_project.marketing.id
+  key        = "STATS_R2_ACCESS_KEY_ID"
+  value      = var.site_stats_reader_access_key_id
+  target     = ["production", "preview"]
+  sensitive  = true
+}
+
+resource "vercel_project_environment_variable" "marketing_stats_secret_access_key" {
+  count = nonsensitive(var.site_stats_reader_access_key_id != null) ? 1 : 0
+
+  team_id    = var.vercel_team_id
+  project_id = vercel_project.marketing.id
+  key        = "STATS_R2_SECRET_ACCESS_KEY"
+  value      = var.site_stats_reader_secret_access_key
+  target     = ["production", "preview"]
+  sensitive  = true
+}

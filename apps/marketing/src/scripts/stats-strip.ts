@@ -1,6 +1,8 @@
 import { COUNT_UP_DURATION_MS, COUNT_UP_VISIBLE_THRESHOLD } from '../constants';
-import type { StatKey, StatWindow } from '../data/stats-snapshot';
-import { DEFAULT_STAT_WINDOW, isStatKey, isStatWindow } from '../data/stats-snapshot';
+import type { StatKey, StatWindow } from '@nomadware/site-stats';
+import { isStatKey, isStatWindow } from '@nomadware/site-stats';
+
+import { DEFAULT_STAT_WINDOW } from '../data/stats-snapshot';
 import { formatStat } from '../format/format-stat';
 import { STATS_VIEWED_THRESHOLD } from './analytics/constants';
 import { track } from './analytics/track';

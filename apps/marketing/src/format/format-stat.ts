@@ -1,4 +1,4 @@
-import type { StatKey } from '../data/stats-snapshot';
+import type { StatKey } from '@nomadware/site-stats';
 
 const COMPACT_KEYS: ReadonlySet<StatKey> = new Set<StatKey>([
   'actions',

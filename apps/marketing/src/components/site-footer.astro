@@ -2,6 +2,11 @@
 import { BUILD_INFO } from '../config/build-info';
 import { SITE } from '../config/site';
 import RelativeTime from './relative-time.astro';
+
+interface Props {
+  renderedAt: string;
+}
+const { renderedAt } = Astro.props;
 ---
 
 <footer class="footer">
@@ -9,7 +14,7 @@ import RelativeTime from './relative-time.astro';
     <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no office · no overhead · just software</span>
   </p>
   <p>
-    last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={BUILD_INFO.builtAt} /> · <span
+    last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={renderedAt} /> · <span
       class="sha">{BUILD_INFO.sha}</span
     ><span class="privacy"> · <button type="button" data-consent-open>privacy</button></span>
   </p>

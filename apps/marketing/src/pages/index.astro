@@ -5,19 +5,27 @@ import HowWeWork from '../components/how-we-work.astro';
 import SiteFooter from '../components/site-footer.astro';
 import SiteNav from '../components/site-nav.astro';
 import StatsStrip from '../components/stats-strip.astro';
-import { BUILD_INFO } from '../config/build-info';
+import { STATS_PAGE_CACHE_CONTROL } from '../constants';
+import { loadStats } from '../data/load-stats';
 import BaseLayout from '../layouts/base-layout.astro';
+
+// Rendered per request (behind Vercel's CDN cache) so the stats strip carries the live numbers.
+export const prerender = false;
+
+const stats = await loadStats();
+const renderedAt = new Date().toISOString();
+Astro.response.headers.set('Cache-Control', STATS_PAGE_CACHE_CONTROL);
 ---
 
 <BaseLayout>
   <SiteNav />
   <main id="main" tabindex="-1">
     <Hero />
-    <StatsStrip renderedAt={BUILD_INFO.builtAt} />
+    <StatsStrip stats={stats} renderedAt={renderedAt} />
     <HowWeWork />
     <ContactTerminal />
   </main>
-  <SiteFooter />
+  <SiteFooter renderedAt={renderedAt} />
 </BaseLayout>
 
 <script>

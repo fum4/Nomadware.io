@@ -1,4 +1,4 @@
-import type { StatWindow } from '../../data/stats-snapshot';
+import type { StatWindow } from '@nomadware/site-stats';
 import type { PostFailure } from '../contact/post-contact';
 
 /** Why a send didn't go through: blocked client-side, no Turnstile token, or the post's failure. */
