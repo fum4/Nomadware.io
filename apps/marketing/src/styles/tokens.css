@@ -4,6 +4,8 @@
   --line: rgba(255, 255, 255, 0.07);
   --fg: #ecebf3;
   --dim: #8a889c;
+  /* One step under --dim (body copy under a --dim line); 5.3:1 on a section band. */
+  --subdued: #838196;
   /* The mock's #55536a fails 4.5:1 for text; this is the dimmest text that passes on --ink. */
   --faint: #7c7a91;
   --sig: #c6ff4a;
