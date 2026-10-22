@@ -1,75 +1,36 @@
-// The stats strip's data, shaped like the snapshot JSON live stats will publish. Placeholder
-// numbers until then, hand-computed from the devbox (method per field in apps/marketing/README.md).
+import type { StatsSnapshot, StatWindow } from '@nomadware/site-stats';
 
-export const STAT_WINDOWS = ['7d', '30d'] as const;
-export type StatWindow = (typeof STAT_WINDOWS)[number];
+// The bundled fallback: what the stats strip shows when the live snapshot (R2, written by
+// tools/stats-publisher) can't be read. Its age shows on the page ("updated Xd ago", stale dot),
+// so refreshing it is optional: `mise run stats:compute` prints a current one.
 
-export interface StatWindowValues {
-  prs: number;
-  runs: number;
-  agentHours: number;
-  checks: number;
-  caught: number;
-  actions: number;
-  linesAdded: number;
-  linesDeleted: number;
-  repos: number;
-}
-
-export type StatKey = keyof StatWindowValues;
-
-export const STAT_KEYS: readonly StatKey[] = [
-  'prs',
-  'runs',
-  'agentHours',
-  'checks',
-  'caught',
-  'actions',
-  'linesAdded',
-  'linesDeleted',
-  'repos',
-];
-
-export function isStatKey(value: string | undefined): value is StatKey {
-  return STAT_KEYS.some((key) => key === value);
-}
-
-export function isStatWindow(value: string | undefined): value is StatWindow {
-  return STAT_WINDOWS.some((window) => window === value);
-}
-
-export interface StatsSnapshot {
-  /** ISO 8601 — when these numbers were computed ("updated Xm ago"). */
-  generatedAt: string;
-  windows: Record<StatWindow, StatWindowValues>;
-}
-
-export const STATS_SNAPSHOT: StatsSnapshot = {
-  generatedAt: '2026-10-22T19:23:03Z',
+export const BUNDLED_STATS_SNAPSHOT: StatsSnapshot = {
+  generatedAt: '2026-10-22T20:52:23Z',
   windows: {
     '7d': {
-      prs: 174,
-      runs: 253,
-      agentHours: 83,
-      checks: 538,
-      caught: 37,
-      actions: 14_711,
-      linesAdded: 111_704,
-      linesDeleted: 18_661,
+      prs: 194,
+      runs: 263,
+      agentHours: 85,
+      checks: 513,
+      caught: 31,
+      actions: 15_669,
+      linesAdded: 76_541,
+      linesDeleted: 14_925,
       repos: 9,
     },
     '30d': {
-      prs: 530,
-      runs: 1_532,
-      agentHours: 373,
-      checks: 754,
+      prs: 544,
+      runs: 1_553,
+      agentHours: 378,
+      checks: 770,
       caught: 56,
-      actions: 94_596,
-      linesAdded: 593_000,
-      linesDeleted: 83_000,
-      repos: 10,
+      actions: 95_691,
+      linesAdded: 426_239,
+      linesDeleted: 80_495,
+      repos: 11,
     },
   },
 };
 
+/** The range the strip opens on. */
 export const DEFAULT_STAT_WINDOW: StatWindow = '7d';

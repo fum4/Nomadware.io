@@ -1,17 +1,29 @@
 ---
-import { DEFAULT_STAT_WINDOW, STAT_WINDOWS, STATS_SNAPSHOT } from '../data/stats-snapshot';
+import { STAT_WINDOWS } from '@nomadware/site-stats';
+
+import { STATS_STALE_AFTER_MS } from '../constants';
+import type { LoadedStats } from '../data/load-stats';
+import { DEFAULT_STAT_WINDOW } from '../data/stats-snapshot';
 import RelativeTime from './relative-time.astro';
 import StatValue from './stat-value.astro';
 
 interface Props {
+  stats: LoadedStats;
   renderedAt: string;
 }
-const { renderedAt } = Astro.props;
-const snapshot = STATS_SNAPSHOT;
+const { stats, renderedAt } = Astro.props;
+const { snapshot, source } = stats;
+// Over a day old (the publisher stopped, or this is the bundled fallback): no live dot.
+const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_STALE_AFTER_MS;
 const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
 ---
 
-<section class="stats" aria-labelledby="stats-title" data-stats>
+<section
+  class:list={['stats', { stale }]}
+  aria-labelledby="stats-title"
+  data-stats
+  data-stats-source={source}
+>
   <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
   <div class="head">
     <span class="range">
@@ -107,6 +119,12 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
     border-radius: 50%;
     background: var(--sig);
     animation: pulse 2s infinite;
+  }
+
+  /* Same box, so nothing moves: only the colour and the pulse go. */
+  .stale .dot {
+    background: var(--faint);
+    animation: none;
   }
 
   @keyframes pulse {

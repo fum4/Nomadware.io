@@ -2,12 +2,16 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import { defineConfig, envField, fontProviders } from 'astro/config';
 
-// Static by default: every page is prerendered. On-demand routes (the contact endpoint, later
-// live stats) opt out per route with `export const prerender = false`.
+import { SITE } from './src/config/site';
+
+// Static by default: every page is prerendered; a route opts out with `export const prerender =
+// false` (the contact endpoint does, and the home page: it renders with live stats).
 export default defineConfig({
-  site: 'https://nomadware.io',
+  site: SITE.url,
   adapter: vercel(),
-  integrations: [sitemap()],
+  // The sitemap lists prerendered pages only; on-demand ones are named here.
+  integrations: [sitemap({ customPages: [SITE.url] })],
+  vite: { define: { 'import.meta.env.BUILT_AT': JSON.stringify(new Date().toISOString()) } },
   // One small stylesheet: inlining it removes the only render-blocking request.
   build: { inlineStylesheets: 'always' },
   env: {
@@ -27,6 +31,17 @@ export default defineConfig({
       TURNSTILE_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
       TURNSTILE_HOSTNAME: envField.string({ context: 'server', access: 'public', optional: true }),
       RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // R2 read-only credential for the live stats (vercel.tf); validated in src/config/stats-source.ts.
+      STATS_R2_ACCESS_KEY_ID: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
+      STATS_R2_SECRET_ACCESS_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
     },
   },
   fonts: [
