@@ -71,11 +71,6 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
   <p class="foot">across <StatValue stat="repos" snapshot={snapshot} /> codebases</p>
 </section>
 
-<script>
-  import { initStats } from '../scripts/stats-strip';
-  initStats();
-</script>
-
 <style>
   .stats {
     border: 1px solid var(--line);

@@ -13,7 +13,7 @@
 | `src/pages/index.astro` | the page: nav, hero, stats, how we work, contact, footer |
 | `src/layouts/base-layout.astro` | `<html>`, fonts (preloaded), SEO head, JSON-LD, skip link, page frame |
 | `src/components/` | one `.astro` component per file, styles scoped inside it |
-| `src/scripts/` | client behaviour (wordmark, headline scramble, dot field, stats count-up, relative times); `scripts/contact/` = the terminal form |
+| `src/scripts/` | client behaviour (wordmark, headline scramble, dot field, stats count-up, relative times); `intro-sequence.ts` = the load choreography (scramble → stats → wordmark, each started by the previous one finishing); `scripts/contact/` = the terminal form |
 | `src/styles/` | `tokens.css` (every colour/font/radius), `global.css`, the contact terminal's global CSS (its spans are painted by script) |
 | `src/config/` | `site.ts` (name, URL, SEO copy, email) · `build-info.ts` (commit SHA + build time for "last deploy") |
 | `src/data/stats-snapshot.ts` | the stats strip's numbers, typed like the future live snapshot JSON |

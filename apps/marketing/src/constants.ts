@@ -9,7 +9,15 @@ export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 export const SHA_LENGTH = 7;
 
-export const WORDMARK_EXPAND_DELAY_MS = 700;
+/** Intro (scripts/intro-sequence.ts): headline scramble → gap → stats count-up → gap → wordmark. */
+export const INTRO_GAP_MS = 500;
+/**
+ * Latest the wordmark starts, counted from the headline settling, when the stats strip is below
+ * the fold and never scrolled into view. The in-view path takes 500 + 1600 + 500 = 2.6 s, so 4 s
+ * still lets a visitor who scrolls straight down see the full order before the nav gives up.
+ */
+export const INTRO_WORDMARK_MAX_WAIT_MS = 4_000;
+
 export const WORDMARK_LETTER_DELAY_S = 0.25;
 export const WORDMARK_LETTER_STAGGER_S = 0.08;
 
