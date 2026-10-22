@@ -22,9 +22,8 @@ resource "vercel_project" "marketing" {
   auto_assign_custom_domains = false
   build_machine_type         = "basic"
   resource_config = {
-    fluid                     = false
-    function_default_cpu_type = "standard_legacy"
-    function_default_regions  = ["fra1"]
+    fluid                    = false
+    function_default_regions = ["fra1"]
   }
 }
 
