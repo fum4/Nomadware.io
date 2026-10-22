@@ -37,3 +37,29 @@ resource "vercel_project_environment_variable" "marketing_corepack" {
   target     = ["production", "preview"]
   sensitive  = false
 }
+
+# Production domains. The apex is canonical (site.ts, sitemap, robots, OG all use it): it serves,
+# www redirects to it. Imported 2026-10-22; the dashboard had it the other way round.
+import {
+  to = vercel_project_domain.marketing_apex
+  id = "${var.vercel_team_id}/prj_UXE0adk5RZs6C8RxtWMEsn0dfof1/nomadware.io"
+}
+
+resource "vercel_project_domain" "marketing_apex" {
+  team_id    = var.vercel_team_id
+  project_id = vercel_project.marketing.id
+  domain     = "nomadware.io"
+}
+
+import {
+  to = vercel_project_domain.marketing_www
+  id = "${var.vercel_team_id}/prj_UXE0adk5RZs6C8RxtWMEsn0dfof1/www.nomadware.io"
+}
+
+resource "vercel_project_domain" "marketing_www" {
+  team_id              = var.vercel_team_id
+  project_id           = vercel_project.marketing.id
+  domain               = "www.nomadware.io"
+  redirect             = vercel_project_domain.marketing_apex.domain
+  redirect_status_code = 308
+}

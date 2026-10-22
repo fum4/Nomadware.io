@@ -6,7 +6,7 @@ The `nomadware.io` zone and every record in it. Both registration (Cloudflare Re
 |---|---|
 | `zone.tf` | the zone (+ `name_servers` output) |
 | `records.tf` | all records, one map entry each (site, `ops`, iCloud Mail, verifications) |
-| `vercel.tf` | the Vercel project `nomadware-io` (team `nware`) that builds the marketing site, + its env vars |
+| `vercel.tf` | the Vercel project `nomadware-io` (team `nware`) that builds the marketing site, its env vars, and its domains (apex serves; `www` 308s to the apex) |
 | `backend.tf` | state in R2 bucket `nomadware-io-backup` (created by hand: bootstrap exception) |
 | `versions.tf` | Terraform + provider pins (bump deliberately to the latest release) |
 

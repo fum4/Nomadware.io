@@ -1,6 +1,6 @@
 # `apps/marketing` — the nomadware.io site
 
-**What:** the public site at `nomadware.io` / `www.nomadware.io`. One page, Astro 7, prerendered to static HTML, deployed by Vercel through `@astrojs/vercel`. Client JS is a handful of small vanilla `<script>` modules — no framework runtime. Package `@nomadware/marketing`.
+**What:** the public site at `nomadware.io` (canonical; `www.nomadware.io` 308s to it, `infra/terraform/vercel.tf`). One page, Astro 7, prerendered to static HTML, deployed by Vercel through `@astrojs/vercel`. Client JS is a handful of small vanilla `<script>` modules — no framework runtime. Package `@nomadware/marketing`.
 
 **Depends on:** nothing else in the repo. The Vercel project (`nomadware-io`, team `nware`, framework preset `astro`) builds it with Root Directory `apps/marketing`; those settings are Terraform in `infra/terraform/vercel.tf`.
 
