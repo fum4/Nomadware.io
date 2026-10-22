@@ -83,13 +83,18 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
     color: var(--sig);
   }
 
-  /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline.
-     Only with JS and motion; the failsafe lights them anyway if the intro never runs. */
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html.js) .tags > span {
-      opacity: 0;
-      animation: tags-failsafe 0s 4s forwards;
-    }
+  /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline
+     (only with JS); the failsafe lights them anyway if the intro never runs. `is-fading`: the
+     reduced-motion stand-in for the flicker, a plain fade (scripts/motion-policy.ts). */
+  :global(html.js) .tags > span {
+    opacity: 0;
+    animation: tags-failsafe 0s 4s forwards;
+  }
+
+  :global(html.js) .tags:global(.is-fading) > span {
+    opacity: 1;
+    animation: none;
+    transition: opacity var(--flash-fallback-fade) ease-out;
   }
 
   @keyframes tags-failsafe {

@@ -1,8 +1,7 @@
-import { FINE_POINTER_QUERY, MOBILE_QUERY, REDUCED_MOTION_QUERY } from '../constants';
+import { FINE_POINTER_QUERY, MOBILE_QUERY } from '../constants';
 
-// Environment questions every client script asks, answered in one place.
-
-export const prefersReducedMotion = (): boolean => matchMedia(REDUCED_MOTION_QUERY).matches;
+// Environment questions every client script asks, answered in one place (reduced motion: the
+// motion policy, motion-policy.ts).
 
 export const isMobileViewport = (): boolean => matchMedia(MOBILE_QUERY).matches;
 

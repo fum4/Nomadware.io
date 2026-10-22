@@ -6,7 +6,7 @@ import { DEFAULT_STAT_WINDOW } from '../data/stats-snapshot';
 import { formatStat } from '../format/format-stat';
 import { STATS_VIEWED_THRESHOLD } from './analytics/constants';
 import { track } from './analytics/track';
-import { onceVisible, prefersReducedMotion } from './motion';
+import { onceVisible } from './motion';
 
 interface StatElement {
   element: HTMLElement;
@@ -56,17 +56,11 @@ function paint(stats: StatElement[], finals: number[], progress: number): void {
 let latestShow = 0;
 
 /**
- * Show one range; resolves when its numbers have settled (or a newer `show` took over). With
- * motion, every number counts up from 0 (ease-out-expo) inside its locked final width.
+ * Show one range; resolves when its numbers have settled (or a newer `show` took over). Every
+ * number counts up from 0 (ease-out-expo) inside its locked final width.
  */
-function show(stats: StatElement[], range: StatWindow, animate: boolean): Promise<void> {
+function show(stats: StatElement[], range: StatWindow): Promise<void> {
   const run = ++latestShow;
-  if (!animate) {
-    stats.forEach(
-      (stat) => (stat.element.textContent = formatStat(stat.key, stat.values[range] ?? 0)),
-    );
-    return Promise.resolve();
-  }
   const finals = lockFinals(stats, range);
   return new Promise((resolve) => {
     const start = performance.now();
@@ -84,7 +78,7 @@ function show(stats: StatElement[], range: StatWindow, animate: boolean): Promis
 /**
  * Wire the 7d/30d toggle and hold the numbers at 0 for the intro. Returns the intro's count-up:
  * it waits until the strip is in view, then resolves when the count settles (at once if the
- * visitor already picked a range, or with reduced motion).
+ * visitor already picked a range).
  */
 export function initStats(): () => Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-stats]');
@@ -92,14 +86,13 @@ export function initStats(): () => Promise<void> {
   const stats = readStats(root);
   const labels = [...root.querySelectorAll<HTMLElement>('[data-range-label]')];
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-range]')];
-  const animate = !prefersReducedMotion();
   let picked = false;
   let current: StatWindow = DEFAULT_STAT_WINDOW;
 
   // Analytics only: independent of the intro's count-up, which has its own visibility gate.
   onceVisible(root, STATS_VIEWED_THRESHOLD, () => track('stats_viewed', { window: current }));
 
-  if (animate) paint(stats, lockFinals(stats, DEFAULT_STAT_WINDOW), 0);
+  paint(stats, lockFinals(stats, DEFAULT_STAT_WINDOW), 0);
 
   buttons.forEach((button) =>
     button.addEventListener('click', () => {
@@ -112,18 +105,18 @@ export function initStats(): () => Promise<void> {
       );
       current = range;
       track('stats_window_toggled', { window: range });
-      void show(stats, range, animate);
+      void show(stats, range);
     }),
   );
 
   return () =>
-    !animate || picked
+    picked
       ? Promise.resolve()
       : new Promise((resolve) =>
           onceVisible(root, COUNT_UP_VISIBLE_THRESHOLD, () => {
             if (picked) return resolve();
             performance.mark('intro:stats-start');
-            resolve(show(stats, DEFAULT_STAT_WINDOW, animate));
+            resolve(show(stats, DEFAULT_STAT_WINDOW));
           }),
         );
 }

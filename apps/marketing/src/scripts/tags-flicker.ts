@@ -1,9 +1,12 @@
 import { TAGS_FLICKER } from '../constants';
+import { flashingAllowed } from './motion-policy';
 
 const GLOW = '0 0 6px currentColor';
 const NO_GLOW = 'none';
 /** Hold each step, then jump: a failing tube, not a fade. */
 const STEP = 'steps(1, end)';
+/** hero.astro: fades the tags in with CSS, the flicker's reduced-motion stand-in. */
+const FADING = 'is-fading';
 
 const between = (min: number, max: number): number => min + Math.random() * (max - min);
 
@@ -60,14 +63,23 @@ function schedule(tags: HTMLElement[], slashes: HTMLElement[]): Flicker[] {
   return flickers;
 }
 
+/** Light every tag with a plain fade; resolves once it has finished. */
+function fadeIn(root: HTMLElement): Promise<void> {
+  root.classList.add(FADING);
+  const transitions = root.getAnimations({ subtree: true }).map((animation) => animation.finished);
+  return Promise.all(transitions).then(() => undefined);
+}
+
 /**
  * Flicker the hero tags on like a neon sign with a bad power supply; resolves when all are lit.
- * The tags are hidden by CSS until now (only with JS and motion; see hero.astro), and are left
- * at full opacity with no animation attached.
+ * The tags are hidden by CSS until now (only with JS; see hero.astro), and are left at full
+ * opacity with no animation attached. It flashes, so under reduced motion it is a plain fade
+ * instead (scripts/motion-policy.ts).
  */
 export async function flickerTags(): Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-tags]');
   if (!root) return;
+  if (!flashingAllowed()) return fadeIn(root);
   const tags = [...root.querySelectorAll<HTMLElement>('[data-tag]')];
   const slashes = [...root.querySelectorAll<HTMLElement>('[data-slash]')];
 

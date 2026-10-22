@@ -50,6 +50,9 @@
      would shift the layout (CLS). Every font shorthand carries it; body passes it down. */
   --leading: 1.28;
 
+  /* What a flashing effect becomes under prefers-reduced-motion (scripts/motion-policy.ts). */
+  --flash-fallback-fade: 180ms;
+
   --radius: 12px;
   --radius-sm: 6px;
   /* The content column (.wrap, padding included); the column halo is centred on it. */

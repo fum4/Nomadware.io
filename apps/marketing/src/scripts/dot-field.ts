@@ -1,5 +1,5 @@
 import { DOT_FIELD } from '../constants';
-import { hasFinePointer, isMobileViewport, prefersReducedMotion } from './motion';
+import { hasFinePointer, isMobileViewport } from './motion';
 
 interface Dot {
   x: number;
@@ -13,8 +13,7 @@ const OFF_SCREEN = -9_999;
 
 /**
  * Drifting dots behind the hero; on a mouse-first desktop they scatter from the cursor.
- * The loop runs only while the hero is on screen and the tab is visible; reduced motion draws
- * one still frame.
+ * The loop runs only while the hero is on screen and the tab is visible.
  */
 export function initDotField(): void {
   const canvas = document.querySelector<HTMLCanvasElement>('[data-dot-field]');
@@ -22,8 +21,7 @@ export function initDotField(): void {
   const host = canvas?.parentElement;
   if (!canvas || !context || !host) return;
 
-  const still = prefersReducedMotion();
-  const chase = !still && hasFinePointer() && !isMobileViewport();
+  const chase = hasFinePointer() && !isMobileViewport();
   const scale = DOT_FIELD.canvasScale;
   const pointer = { x: OFF_SCREEN, y: OFF_SCREEN };
   let dots: Dot[] = [];
@@ -46,7 +44,6 @@ export function initDotField(): void {
         highlight: Math.random() < DOT_FIELD.highlightShare,
       }));
     }
-    if (still) draw();
   };
 
   const move = (dot: Dot): void => {
@@ -63,15 +60,14 @@ export function initDotField(): void {
     dot.y = (dot.y + dot.vy + canvas.height) % canvas.height;
   };
 
-  function draw(): void {
-    if (!context || !canvas) return;
+  const draw = (): void => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (const dot of dots) {
       const size = dot.highlight ? DOT_FIELD.highlightSize : DOT_FIELD.size;
       context.fillStyle = dot.highlight ? DOT_FIELD.highlightColor : DOT_FIELD.color;
       context.fillRect(dot.x, dot.y, size, size);
     }
-  }
+  };
 
   const tick = (): void => {
     dots.forEach(move);
@@ -80,7 +76,7 @@ export function initDotField(): void {
   };
 
   const resume = (): void => {
-    if (!still && frame === 0 && onScreen && !document.hidden) frame = requestAnimationFrame(tick);
+    if (frame === 0 && onScreen && !document.hidden) frame = requestAnimationFrame(tick);
   };
 
   resize();
