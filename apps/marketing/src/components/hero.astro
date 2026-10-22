@@ -7,8 +7,9 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
   <canvas class="dots" data-dot-field aria-hidden="true"></canvas>
   <p class="eyebrow">Small studio · large output</p>
   <h1 id="hero-title">
-    <span class="headline" data-scramble>{HEADLINE}</span>
-    <span class="subline">Human judgment, at agent speed.</span>
+    <span class="headline" data-scramble>{HEADLINE}</span>{' '}
+    <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
+    <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
   </h1>
   <p class="tags">{TAGS.map((tag, index) => <>{index > 0 && <span class="slash">/</span>}{tag}</>)}</p>
 </section>
@@ -72,6 +73,10 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
 
   .subline {
     color: var(--dim);
+  }
+
+  .subline > span {
+    display: block;
   }
 
   /* Built by scripts/headline-scramble.ts: the real letter keeps its space, a glyph covers it.
