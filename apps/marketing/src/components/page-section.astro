@@ -43,7 +43,8 @@ const { id, title, band = false } = Astro.props;
   /* The band's padding sits inside the same gap, so its title lands where any section's would.
      The band itself is painted by ::before: full-bleed via a spread shadow clipped to its own
      height (no 100vw, so no horizontal scrollbar), and moved onto grid lines by
-     scripts/grid-band.ts with a transform only, which never shifts layout (zero CLS). */
+     scripts/grid-band.ts with a transform only, which never shifts layout (zero CLS). Each edge
+     can land up to a cell outside the box; the section gaps leave room for that. */
   .section.is-band {
     position: relative;
     margin-top: calc(var(--section-gap) - var(--band-pad));
@@ -81,6 +82,13 @@ const { id, title, band = false } = Astro.props;
       grid-template-columns: 1fr;
       gap: 16px;
       padding-bottom: 4px;
+    }
+
+    /* A band's painted edges overshoot its box by up to a cell (scripts/grid-band-edges.ts), so
+       the gaps around it keep the desktop three cells: the band always clears its neighbours. */
+    .section.is-band,
+    .section.is-band + .section {
+      --section-gap: calc(var(--grid) * 3);
     }
   }
 </style>

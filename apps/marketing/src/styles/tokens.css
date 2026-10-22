@@ -3,7 +3,11 @@
   --ink: #0c0b12;
   --line: rgba(255, 255, 255, 0.07);
   --fg: #ecebf3;
+  /* Between --fg and --dim: a lead line under a --fg heading (how-we-work subtitles). */
+  --soft: #b9b7c8;
   --dim: #8a889c;
+  /* One step under --dim: body copy under a --soft lead line; 5.3:1 on a section band. */
+  --subdued: #838196;
   /* The mock's #55536a fails 4.5:1 for text; this is the dimmest text that passes on --ink. */
   --faint: #7c7a91;
   --sig: #c6ff4a;
