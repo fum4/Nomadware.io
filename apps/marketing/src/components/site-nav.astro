@@ -1,0 +1,45 @@
+---
+import LogoMark from './logo-mark.astro';
+import Wordmark from './wordmark.astro';
+---
+
+<header>
+  <nav aria-label="Primary">
+    <a class="brand" href="/" aria-label="Nomadware home">
+      <LogoMark />
+      <Wordmark />
+    </a>
+    <a class="link" href="#contact">contact</a>
+  </nav>
+</header>
+
+<style>
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: 400 12px var(--mono);
+    color: var(--dim);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--fg);
+    font: 600 15px var(--sans);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .link {
+    padding: 6px 0;
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .link:hover {
+    color: var(--fg);
+  }
+</style>

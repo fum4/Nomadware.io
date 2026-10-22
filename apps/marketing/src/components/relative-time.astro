@@ -1,0 +1,18 @@
+---
+import { relativeTime } from '../format/relative-time';
+
+// A timestamp shown as "4m ago". Rendered relative to build time, then kept current in the
+// browser by scripts/relative-times.ts.
+interface Props {
+  iso: string;
+  renderedAt: string;
+}
+const { iso, renderedAt } = Astro.props;
+---
+
+<time datetime={iso} data-relative>{relativeTime(iso, Date.parse(renderedAt))}</time>
+
+<script>
+  import { initRelativeTimes } from '../scripts/relative-times';
+  initRelativeTimes();
+</script>

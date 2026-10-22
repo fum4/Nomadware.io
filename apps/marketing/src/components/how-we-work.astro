@@ -1,0 +1,67 @@
+---
+import PageSection from './page-section.astro';
+
+const PRINCIPLES = [
+  {
+    title: 'Product mindset',
+    text: 'We build for your users, not for the ticket, we ship what moves the needle.',
+  },
+  {
+    title: 'Always in motion',
+    text: 'Agents work around the clock. You wake up to progress, not questions.',
+  },
+  {
+    title: 'Zero friction',
+    text: 'No calls, no tickets to babysit. New builds show up on your phone as they land.',
+  },
+];
+---
+
+<PageSection id="how-we-work" title="How we work">
+  <ul class="rows">
+    {
+      PRINCIPLES.map(({ title, text }) => (
+        <li>
+          <h3>{title}</h3>
+          <p>{text}</p>
+        </li>
+      ))
+    }
+  </ul>
+</PageSection>
+
+<style>
+  .rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  li:first-child {
+    padding-top: 0;
+  }
+
+  li:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  h3 {
+    margin: 0 0 6px;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--dim);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+</style>

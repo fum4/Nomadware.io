@@ -1,0 +1,42 @@
+---
+// A titled band: small mono label in the left column, content on the right (stacked on phones).
+interface Props {
+  id: string;
+  title: string;
+}
+const { id, title } = Astro.props;
+---
+
+<section class="section" id={id} aria-labelledby={`${id}-title`}>
+  <h2 class="title" id={`${id}-title`}>{title}</h2>
+  <div><slot /></div>
+</section>
+
+<style>
+  .section {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    margin-top: 48px;
+    padding: 48px 0 8px;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 24px;
+  }
+
+  .title {
+    margin: 4px 0;
+    font: 400 11px var(--mono);
+    color: var(--dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 640px) {
+    .section {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 36px;
+      padding: 36px 0 4px;
+    }
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+// The rounded-square mark: three leaning bars on black. Decorative next to the wordmark.
+interface Props {
+  size?: number;
+}
+const { size = 28 } = Astro.props;
+---
+
+<span class="logo" style={`--logo-size: ${size}px`} aria-hidden="true">
+  <svg viewBox="0 0 500 500" focusable="false">
+    <rect x="138" y="185" width="44" height="200" rx="14" transform="rotate(28 160 285)"></rect>
+    <rect x="229" y="172" width="46" height="208" rx="14" transform="rotate(15 252 276)"></rect>
+    <rect x="328" y="134" width="50" height="246" rx="14" transform="rotate(5 353 257)"></rect>
+  </svg>
+</span>
+
+<style>
+  .logo {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--logo-size);
+    height: var(--logo-size);
+    border: 1px solid var(--logo-border);
+    border-radius: calc(var(--logo-size) * 0.2857);
+    background: var(--logo-bg);
+  }
+
+  svg {
+    width: calc(var(--logo-size) * 0.7857);
+    height: calc(var(--logo-size) * 0.7857);
+    fill: var(--logo-bar);
+  }
+</style>
