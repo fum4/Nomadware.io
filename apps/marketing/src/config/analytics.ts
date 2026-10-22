@@ -6,6 +6,6 @@ export const ANALYTICS = {
   /** Must match the rewrite prefix in vercel.json. */
   apiHost: '/ingest',
   uiHost: 'https://eu.posthog.com',
-  /** Production builds only (Vercel production + previews): dev and `astro dev` never send. */
+  /** Production builds only (Vercel production, and the local `marketing:preview`): dev and `astro dev` never send. */
   enabled: import.meta.env.PROD,
 } as const;

@@ -6,7 +6,7 @@ The `nomadware.io` zone and every record in it. Both registration (Cloudflare Re
 |---|---|
 | `zone.tf` | the zone (+ `name_servers` output) |
 | `records.tf` | all records, one map entry each (site, `ops`, iCloud Mail, verifications) |
-| `vercel.tf` | the Vercel project `nomadware-io` (team `nware`) that builds the marketing site, its env vars (incl. the contact form's Turnstile + Resend values), and its domains (apex serves; `www` 308s to the apex) |
+| `vercel.tf` | the Vercel project `nomadware-io` (team `nware`) that builds the marketing site (production only: `master` commits that touch it; no preview deployments — `mise run marketing:preview` is the preview), its env vars (incl. the contact form's Turnstile + Resend values), and its domains (apex serves; `www` 308s to the apex) |
 | `turnstile.tf` | the contact form's Cloudflare Turnstile widget (its site key and secret flow straight into `vercel.tf`) |
 | `r2.tf` | R2 bucket `nomadware-io-site-stats` (the site's live stats object; `tools/stats-publisher`) |
 | `backend.tf` | state in R2 bucket `nomadware-io-backup` (created by hand: bootstrap exception) |
