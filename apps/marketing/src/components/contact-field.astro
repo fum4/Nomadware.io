@@ -1,0 +1,46 @@
+---
+import '../styles/contact-field.css';
+
+// One prompt line of the contact terminal. The real <input>/<textarea> sits invisibly on top of
+// a painted copy (.term-vis) so the caret and fresh-character glow can be custom; it keeps focus,
+// selection, autofill and assistive tech. Without JS the real control is shown instead.
+interface Props {
+  name: 'name' | 'email' | 'brief';
+  placeholder: string;
+  autocomplete?: 'name' | 'email' | 'off';
+  type?: 'text' | 'email';
+  multiline?: boolean;
+  error?: string;
+}
+const { name, placeholder, autocomplete = 'off', type = 'text', multiline = false, error } = Astro.props;
+const id = `contact-${name}`;
+const errorId = `${id}-error`;
+---
+
+<div class="term-line" data-field={name}>
+  <span class="term-prompt" aria-hidden="true">›</span>
+  <label class="term-key" for={id}>{name}</label>
+  <div class="term-field">
+    <div class="term-vis" aria-hidden="true"><span class="term-ph">{placeholder}</span></div>
+    {
+      multiline ? (
+        <textarea id={id} name={name} rows="3" required minlength="4" data-placeholder={placeholder} />
+      ) : (
+        <input
+          id={id}
+          name={name}
+          type={type}
+          autocomplete={autocomplete}
+          required
+          aria-describedby={error ? errorId : undefined}
+          data-placeholder={placeholder}
+        />
+      )
+    }
+  </div>
+  {
+    error && (
+      <p class="term-err" id={errorId} data-error={error} aria-live="polite" />
+    )
+  }
+</div>

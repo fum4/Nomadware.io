@@ -1,0 +1,49 @@
+---
+import '../styles/contact-terminal.css';
+import { SITE } from '../config/site';
+import ContactField from './contact-field.astro';
+import PageSection from './page-section.astro';
+
+// Until the form endpoint exists, "send" opens a pre-filled email (and so does the plain HTML
+// form without JS, via its mailto: action).
+---
+
+<PageSection id="contact" title="Contact">
+  <form
+    class="term is-idle"
+    data-contact
+    action={`mailto:${SITE.email}`}
+    method="post"
+    enctype="text/plain"
+    aria-labelledby="contact-heading"
+  >
+    <div class="term-bar">
+      <span class="term-path">~/nomadware</span>
+      <a class="term-mail" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    </div>
+    <div class="term-body">
+      <h3 class="term-heading" id="contact-heading">Tell us what you're building.</h3>
+      <ContactField name="name" placeholder="your name" autocomplete="name" />
+      <ContactField
+        name="email"
+        type="email"
+        placeholder="you@company.com"
+        autocomplete="email"
+        error="that address doesn't look right"
+      />
+      <ContactField name="brief" multiline placeholder="what you're building, where it hurts" />
+    </div>
+    <p class="term-out" role="status" data-output></p>
+    <div class="term-run">
+      <span class="term-hints" aria-hidden="true"
+        ><kbd>⏎</kbd> next field · <kbd>↑↓</kbd> move · <kbd>⌘ ⏎</kbd> send</span
+      >
+      <button class="term-send" type="submit">send</button>
+    </div>
+  </form>
+</PageSection>
+
+<script>
+  import { initContactForm } from '../scripts/contact/contact-form';
+  initContactForm();
+</script>
