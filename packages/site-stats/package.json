@@ -1,0 +1,17 @@
+{
+  "name": "@nomadware/site-stats",
+  "private": true,
+  "description": "The live-stats contract (snapshot shape + validator) and its R2 object, shared by the publisher and the site",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "node --test 'src/**/*.test.ts'"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3"
+  }
+}

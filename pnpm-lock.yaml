@@ -204,6 +204,28 @@ importers:
         specifier: 5.0.5
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(yaml@2.9.1))
 
+  packages/site-stats:
+    devDependencies:
+      '@types/node':
+        specifier: 24.19.2
+        version: 24.19.2
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  tools/stats-publisher:
+    dependencies:
+      '@nomadware/site-stats':
+        specifier: workspace:*
+        version: link:../../packages/site-stats
+    devDependencies:
+      '@types/node':
+        specifier: 24.19.2
+        version: 24.19.2
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
 packages:
 
   '@astrojs/astro2tsx@0.1.3':
