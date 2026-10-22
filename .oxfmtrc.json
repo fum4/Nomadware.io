@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "//": "Same settings as tipso's. Markdown is hand-authored (oxfmt re-pads whole tables on one cell edit); build output is gitignored but oxfmt still walks it.",
+  "ignorePatterns": ["**/*.md", "**/.vercel/**", "**/dist/**", "**/server/**", "pnpm-lock.yaml"],
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "endOfLine": "lf"
+}

@@ -4,7 +4,7 @@
 terraform = "1.16.6"
 # pnpm also pinned in package.json `packageManager` (Vercel reads it via Corepack); bump both together.
 node = "24.22.1"
-pnpm = "12.14.0"
+pnpm = "12.15.0"
 
 [env]
 # Linear binding: this repo's backlog, decisions and owner to-dos live in Linear (team NWARE).
@@ -19,9 +19,12 @@ description = "terraform in infra/terraform with the repo's secrets in memory (m
 run = "repo-secrets exec secrets/terraform.env.age -- env -u AWS_PROFILE -u AWS_DEFAULT_PROFILE -u AWS_SESSION_TOKEN AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_CONFIG_FILE=/dev/null terraform -chdir=infra/terraform"
 
 [tasks.pre-push]
-description = "Static checks: terraform fmt + validate (own data dir: never touches the real backend or state)"
+description = "Static checks: oxfmt + oxlint, terraform fmt + validate (own data dir: never touches the real backend or state)"
+depends = ["setup"]
 env = { TF_DATA_DIR = ".terraform-validate" }
 run = [
+  "pnpm check:format",
+  "pnpm lint",
   "terraform -chdir=infra/terraform fmt -check -recursive",
   "terraform -chdir=infra/terraform init -backend=false -input=false >/dev/null",
   "terraform -chdir=infra/terraform validate",

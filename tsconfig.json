@@ -22,6 +22,5 @@
       "~/*": ["./src/*"]
     }
   },
-  "files": ["./.eslintrc.cjs"],
   "include": ["src"]
 }
