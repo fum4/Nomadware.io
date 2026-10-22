@@ -2,6 +2,8 @@ import { COUNT_UP_DURATION_MS, COUNT_UP_VISIBLE_THRESHOLD } from '../constants';
 import type { StatKey, StatWindow } from '../data/stats-snapshot';
 import { DEFAULT_STAT_WINDOW, isStatKey, isStatWindow } from '../data/stats-snapshot';
 import { formatStat } from '../format/format-stat';
+import { STATS_VIEWED_THRESHOLD } from './analytics/constants';
+import { track } from './analytics/track';
 import { onceVisible, prefersReducedMotion } from './motion';
 
 interface StatElement {
@@ -90,6 +92,10 @@ export function initStats(): () => Promise<void> {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-range]')];
   const animate = !prefersReducedMotion();
   let picked = false;
+  let current: StatWindow = DEFAULT_STAT_WINDOW;
+
+  // Analytics only: independent of the intro's count-up, which has its own visibility gate.
+  onceVisible(root, STATS_VIEWED_THRESHOLD, () => track('stats_viewed', { window: current }));
 
   if (animate) paint(stats, lockFinals(stats, DEFAULT_STAT_WINDOW), 0);
 
@@ -100,6 +106,8 @@ export function initStats(): () => Promise<void> {
       picked = true;
       buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
       if (label) label.textContent = button.dataset.label ?? '';
+      current = range;
+      track('stats_window_toggled', { window: range });
       void show(stats, range, animate);
     }),
   );
