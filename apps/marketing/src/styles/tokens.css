@@ -2,8 +2,9 @@
 :root {
   --ink: #0c0b12;
   --line: rgba(255, 255, 255, 0.07);
-  /* The page's grid paper (global.css .frame); borders keep --line. */
-  --grid-color: rgba(255, 255, 255, 0.07);
+  /* The page's grid paper (global.css .frame); borders keep --line. Fainter on desktop, where
+     it shows in the wide gutters beside the column halo; phones (below) keep it stronger. */
+  --grid-color: rgba(255, 255, 255, 0.045);
   --fg: #ecebf3;
   /* Between --fg and --dim: a lead line under a --fg heading (how-we-work subtitles). */
   --soft: #b9b7c8;
@@ -26,7 +27,7 @@
   /* Ink veils that keep the background quiet behind text: the column the content sits in (over
      the grid paper, global.css .frame) and the hero copy (over the dot field, hero.astro). */
   --halo-column: rgba(12, 11, 18, 0.6);
-  --halo-text: rgba(12, 11, 18, 0.82);
+  --halo-text: rgba(12, 11, 18, 0.42);
 
   /* Floating cards over the page (the consent banner). */
   --overlay: rgba(19, 18, 28, 0.92);
@@ -61,4 +62,12 @@
   --grid-line: 1px;
 
   color-scheme: dark;
+}
+
+/* Same breakpoint as MOBILE_QUERY (constants.ts): the column halo covers the whole phone screen,
+   so the grid keeps its full alpha there. */
+@media (max-width: 640px) {
+  :root {
+    --grid-color: rgba(255, 255, 255, 0.07);
+  }
 }
