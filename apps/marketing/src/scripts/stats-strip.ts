@@ -90,7 +90,7 @@ export function initStats(): () => Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-stats]');
   if (!root) return () => Promise.resolve();
   const stats = readStats(root);
-  const label = root.querySelector<HTMLElement>('[data-range-label]');
+  const labels = [...root.querySelectorAll<HTMLElement>('[data-range-label]')];
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-range]')];
   const animate = !prefersReducedMotion();
   let picked = false;
@@ -107,7 +107,9 @@ export function initStats(): () => Promise<void> {
       if (!isStatWindow(range) || button.getAttribute('aria-pressed') === 'true') return;
       picked = true;
       buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
-      if (label) label.textContent = button.dataset.label ?? '';
+      labels.forEach((label) =>
+        label.toggleAttribute('data-current', label.dataset.rangeLabel === range),
+      );
       current = range;
       track('stats_window_toggled', { window: range });
       void show(stats, range, animate);

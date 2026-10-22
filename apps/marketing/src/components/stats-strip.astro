@@ -27,14 +27,23 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
   <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
   <div class="head">
     <span class="range">
-      Last <span data-range-label>{days(DEFAULT_STAT_WINDOW)}</span>
+      Last <span class="range-label">
+        {
+          /* Every range's label is laid out in one grid cell, only the current one visible: the
+             cell is as wide as the longest, so switching never moves the toggle beside it. */
+          STAT_WINDOWS.map((range) => (
+            <span data-range-label={range} data-current={range === DEFAULT_STAT_WINDOW ? '' : undefined}>
+              {days(range)}
+            </span>
+          ))
+        }
+      </span>
       <span class="seg" role="group" aria-label="Time range">
         {
           STAT_WINDOWS.map((range) => (
             <button
               type="button"
               data-range={range}
-              data-label={days(range)}
               aria-pressed={range === DEFAULT_STAT_WINDOW ? 'true' : 'false'}
             >
               {range}
@@ -135,6 +144,18 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
     100% {
       box-shadow: 0 0 0 7px rgba(198, 255, 74, 0);
     }
+  }
+
+  .range-label {
+    display: inline-grid;
+  }
+
+  .range-label > span {
+    grid-area: 1 / 1;
+  }
+
+  .range-label > span:not([data-current]) {
+    visibility: hidden;
   }
 
   .seg {
