@@ -1,6 +1,8 @@
 import { SCRAMBLE_GLYPHS, SCRAMBLE_STEP_MS } from '../constants';
 import { prefersReducedMotion } from './motion';
 
+const SCRAMBLING = 'is-scrambling';
+
 const randomGlyph = (): string =>
   SCRAMBLE_GLYPHS[Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)] ?? '';
 
@@ -24,6 +26,7 @@ export function initHeadlineScramble(): void {
     return letter;
   });
   shown.append(...letters);
+  target.classList.add(SCRAMBLING);
   target.replaceChildren(spoken, shown);
 
   let revealed = 0;
@@ -37,6 +40,7 @@ export function initHeadlineScramble(): void {
     if (revealed > letters.length) {
       clearInterval(timer);
       target.textContent = text;
+      target.classList.remove(SCRAMBLING);
     }
   };
   const timer = setInterval(step, SCRAMBLE_STEP_MS);

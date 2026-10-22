@@ -74,7 +74,12 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
     color: var(--dim);
   }
 
-  /* Built by scripts/headline-scramble.ts: the real letter keeps its space, a glyph covers it. */
+  /* Built by scripts/headline-scramble.ts: the real letter keeps its space, a glyph covers it.
+     Per-letter spans lose kerning, so no wrapping meanwhile (it would push the subline down). */
+  .headline:global(.is-scrambling) {
+    white-space: nowrap;
+  }
+
   .headline :global(.scrambled) {
     position: relative;
     color: transparent;

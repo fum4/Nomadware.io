@@ -186,6 +186,13 @@ const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
     white-space: nowrap;
   }
 
+  /* line-height 1: the smaller inline parts sit inside the number's line box, so its height never
+     depends on font metrics (a fallback font would otherwise change it). */
+  .num small,
+  .neg {
+    line-height: 1;
+  }
+
   .num small {
     margin-left: 2px;
     font-size: 18px;
