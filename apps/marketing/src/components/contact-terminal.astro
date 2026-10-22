@@ -18,7 +18,11 @@ import PageSection from './page-section.astro';
     aria-labelledby="contact-heading"
   >
     <div class="term-bar">
-      <span class="term-path">~/nomadware</span>
+      <span class="term-title">
+        {/* Decorative macOS window buttons. */}
+        <span class="term-lights" aria-hidden="true"><span /><span /><span /></span>
+        <span class="term-path">~/nomadware</span>
+      </span>
       <a class="term-mail" href={`mailto:${SITE.email}`}>{SITE.email}</a>
     </div>
     <div class="term-body">
@@ -57,7 +61,7 @@ import PageSection from './page-section.astro';
     </p>
     <div class="term-run">
       <span class="term-hints" aria-hidden="true"
-        ><kbd>⏎</kbd> next field · <kbd>↑↓</kbd> move · <kbd>⌘ ⏎</kbd> send</span
+        ><kbd>↑↓</kbd> move · <kbd>tab</kbd> next · <kbd>⌘ ⏎</kbd> send</span
       >
       <button class="term-send" type="submit">send</button>
     </div>
