@@ -3,7 +3,7 @@
 Cross-repo rules: the owner's global agent rules (devbox `agents/AGENTS.md`); this file adds only what's specific here.
 
 ## What this is
-The nomadware.io hub (Linear project *Nomadware.io*, team NWARE), a pnpm workspace: one `apps/<name>/` per `*.nomadware.io` service (today `apps/marketing`, Qwik on Vercel) plus the domain as code in `infra/terraform/` (zone, records, Vercel project). Map: [README.md](README.md).
+The nomadware.io hub (Linear project *Nomadware.io*, team NWARE), a pnpm workspace: one `apps/<name>/` per `*.nomadware.io` service (today `apps/marketing`, Astro on Vercel) plus the domain as code in `infra/terraform/` (zone, records, Vercel project). Map: [README.md](README.md).
 
 ## Invariants
 - **Every DNS record lives in `infra/terraform/records.tf`; the Vercel project's settings live in `infra/terraform/vercel.tf`.** No dashboard edits (drift); `mise run tf -- plan` must show no changes.
