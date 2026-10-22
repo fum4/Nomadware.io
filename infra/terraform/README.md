@@ -15,6 +15,8 @@ The `nomadware.io` zone and every record in it. Both registration (Cloudflare Re
 
 **Vercel:** every project setting the dashboard used to own lives in `vercel.tf`; change it here, never in the dashboard. Token `nomadware-io-terraform` (`VERCEL_API_TOKEN`), scoped to team `nware`; the team id is config (`vercel_team_id`).
 
+**Deploy budget:** this repo's token (`VERCEL_API_TOKEN`) is project-scoped to `nomadware-io`, so it can't see team-wide usage — and team `nware` (18 projects, shared with tipso) has a 100-deployments/24h Hobby budget; only production deploys of this project spend it now (previews are off, see the `vercel.tf` row above), but the other projects share it. Check usage in the Vercel dashboard (Team → Usage); see devbox `docs/vercel.md`.
+
 **Run** (credentials stay in memory): `mise run tf -- plan` / `mise run tf -- apply`. First time on a machine: `mise install`, the repo's age key at `~/.config/age/Nomadware.io.key`, then `mise run tf -- init`.
 
 **Add a subdomain:** one entry in `local.records` in `records.tf` → `plan` → `apply`. Proxy stays off unless the service is meant to sit behind Cloudflare.
