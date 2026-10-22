@@ -27,7 +27,7 @@ export function readPublishCredentials(): S3Credentials {
   const secretAccessKey = nonEmpty('STATS_R2_SECRET_ACCESS_KEY');
   if (!accessKeyId || !secretAccessKey) {
     throw new Error(
-      'STATS_R2_ACCESS_KEY_ID / STATS_R2_SECRET_ACCESS_KEY missing: run through `mise run stats:publish`',
+      'STATS_R2_ACCESS_KEY_ID / STATS_R2_SECRET_ACCESS_KEY missing or blank: run through `mise run stats:publish`, with both filled in (`mise run secrets:edit secrets/site-stats-publisher.env.age`)',
     );
   }
   return { accessKeyId, secretAccessKey };
