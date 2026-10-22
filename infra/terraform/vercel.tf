@@ -8,7 +8,7 @@ import {
 resource "vercel_project" "marketing" {
   team_id        = var.vercel_team_id
   name           = "nomadware-io"
-  framework      = "vite"
+  framework      = "astro"
   node_version   = "24.x"
   root_directory = "apps/marketing"
 

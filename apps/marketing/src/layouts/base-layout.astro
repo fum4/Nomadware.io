@@ -1,0 +1,31 @@
+---
+import { Font } from 'astro:assets';
+
+import JsonLd from '../components/json-ld.astro';
+import SeoHead from '../components/seo-head.astro';
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Marks JS as available before first paint, so no-JS fallbacks never flash. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+    <Font cssVariable="--font-geist" preload />
+    <Font cssVariable="--font-geist-mono" />
+    <SeoHead />
+    <JsonLd />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="frame">
+      <div class="wrap">
+        <slot />
+      </div>
+    </div>
+  </body>
+</html>

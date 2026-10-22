@@ -1,0 +1,56 @@
+---
+import { BUILD_INFO } from '../config/build-info';
+import { SITE } from '../config/site';
+import RelativeTime from './relative-time.astro';
+---
+
+<footer class="footer">
+  <p class="studio">
+    <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no office · no overhead · just software</span>
+  </p>
+  <p>
+    last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={BUILD_INFO.builtAt} /> · <span
+      class="sha">{BUILD_INFO.sha}</span
+    >
+  </p>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--dim);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .owner,
+  .sha {
+    color: var(--fg);
+  }
+
+  @media (max-width: 640px) {
+    /* Three rows: owner / tagline / deploy. */
+    .footer,
+    .studio {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .footer {
+      margin-top: 36px;
+    }
+
+    .sep {
+      display: none;
+    }
+  }
+</style>

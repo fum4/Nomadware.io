@@ -1,0 +1,21 @@
+---
+import ContactTerminal from '../components/contact-terminal.astro';
+import Hero from '../components/hero.astro';
+import HowWeWork from '../components/how-we-work.astro';
+import SiteFooter from '../components/site-footer.astro';
+import SiteNav from '../components/site-nav.astro';
+import StatsStrip from '../components/stats-strip.astro';
+import { BUILD_INFO } from '../config/build-info';
+import BaseLayout from '../layouts/base-layout.astro';
+---
+
+<BaseLayout>
+  <SiteNav />
+  <main id="main" tabindex="-1">
+    <Hero />
+    <StatsStrip renderedAt={BUILD_INFO.builtAt} />
+    <HowWeWork />
+    <ContactTerminal />
+  </main>
+  <SiteFooter />
+</BaseLayout>

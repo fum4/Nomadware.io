@@ -1,0 +1,210 @@
+/* Contact terminal chrome: frame, title bar, output line, send row. */
+.term {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--term);
+  transition: border-color 0.3s;
+}
+
+.term:focus-within {
+  border-color: var(--sig-soft);
+}
+
+.term-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  font: 400 11px/var(--leading) var(--mono);
+  color: var(--faint);
+}
+
+.term-path {
+  color: var(--dim);
+}
+
+.term-mail {
+  color: var(--faint);
+  text-decoration: none;
+}
+
+.term-mail:hover {
+  color: var(--fg);
+}
+
+.term-body {
+  padding: 22px 20px 16px;
+  font: 400 14px/1.75 var(--mono);
+}
+
+.term-heading {
+  margin: 0 0 16px;
+  color: var(--fg);
+  font: 500 24px/var(--leading) var(--sans);
+  letter-spacing: -0.02em;
+}
+
+.term-out {
+  max-height: 0;
+  margin: 0;
+  padding: 0 20px;
+  overflow: hidden;
+  color: var(--dim);
+  font: 400 13px/var(--leading) var(--mono);
+  transition: max-height 0.4s;
+}
+
+.term-out.is-on {
+  max-height: 80px;
+  padding-bottom: 14px;
+}
+
+.term-out .is-ok {
+  color: var(--sig);
+}
+
+.term-out .is-bad {
+  color: var(--warm);
+}
+
+.term-nojs {
+  display: none;
+  margin: 0;
+  padding: 0 20px 14px;
+  color: var(--dim);
+  font: 400 13px/var(--leading) var(--mono);
+}
+
+html:not(.js) .term-nojs {
+  display: block;
+}
+
+html:not(.js) .term-send {
+  display: none;
+}
+
+.term-run {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  font: 400 11px/var(--leading) var(--mono);
+  color: var(--faint);
+}
+
+.term-run kbd {
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--dim);
+  font: inherit;
+}
+
+.term-send {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--dim);
+  font: 500 12px/var(--leading) var(--mono);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+/* Hover: lime outline and a one-shot "struggling neon" flicker. */
+.term-send:hover {
+  border-color: var(--sig);
+  color: var(--sig);
+  animation: term-surge 0.9s steps(1, end) 1 forwards;
+}
+
+.term.is-ready .term-send {
+  border-color: var(--sig);
+  background: var(--sig);
+  color: var(--ink);
+}
+
+.term.is-ready .term-send:hover {
+  background: transparent;
+  color: var(--sig);
+}
+
+@keyframes term-surge {
+  0% {
+    opacity: 1;
+    text-shadow: none;
+  }
+  6% {
+    opacity: 0.25;
+  }
+  9% {
+    opacity: 1;
+    text-shadow: 0 0 6px rgba(198, 255, 74, 0.8);
+  }
+  14% {
+    opacity: 0.4;
+    text-shadow: none;
+  }
+  17% {
+    opacity: 1;
+  }
+  31% {
+    opacity: 0.15;
+  }
+  34% {
+    opacity: 0.9;
+    text-shadow: 0 0 10px rgba(198, 255, 74, 0.9);
+  }
+  38% {
+    opacity: 0.3;
+    text-shadow: none;
+  }
+  41% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 0.55;
+  }
+  64% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(198, 255, 74, 0.7);
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 6px rgba(198, 255, 74, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-send:hover {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .term-body {
+    padding: 18px 14px 12px;
+  }
+
+  .term-heading {
+    font-size: 20px;
+  }
+
+  .term-run {
+    justify-content: flex-end;
+  }
+
+  .term-hints {
+    display: none;
+  }
+
+  .term-send {
+    padding: 9px 18px;
+    font-size: 13px;
+  }
+}

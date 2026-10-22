@@ -1,0 +1,279 @@
+---
+import { DEFAULT_STAT_WINDOW, STAT_WINDOWS, STATS_SNAPSHOT } from '../data/stats-snapshot';
+import RelativeTime from './relative-time.astro';
+import StatValue from './stat-value.astro';
+
+interface Props {
+  renderedAt: string;
+}
+const { renderedAt } = Astro.props;
+const snapshot = STATS_SNAPSHOT;
+const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
+---
+
+<section class="stats" aria-labelledby="stats-title" data-stats>
+  <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
+  <div class="head">
+    <span class="range">
+      Last <span data-range-label>{days(DEFAULT_STAT_WINDOW)}</span>
+      <span class="seg" role="group" aria-label="Time range">
+        {
+          STAT_WINDOWS.map((range) => (
+            <button
+              type="button"
+              data-range={range}
+              data-label={days(range)}
+              aria-pressed={range === DEFAULT_STAT_WINDOW ? 'true' : 'false'}
+            >
+              {range}
+            </button>
+          ))
+        }
+      </span>
+    </span>
+    <span class="live">
+      <span class="dot" aria-hidden="true"></span>updated <RelativeTime
+        iso={snapshot.generatedAt}
+        renderedAt={renderedAt}
+      />
+    </span>
+  </div>
+  <dl class="grid">
+    <div class="cell">
+      <dt class="lab">PRs merged</dt>
+      <dd class="num"><StatValue stat="prs" snapshot={snapshot} /></dd>
+    </div>
+    <div class="cell">
+      <dt class="lab">agent runs</dt>
+      <dd class="num"><StatValue stat="runs" snapshot={snapshot} /></dd>
+    </div>
+    <div class="cell">
+      <dt class="lab">agent-hours</dt>
+      <dd class="num"><StatValue stat="agentHours" snapshot={snapshot} /><small>h</small></dd>
+    </div>
+    <div class="cell">
+      <dt class="lab">
+        checks run<span class="sep"> · </span><b><StatValue stat="caught" snapshot={snapshot} /> caught</b>
+      </dt>
+      <dd class="num"><StatValue stat="checks" snapshot={snapshot} /></dd>
+    </div>
+    <div class="cell">
+      <dt class="lab">agent actions</dt>
+      <dd class="num"><StatValue stat="actions" snapshot={snapshot} /></dd>
+    </div>
+    <div class="cell">
+      <dt class="lab">lines changed</dt>
+      <dd class="num">
+        +<StatValue stat="linesAdded" snapshot={snapshot} /><span class="neg">−<StatValue stat="linesDeleted" snapshot={snapshot} /></span>
+      </dd>
+    </div>
+  </dl>
+  <p class="foot">across <StatValue stat="repos" snapshot={snapshot} /> codebases</p>
+</section>
+
+<script>
+  import { initStats } from '../scripts/stats-strip';
+  initStats();
+</script>
+
+<style>
+  .stats {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    backdrop-filter: blur(6px);
+  }
+
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--sig);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(198, 255, 74, 0.6);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 7px rgba(198, 255, 74, 0);
+    }
+  }
+
+  .seg {
+    display: inline-flex;
+    margin-left: 10px;
+    overflow: hidden;
+    vertical-align: middle;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+
+  .seg button {
+    padding: 3px 8px;
+    border: 0;
+    background: none;
+    color: var(--dim);
+    font: 500 10px/var(--leading) var(--mono);
+    cursor: pointer;
+  }
+
+  .seg button[aria-pressed='true'] {
+    background: var(--chip);
+    color: var(--fg);
+  }
+
+  .seg button:focus-visible {
+    outline-offset: -2px;
+  }
+
+  :global(html:not(.js)) .seg {
+    display: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    padding: 20px 18px 18px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .cell:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .cell:nth-last-child(-n + 3) {
+    border-bottom: 0;
+  }
+
+  .num {
+    margin: 0;
+    font: 500 38px/var(--leading) var(--sans);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* line-height 1: the smaller inline parts sit inside the number's line box, so its height never
+     depends on font metrics (a fallback font would otherwise change it). */
+  .num small,
+  .neg {
+    line-height: 1;
+  }
+
+  .num small {
+    margin-left: 2px;
+    font-size: 18px;
+    color: var(--dim);
+  }
+
+  .neg {
+    margin-left: 6px;
+    font-size: 22px;
+    color: var(--dim);
+  }
+
+  .lab {
+    margin-top: 6px;
+    font: 400 12px/var(--leading) var(--mono);
+    color: var(--dim);
+  }
+
+  .lab b {
+    color: var(--warm);
+    font-weight: 500;
+  }
+
+  .foot {
+    margin: 0;
+    padding: 10px 18px;
+    border-top: 1px solid var(--line);
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--dim);
+  }
+
+  @media (max-width: 640px) {
+    .head {
+      padding: 11px 14px;
+    }
+
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cell {
+      padding: 16px 14px 14px;
+    }
+
+    .cell:nth-child(n) {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .cell:nth-child(2n) {
+      border-right: 0;
+    }
+
+    .cell:nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+
+    .num {
+      font-size: 30px;
+    }
+
+    .neg {
+      margin-left: 4px;
+      font-size: 17px;
+    }
+
+    .lab {
+      font-size: 11px;
+    }
+
+    /* "37 caught" gets its own line on phones. */
+    .lab .sep {
+      display: none;
+    }
+
+    .lab b {
+      display: block;
+    }
+
+    .foot {
+      padding: 10px 14px;
+    }
+  }
+</style>

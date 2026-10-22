@@ -4,7 +4,7 @@ The hub for everything under `nomadware.io`: each app that serves a `*.nomadware
 
 | Path | What | Deploys to |
 |---|---|---|
-| [`apps/marketing/`](apps/marketing/README.md) | the marketing site (`nomadware.io`, `www`) | Vercel |
+| [`apps/marketing/`](apps/marketing/README.md) | the marketing site (`nomadware.io`, `www`), Astro | Vercel |
 | [`infra/terraform/`](infra/terraform/README.md) | the `nomadware.io` zone, every DNS record, the Vercel project | Cloudflare, Vercel (`mise run tf -- apply`) |
 | [`secrets/`](secrets/README.md) | Terraform credentials, age-encrypted | — |
 

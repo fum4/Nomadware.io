@@ -1,0 +1,33 @@
+---
+import { SITE } from '../config/site';
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE.url}#organization`,
+      name: SITE.name,
+      url: SITE.url,
+      logo: new URL(SITE.logoPath, SITE.url).href,
+      email: SITE.email,
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'sales',
+        email: SITE.email,
+        availableLanguage: ['English'],
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE.url}#website`,
+      name: SITE.name,
+      url: SITE.url,
+      inLanguage: 'en',
+      publisher: { '@id': `${SITE.url}#organization` },
+    },
+  ],
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(graph)} />
