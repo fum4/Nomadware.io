@@ -4,7 +4,8 @@ import { CONTACT } from '../constants';
 
 // One prompt line of the contact terminal. The real <input>/<textarea> sits invisibly on top of
 // a painted copy (.term-vis) so the caret and fresh-character glow can be custom; it keeps focus,
-// selection, autofill and assistive tech. Without JS the real control is shown instead.
+// selection, autofill and assistive tech. Without JS the real control is shown instead. The copy
+// is what the visitor typed, so it is `data-private` (masked in replay, ignored by autocapture).
 interface Props {
   name: 'name' | 'email' | 'brief';
   placeholder: string;
@@ -33,7 +34,7 @@ const errorId = `${id}-error`;
   <span class="term-prompt" aria-hidden="true">›</span>
   <label class="term-key" for={id}>{name}</label>
   <div class="term-field">
-    <div class="term-vis" aria-hidden="true"><span class="term-ph">{placeholder}</span></div>
+    <div class="term-vis" aria-hidden="true" data-private><span class="term-ph">{placeholder}</span></div>
     {
       multiline ? (
         <textarea

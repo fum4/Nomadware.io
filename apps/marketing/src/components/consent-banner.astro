@@ -1,0 +1,198 @@
+---
+import { SITE } from '../config/site';
+
+// The analytics consent card (owner-approved mock, NWARE-82). Hidden until its script shows it;
+// without JS there is no analytics and nothing to consent to.
+const MORE = 'what we track ▸';
+const LESS = 'less ▾';
+---
+
+<div class="consent" role="dialog" aria-label="Analytics consent" data-consent hidden>
+  <p class="title"><span class="dot" aria-hidden="true"></span>analytics?</p>
+  <p class="lede">We'd like to remember you between visits and see how the page is used.</p>
+  <div class="row">
+    <button
+      type="button"
+      class="more"
+      aria-expanded="false"
+      aria-controls="consent-details"
+      data-consent-more
+      data-more={MORE}
+      data-less={LESS}>{MORE}</button
+    >
+    <span class="actions">
+      <button type="button" class="choice" data-consent-choice="denied">no thanks</button>
+      <button type="button" class="choice is-yes" data-consent-choice="granted">sure</button>
+    </span>
+  </div>
+  <dl class="details" id="consent-details" data-consent-details hidden>
+    <dt>everyone</dt>
+    <dd>anonymous page views, clicks, page speed. Nothing stored on your device.</dd>
+    <dt>if you say sure</dt>
+    <dd>a cookie to recognise repeat visits + session replay (typing always hidden).</dd>
+    <dt>never</dt>
+    <dd>what you type, ads, selling data. IPs dropped after country lookup.</dd>
+    <dt>by</dt>
+    <dd>PostHog, EU servers · <a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+  </dl>
+</div>
+
+<script>
+  import { initConsentBanner } from '../scripts/analytics/consent-banner';
+  import { loadAnalytics } from '../scripts/analytics/posthog-client';
+  initConsentBanner();
+  loadAnalytics();
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    z-index: 20;
+    max-width: 330px;
+    padding: 14px 16px;
+    border: 1px solid var(--overlay-line);
+    border-radius: var(--radius);
+    background: var(--overlay);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--overlay-shadow);
+    font: 400 12px/1.55 var(--mono);
+    color: var(--dim);
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 0.25s ease-out,
+      transform 0.25s ease-out;
+  }
+
+  .consent.is-on {
+    opacity: 1;
+    transform: none;
+  }
+
+  .consent[hidden] {
+    display: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sig);
+    box-shadow: 0 0 8px var(--sig-glow);
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .more {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--faint);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .more:hover {
+    color: var(--dim);
+  }
+
+  .actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .choice {
+    padding: 5px 10px;
+    border: 1px solid var(--overlay-line);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--fg);
+    font: 500 11.5px/var(--leading) var(--mono);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background-color 0.15s;
+  }
+
+  .choice:hover {
+    border-color: var(--dim);
+  }
+
+  .choice.is-yes {
+    border-color: var(--fg);
+    background: var(--fg);
+    color: var(--ink);
+  }
+
+  .choice.is-yes:hover {
+    background: var(--sig);
+    border-color: var(--sig);
+  }
+
+  .details {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 12px;
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 11.5px;
+  }
+
+  .details[hidden] {
+    display: none;
+  }
+
+  dt {
+    color: var(--fg);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .details a {
+    color: var(--dim);
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 640px) {
+    .consent {
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      max-width: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .consent {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
