@@ -23,6 +23,13 @@ resource "vercel_project" "marketing" {
   # later production build goes live only on *.vercel.app.
   auto_assign_custom_domains = true
   build_machine_type         = "basic"
+
+  # Only master deploys: a branch or PR gets no Vercel build (deploy budget). The production
+  # build is checked locally instead: `mise run marketing:preview` (apps/marketing/README.md).
+  preview_deployments_disabled = true
+  # "Skip unaffected projects": a master commit that touches neither apps/marketing nor a
+  # workspace package it depends on (packages/site-stats) is skipped before a build starts.
+  enable_affected_projects_deployments = true
   resource_config = {
     fluid                    = false
     function_default_regions = ["fra1"]
@@ -36,7 +43,7 @@ resource "vercel_project_environment_variable" "marketing_corepack" {
   project_id = vercel_project.marketing.id
   key        = "ENABLE_EXPERIMENTAL_COREPACK"
   value      = "1"
-  target     = ["production", "preview"]
+  target     = ["production"]
   sensitive  = false
 }
 
@@ -67,24 +74,13 @@ resource "vercel_project_domain" "marketing_www" {
 }
 
 # ── Contact form (NWARE-82): POST /api/contact, apps/marketing/src/config/contact.ts ──
-# Production gets the real Turnstile widget (turnstile.tf) and the Resend key. Previews get only
-# Cloudflare's always-pass test site key, so they build; their endpoint answers `unconfigured`
-# (no secret, no Resend key), so a preview can never send mail.
+# Production only (previews are off): the real Turnstile widget (turnstile.tf) and the Resend key.
 resource "vercel_project_environment_variable" "marketing_turnstile_site_key" {
   team_id    = var.vercel_team_id
   project_id = vercel_project.marketing.id
   key        = "TURNSTILE_SITE_KEY"
   value      = cloudflare_turnstile_widget.marketing_contact.sitekey
   target     = ["production"]
-  sensitive  = false
-}
-
-resource "vercel_project_environment_variable" "marketing_turnstile_site_key_preview" {
-  team_id    = var.vercel_team_id
-  project_id = vercel_project.marketing.id
-  key        = "TURNSTILE_SITE_KEY"
-  value      = "1x00000000000000000000AA" # Cloudflare's documented always-pass test site key
-  target     = ["preview"]
   sensitive  = false
 }
 
@@ -130,7 +126,7 @@ resource "vercel_project_environment_variable" "marketing_stats_access_key_id" {
   project_id = vercel_project.marketing.id
   key        = "STATS_R2_ACCESS_KEY_ID"
   value      = var.site_stats_reader_access_key_id
-  target     = ["production", "preview"]
+  target     = ["production"]
   sensitive  = true
 }
 
@@ -141,6 +137,6 @@ resource "vercel_project_environment_variable" "marketing_stats_secret_access_ke
   project_id = vercel_project.marketing.id
   key        = "STATS_R2_SECRET_ACCESS_KEY"
   value      = var.site_stats_reader_secret_access_key
-  target     = ["production", "preview"]
+  target     = ["production"]
   sensitive  = true
 }
