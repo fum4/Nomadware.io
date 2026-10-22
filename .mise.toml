@@ -31,22 +31,24 @@ run = [
 ]
 
 [tasks.pre-merge]
-description = "Every app's build: marketing = qwik build (types + lint + client/SSR bundles)"
+description = "Every app's build: marketing = astro check (types) + astro build"
 depends = ["marketing:build"]
 
-# ── apps/marketing (@nomadware/marketing, Qwik on Vercel) ─────────────────
+# ── apps/marketing (@nomadware/marketing, Astro on Vercel) ────────────────
+# Astro backgrounds its servers when it detects an agent; --ignore-lock (package.json) keeps
+# them in the foreground so devstack / process-compose own the process.
 [tasks."marketing:dev"]
-description = "Marketing site dev server (vite, SSR mode)"
+description = "Marketing site dev server (astro dev, :4321)"
 depends = ["setup"]
 run = "pnpm --filter @nomadware/marketing dev"
 
 [tasks."marketing:build"]
-description = "Marketing site production build (what Vercel runs)"
+description = "Marketing site production build: astro check + astro build (what Vercel runs)"
 depends = ["setup"]
 run = "pnpm --filter @nomadware/marketing build"
 
 [tasks."marketing:preview"]
-description = "Build, then serve the production bundle locally"
+description = "Build, then serve the static output locally (astro preview, :4321)"
 depends = ["setup"]
 run = "pnpm --filter @nomadware/marketing preview"
 

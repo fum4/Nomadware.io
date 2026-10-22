@@ -1,20 +1,24 @@
 {
   "name": "@nomadware/marketing",
   "private": true,
-  "description": "App with Routing built-in (recommended)",
+  "description": "The nomadware.io marketing site (Astro, static on Vercel)",
+  "type": "module",
   "scripts": {
-    "build": "qwik build",
-    "build.client": "vite build",
-    "build.preview": "vite build --ssr src/entry.preview.tsx",
-    "build.server": "vite build -c adaptors/vercel-edge/vite.config.ts",
-    "build.types": "tsc --incremental --noEmit",
-    "deploy": "vercel deploy",
-    "dev": "vite --mode ssr",
-    "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
-    "preview": "qwik build preview && vite preview --open",
-    "start": "vite --open --mode ssr",
-    "qwik": "qwik",
-    "lint": "oxlint -c ../../.oxlintrc.json"
+    "dev": "astro dev --ignore-lock",
+    "build": "astro check && astro build",
+    "preview": "astro build && astro preview --ignore-lock",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
+    "@astrojs/vercel": "11.0.16",
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "astro": "7.4.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "typescript": "6.0.3"
   },
   "engines": {
     "node": "24.x"
