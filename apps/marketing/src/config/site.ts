@@ -14,5 +14,5 @@ export const SITE = {
     height: 630,
     alt: 'Nomadware — We build software. Human judgment, at agent speed.',
   },
-  logoPath: '/icon-512.png',
+  logoPath: '/logo.png',
 } as const;
