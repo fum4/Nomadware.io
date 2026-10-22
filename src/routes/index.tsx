@@ -9,7 +9,7 @@ export default component$(() => {
       <Hero />
       <Content />
     </div>
-  )
+  );
 });
 
 export const head: DocumentHead = {

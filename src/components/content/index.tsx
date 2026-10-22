@@ -45,21 +45,12 @@ export default component$(() => {
       {store.showText && (
         <div ref={scrollRef}>
           <TextBox>
-            <H1 class={fadeInClass}>
-              Time is performance.
-            </H1>
-            <H1 class={slideInClass}>
-              Don't waste any.
-            </H1>
+            <H1 class={fadeInClass}>Time is performance.</H1>
+            <H1 class={slideInClass}>Don't waste any.</H1>
           </TextBox>
           <LogoBox class={fadeInLateClass}>
-            <Logo
-              alt='Nomadware.io logo'
-              src='./logo.png'
-            />
-            <H2>
-              Nomadware.io
-            </H2>
+            <Logo alt="Nomadware.io logo" src="./logo.png" />
+            <H2>Nomadware.io</H2>
           </LogoBox>
         </div>
       )}

@@ -10,7 +10,7 @@ export const Header = styled.header({
   position: 'fixed',
   top: 0,
   left: 0,
-})
+});
 
 export const Content = styled.div({
   display: 'flex',
@@ -27,8 +27,8 @@ export const LogoBox = styled.div({
   '@media': {
     [`screen and (max-width: ${Breakpoints.SM}px)`]: {
       width: 80,
-    }
-  }
+    },
+  },
 });
 
 export const Logo = styled.img({
@@ -45,7 +45,7 @@ export const Text = styled.span({
 
   ':hover': {
     cursor: 'default',
-  }
+  },
 });
 
 export const Title = styled.h4({
@@ -63,16 +63,22 @@ export const baseEmojiStyle = style({
 });
 
 export const emoji = styleVariants({
-  HEART: [baseEmojiStyle, {
-    ':hover': {
-      cursor: 'default',
-    }
-  }],
-  COFFEE: [baseEmojiStyle, {
-    ':hover': {
-      cursor: 'grab',
-    }
-  }]
+  HEART: [
+    baseEmojiStyle,
+    {
+      ':hover': {
+        cursor: 'default',
+      },
+    },
+  ],
+  COFFEE: [
+    baseEmojiStyle,
+    {
+      ':hover': {
+        cursor: 'grab',
+      },
+    },
+  ],
 });
 
 export const logoLink = style({
@@ -88,7 +94,7 @@ export const logoLink = style({
 
   ':hover': {
     backgroundPosition: 'bottom',
-  }
+  },
 });
 
 export const textLink = style({
@@ -116,8 +122,8 @@ export const textLink = style({
     '&:hover::after': {
       transform: 'scale(1)',
       opacity: 1,
-    }
-  }
+    },
+  },
 });
 
 export const ButtonsBox = styled.div({
@@ -133,12 +139,12 @@ export const Buttons = styled.div({
 export const Icon = styled.img({
   height: 25,
   width: 25,
-  opacity: .5,
+  opacity: 0.5,
 
   ':hover': {
     opacity: 1,
     cursor: 'pointer',
-  }
+  },
 });
 
 export const Anchor = styled.a({

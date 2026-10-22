@@ -20,7 +20,7 @@ const fadeInAnimation = keyframes({
   },
   '100%': {
     opacity: 1,
-  }
+  },
 });
 
 const fadeOutAnimation = keyframes({
@@ -29,7 +29,7 @@ const fadeOutAnimation = keyframes({
   },
   '100%': {
     opacity: 0,
-  }
+  },
 });
 
 export const fadeOutClass = style({
@@ -92,25 +92,31 @@ const baseMetrics = style({
     [`screen and (max-width: ${Breakpoints.XS}px)`]: {
       display: 'grid',
       gridTemplateColumns: '100px 100px',
-    }
+    },
   },
 });
 
-export const PrimaryMetrics = styled.div([ baseMetrics, {
-  '@media': {
-    [`screen and (max-width: ${Breakpoints.XS}px)`]: {
-      gridTemplateRows: '100px 100px',
-    }
+export const PrimaryMetrics = styled.div([
+  baseMetrics,
+  {
+    '@media': {
+      [`screen and (max-width: ${Breakpoints.XS}px)`]: {
+        gridTemplateRows: '100px 100px',
+      },
+    },
   },
-}]);
+]);
 
-export const SecondaryMetrics = styled.div([ baseMetrics, {
-  '@media': {
-    [`screen and (max-width: ${Breakpoints.XS}px)`]: {
-      gridTemplateRows: '60px 60px',
-    }
+export const SecondaryMetrics = styled.div([
+  baseMetrics,
+  {
+    '@media': {
+      [`screen and (max-width: ${Breakpoints.XS}px)`]: {
+        gridTemplateRows: '60px 60px',
+      },
+    },
   },
-}]);
+]);
 
 export const Metric = styled.div({
   display: 'flex',
@@ -167,6 +173,6 @@ export const LoadingText = styled.p({
   '@media': {
     [`screen and (max-width: ${Breakpoints.XS}px)`]: {
       marginTop: 0,
-    }
+    },
   },
 });

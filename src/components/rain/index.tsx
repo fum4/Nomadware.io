@@ -4,7 +4,7 @@ import {
   useStore,
   useBrowserVisibleTask$,
   useOnWindow,
-  $
+  $,
 } from '@builder.io/qwik';
 
 interface RainCoordinates {
@@ -20,7 +20,7 @@ interface State {
   lightningAlpha: number;
   rainSpeed: number;
   msTimer: number;
-  width : number;
+  width: number;
   isRaining: boolean;
   rainProgress: number;
 }
@@ -79,16 +79,21 @@ export default component$(() => {
     if (ctx) {
       const gradient = ctx.createLinearGradient(store.width / 2, 210, store.width / 2, 500);
 
-      gradient.addColorStop(0.000, 'rgba(30, 30, 60, 1.000)');
+      gradient.addColorStop(0.0, 'rgba(30, 30, 60, 1.000)');
       gradient.addColorStop(0.2, 'rgba(50, 50, 80, 1.000)');
       gradient.addColorStop(1, 'rgba(15, 15, 45, 1.000)');
 
       ctx.fillStyle = gradient;
       ctx.fillRect(store.width / 2, 210, 6, 290);
 
-      const gradientOuterHigh = ctx.createLinearGradient(store.width / 2, 210, store.width / 2, 500);
+      const gradientOuterHigh = ctx.createLinearGradient(
+        store.width / 2,
+        210,
+        store.width / 2,
+        500,
+      );
 
-      gradientOuterHigh.addColorStop(0.000, 'rgba(35, 35, 75, 1.000)');
+      gradientOuterHigh.addColorStop(0.0, 'rgba(35, 35, 75, 1.000)');
       gradientOuterHigh.addColorStop(0.2, 'rgba(65, 65, 105, 1.000)');
       gradientOuterHigh.addColorStop(1, 'rgba(17, 22, 57, 1.000)');
 
@@ -97,7 +102,7 @@ export default component$(() => {
 
       const gradientOuterLow = ctx.createLinearGradient(store.width / 2, 210, store.width / 2, 500);
 
-      gradientOuterLow.addColorStop(0.000, 'rgba(35, 35, 65, 1.000)');
+      gradientOuterLow.addColorStop(0.0, 'rgba(35, 35, 65, 1.000)');
       gradientOuterLow.addColorStop(0.2, 'rgba(50, 50, 80, 1.000)');
       gradientOuterLow.addColorStop(1, 'rgba(33, 33, 63, 1.000)');
 
@@ -107,9 +112,16 @@ export default component$(() => {
       // Modify glow based on passed time
       const sinGlowMod = 5 * Math.sin(store.msTimer / 200);
       const cosGlowMod = 5 * Math.cos((store.msTimer + 0.5 * sinGlowMod) / 200);
-      const gradientGlow = ctx.createRadialGradient(store.width / 2 + 3, 200, 0, store.width / 2 + sinGlowMod, 400, 206 + cosGlowMod);
+      const gradientGlow = ctx.createRadialGradient(
+        store.width / 2 + 3,
+        200,
+        0,
+        store.width / 2 + sinGlowMod,
+        400,
+        206 + cosGlowMod,
+      );
 
-      gradientGlow.addColorStop(0.000, 'rgba(140, 180, 160, 1)');
+      gradientGlow.addColorStop(0.0, 'rgba(140, 180, 160, 1)');
       gradientGlow.addColorStop(0.2, 'rgba(100, 180, 160, 0.4)');
       gradientGlow.addColorStop(0.4, 'rgba(60, 180, 160, 0.2)');
       gradientGlow.addColorStop(1, 'rgba(60, 140, 160, 0)');
@@ -159,15 +171,27 @@ export default component$(() => {
             store.rainCoordinates[i].x -= 5 + Math.floor(store.rainCoordinates[i].y / 250);
           }
 
-          const gradient = ctx.createRadialGradient(store.width / 2, 450, 140, store.width / 2, 300, 600);
+          const gradient = ctx.createRadialGradient(
+            store.width / 2,
+            450,
+            140,
+            store.width / 2,
+            300,
+            600,
+          );
 
-          gradient.addColorStop(0.000, 'rgba(100, 170, 160, 0.25)');
+          gradient.addColorStop(0.0, 'rgba(100, 170, 160, 0.25)');
           gradient.addColorStop(0.1, 'rgba(100, 160, 160, 0.17)');
           gradient.addColorStop(0.2, 'rgba(100, 150, 150, 0.15)');
           gradient.addColorStop(1, 'rgba(100, 140, 140, .13)');
 
           ctx.fillStyle = gradient;
-          ctx.fillRect(store.rainCoordinates[i].x, store.rainCoordinates[i].y, store.rainCoordinates[i].z, 4);
+          ctx.fillRect(
+            store.rainCoordinates[i].x,
+            store.rainCoordinates[i].y,
+            store.rainCoordinates[i].z,
+            4,
+          );
         }
       }
     }
@@ -182,16 +206,19 @@ export default component$(() => {
     }
   });
 
-  useOnWindow('resize', $(() => {
-    const isDesktop = window.matchMedia('pointer: fine').matches;
-    const orientationChanged = !isDesktop && window.innerWidth !== screenWidthRef.value;
+  useOnWindow(
+    'resize',
+    $(() => {
+      const isDesktop = window.matchMedia('pointer: fine').matches;
+      const orientationChanged = !isDesktop && window.innerWidth !== screenWidthRef.value;
 
-    screenWidthRef.value = window.innerWidth;
+      screenWidthRef.value = window.innerWidth;
 
-    if (isDesktop || orientationChanged) {
-      handleResize();
-    }
-  }));
+      if (isDesktop || orientationChanged) {
+        handleResize();
+      }
+    }),
+  );
 
   useBrowserVisibleTask$(() => {
     // save this in order to detect orientation change on mobile
@@ -211,29 +238,29 @@ export default component$(() => {
           store.rainCoordinates.push({
             x: 1,
             y: 0,
-            z: 0
+            z: 0,
           } as RainCoordinates);
         }
 
         for (let j = 0; j < 500; j++) {
-          store.rainCoordinates[j].x = Math.floor((Math.random() * 820) - 9);
-          store.rainCoordinates[j].y = Math.floor((Math.random() * 520) - 9);
-          store.rainCoordinates[j].z = Math.floor((Math.random() * 2) + 1);
-          store.rainCoordinates[j].w = Math.floor((Math.random() * 3) + 2);
+          store.rainCoordinates[j].x = Math.floor(Math.random() * 820 - 9);
+          store.rainCoordinates[j].y = Math.floor(Math.random() * 520 - 9);
+          store.rainCoordinates[j].z = Math.floor(Math.random() * 2 + 1);
+          store.rainCoordinates[j].w = Math.floor(Math.random() * 3 + 2);
         }
       };
 
       const mainLoop = () => {
         store.msTimer += 30;
 
-        if (store.lightningTimer < 0)  {
+        if (store.lightningTimer < 0) {
           store.lightningTimer = lightningTimer;
         } else {
           store.lightningTimer -= 30;
         }
 
         ctx.fillStyle = '#0e0f1a';
-        ctx.fillRect(0,0, store.width, 515);
+        ctx.fillRect(0, 0, store.width, 515);
 
         drawSidewalk();
         drawLamp();
@@ -248,7 +275,7 @@ export default component$(() => {
 
         ctx.fillStyle = 'rgba(255, 255, 255, .1)';
         ctx.font = '30px Sans-Serif';
-      }
+      };
 
       setupRain();
 
@@ -288,7 +315,5 @@ export default component$(() => {
     }
   });
 
-  return (
-    <canvas ref={canvasRef} height={515} />
-  );
+  return <canvas ref={canvasRef} height={515} />;
 });
