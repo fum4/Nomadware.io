@@ -4,8 +4,8 @@ import { STAT_WINDOW_DAYS } from './windows.ts';
 
 // The snapshot's time series: what the site's activity chart draws. Optional in the snapshot (an
 // older publisher leaves it out; the card then shows its numbers without the chart), and dropped
-// as a whole when malformed or incomplete (a series from before runs/actions/checks/caught,
-// caughtFixMinutes and caughtCategories counts as incomplete) — a chart bug never takes the numbers down with it.
+// as a whole when malformed or incomplete (a series from before runs, actions, checks, caught and
+// the caught* splits counts as incomplete): a chart bug never takes the numbers down with it.
 
 const HOUR_MS = 3_600_000;
 const HOURS_PER_DAY = 24;
@@ -46,7 +46,17 @@ export interface StatSeries {
    * started recording the failing task); otherwise its counts may sum to less than `caught`.
    */
   caughtCategories: (number[] | null)[];
+  /**
+   * Which gate caught the bucket's issues: per entry of CAUGHT_GATES, how many. null when it
+   * caught nothing; otherwise its counts sum to `caught`.
+   */
+  caughtByGate: (number[] | null)[];
 }
+
+/** The git-hook gates, in the order of every `caughtByGate` entry. */
+export const CAUGHT_GATES = ['push', 'merge'] as const;
+
+export type CaughtGate = (typeof CAUGHT_GATES)[number];
 
 /** What a caught issue was, by the task that failed: the order of every `caughtCategories` entry. */
 export const CAUGHT_CATEGORIES = ['format', 'lint', 'types', 'tests', 'build', 'other'] as const;
@@ -56,7 +66,7 @@ export type CaughtCategory = (typeof CAUGHT_CATEGORIES)[number];
 /** The per-bucket counts of a series: one entry per bucket, each a non-negative integer. */
 export type SeriesCounts = Exclude<
   keyof StatSeries,
-  'bucketHours' | 'caughtFixMinutes' | 'caughtCategories'
+  'bucketHours' | 'caughtFixMinutes' | 'caughtCategories' | 'caughtByGate'
 >;
 
 export const SERIES_COUNTS: readonly SeriesCounts[] = [
@@ -102,12 +112,14 @@ function parseNullableCounts(value: unknown, length: number): (number | null)[] 
     : null;
 }
 
-const isCategoryCountsOrNull = (value: unknown): value is number[] | null =>
-  value === null ||
-  (Array.isArray(value) && value.length === CAUGHT_CATEGORIES.length && value.every(isCount));
+const isSplit = (value: unknown, width: number): value is number[] | null =>
+  value === null || (Array.isArray(value) && value.length === width && value.every(isCount));
 
-function parseCategories(value: unknown, length: number): (number[] | null)[] | null {
-  return Array.isArray(value) && value.length === length && value.every(isCategoryCountsOrNull)
+/** Per bucket, null or `width` counts: what caughtCategories and caughtByGate hold. */
+function parseSplits(value: unknown, length: number, width: number): (number[] | null)[] | null {
+  return Array.isArray(value) &&
+    value.length === length &&
+    value.every((entry) => isSplit(entry, width))
     ? value
     : null;
 }
@@ -130,12 +142,14 @@ function parseWindowSeries(value: unknown, window: StatWindow): StatSeries | nul
     checks: counts('checks'),
     caught: counts('caught'),
     caughtFixMinutes: parseNullableCounts(value['caughtFixMinutes'], count) ?? [],
-    caughtCategories: parseCategories(value['caughtCategories'], count) ?? [],
+    caughtCategories: parseSplits(value['caughtCategories'], count, CAUGHT_CATEGORIES.length) ?? [],
+    caughtByGate: parseSplits(value['caughtByGate'], count, CAUGHT_GATES.length) ?? [],
   };
   const complete = [
     ...SERIES_COUNTS,
     'caughtFixMinutes' as const,
     'caughtCategories' as const,
+    'caughtByGate' as const,
   ].every((key) => series[key].length === count);
   return complete ? series : null;
 }

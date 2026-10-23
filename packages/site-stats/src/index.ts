@@ -1,9 +1,16 @@
 export type { S3Credentials } from './sigv4.ts';
-export type { CaughtCategory, SeriesCounts, StatSeries, StatsSeries } from './series.ts';
+export type {
+  CaughtCategory,
+  CaughtGate,
+  SeriesCounts,
+  StatSeries,
+  StatsSeries,
+} from './series.ts';
 export {
   bucketCount,
   bucketStartMs,
   CAUGHT_CATEGORIES,
+  CAUGHT_GATES,
   parseStatsSeries,
   SERIES_BUCKET_HOURS,
   SERIES_COUNTS,

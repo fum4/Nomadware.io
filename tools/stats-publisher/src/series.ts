@@ -3,12 +3,14 @@ import {
   bucketCount,
   bucketStartMs,
   CAUGHT_CATEGORIES,
+  CAUGHT_GATES,
   SERIES_BUCKET_HOURS,
 } from '@nomadware/site-stats';
 
 import { HOUR_MS, MINUTE_MS } from './constants.ts';
+import { caughtGate } from './caught-category.ts';
 import { fixMinutes } from './fix-times.ts';
-import type { State } from './state.ts';
+import type { GateRun, State } from './state.ts';
 
 // The store → the activity chart's series (@nomadware/site-stats § series.ts). Aggregates only,
 // like aggregate.ts: per bucket, never per file or per repo.
@@ -34,23 +36,32 @@ function caughtFixMinutes(
   return longest.map((minutes, index) => (unfixed.has(index) ? null : minutes));
 }
 
-/** Per bucket, its caught issues per category (CAUGHT_CATEGORIES order); null if none says. */
-function caughtCategories(
+/**
+ * Per bucket, its caught issues split by `slotOf` (an index into `width` slots, or null for one
+ * that doesn't say); null where none says.
+ */
+function caughtSplit(
   state: State,
   bucketOf: (atMs: number) => number | null,
   buckets: number,
+  width: number,
+  slotOf: (run: GateRun) => number | null,
 ): (number[] | null)[] {
   const counts: (number[] | null)[] = Array.from({ length: buckets }, () => null);
-  for (const { atMs, category } of state.journal.failed) {
-    const index = bucketOf(atMs);
-    if (index === null || !category) continue;
-    const bucket = counts[index] ?? CAUGHT_CATEGORIES.map(() => 0);
-    const slot = CAUGHT_CATEGORIES.indexOf(category);
+  for (const run of state.journal.failed) {
+    const index = bucketOf(run.atMs);
+    const slot = slotOf(run);
+    if (index === null || slot === null) continue;
+    const bucket = counts[index] ?? Array.from({ length: width }, () => 0);
     bucket[slot] = (bucket[slot] ?? 0) + 1;
     counts[index] = bucket;
   }
   return counts;
 }
+
+/** A slot index, or null for a value that has none. */
+const slotIn = <T>(list: readonly T[], value: T | null | undefined): number | null =>
+  value === null || value === undefined || !list.includes(value) ? null : list.indexOf(value);
 
 function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeries {
   const bucketHours = SERIES_BUCKET_HOURS[window];
@@ -112,7 +123,12 @@ function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeri
     checks: perBucket(state.journal.checksMs),
     caught: perBucket(state.journal.failed.map((run) => run.atMs)),
     caughtFixMinutes: caughtFixMinutes(state, bucketOf, buckets),
-    caughtCategories: caughtCategories(state, bucketOf, buckets),
+    caughtCategories: caughtSplit(state, bucketOf, buckets, CAUGHT_CATEGORIES.length, (run) =>
+      slotIn(CAUGHT_CATEGORIES, run.category),
+    ),
+    caughtByGate: caughtSplit(state, bucketOf, buckets, CAUGHT_GATES.length, (run) =>
+      slotIn(CAUGHT_GATES, caughtGate(run.unit)),
+    ),
   };
 }
 

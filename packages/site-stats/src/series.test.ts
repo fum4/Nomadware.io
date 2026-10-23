@@ -22,6 +22,9 @@ const windowSeries = (bucketHours: number, buckets: number) => ({
   caughtCategories: Array.from({ length: buckets }, (_, index): number[] | null =>
     index === 5 ? [0, 1, 0, 2, 0, 0] : null,
   ),
+  caughtByGate: Array.from({ length: buckets }, (_, index): number[] | null =>
+    index === 5 ? [2, 1] : null,
+  ),
 });
 const SERIES = { '7d': windowSeries(2, 84), '30d': windowSeries(6, 120) };
 
@@ -83,6 +86,9 @@ test('rejects bad lengths, sizes, negatives, fractions, text and a missing array
   const negativeCategory = [...SERIES['7d'].caughtCategories];
   negativeCategory[5] = [0, 0, 0, -1, 0, 0];
   assert.equal(parseStatsSeries(withWeek({ caughtCategories: negativeCategory })), null);
+  const wideGates = [...SERIES['7d'].caughtByGate];
+  wideGates[5] = [1, 1, 1];
+  assert.equal(parseStatsSeries(withWeek({ caughtByGate: wideGates })), null);
   assert.equal(parseStatsSeries({ '7d': SERIES['7d'] }), null);
   assert.equal(parseStatsSeries(undefined), null);
 });
@@ -95,6 +101,7 @@ test('a series from before the per-stat arrays is dropped whole', () => {
     'caught',
     'caughtFixMinutes',
     'caughtCategories',
+    'caughtByGate',
   ]) {
     assert.equal(parseStatsSeries(withWeek({ [key]: undefined })), null);
   }

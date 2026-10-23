@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { caughtCategory } from './caught-category.ts';
+import { caughtCategory, caughtGate } from './caught-category.ts';
 
 test('maps task names by keyword', () => {
   assert.equal(caughtCategory('check:format', undefined), 'format');
@@ -19,4 +19,10 @@ test("a gate task's failing run-list command decides; the task when the command 
   assert.equal(caughtCategory('pre-merge', 'astro check && astro build'), 'types');
   assert.equal(caughtCategory('test', 'node --run something'), 'tests');
   assert.equal(caughtCategory('pre-push', 'terraform validate'), 'other');
+});
+
+test('the gate comes from the unit name', () => {
+  assert.equal(caughtGate('pc-Nomadware.io-x.pre-push.service'), 'push');
+  assert.equal(caughtGate('pc-tipso.pre-merge.service'), 'merge');
+  assert.equal(caughtGate('pc-tipso.serve.service'), null);
 });

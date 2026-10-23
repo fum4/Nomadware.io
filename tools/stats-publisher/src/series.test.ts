@@ -29,7 +29,8 @@ test('an empty store gives full-length series of zeros', () => {
       assert.equal(values.length, length);
       assert.ok(values.every((value) => value === 0));
     }
-    for (const values of [series[window].caughtFixMinutes, series[window].caughtCategories]) {
+    const { caughtFixMinutes, caughtCategories, caughtByGate } = series[window];
+    for (const values of [caughtFixMinutes, caughtCategories, caughtByGate]) {
       assert.equal(values.length, length);
       assert.ok(values.every((value) => value === null));
     }
@@ -192,4 +193,16 @@ test('caught issues count per category where devstack named the task; none says 
   assert.deepEqual(week.caughtCategories[83], [0, 0, 1, 2, 0, 0]);
   assert.equal(week.caughtCategories[82], null);
   assert.deepEqual([week.caught[83], week.caught[82]], [4, 1]);
+});
+
+test('caught issues split by the gate that caught them, every one of them', () => {
+  const state = emptyState();
+  state.journal.failed = [
+    run('2026-10-22T18:10:00Z', 'pc-a.pre-push.service'),
+    run('2026-10-22T18:20:00Z', 'pc-a.pre-merge.service'),
+    run('2026-10-22T18:30:00Z', 'pc-b.pre-push.service'),
+  ];
+  const { '7d': week } = buildSeries(state, NOW);
+  assert.deepEqual(week.caughtByGate[83], [2, 1]);
+  assert.equal(week.caughtByGate[82], null);
 });
