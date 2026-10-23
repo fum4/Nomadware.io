@@ -5,7 +5,7 @@
 import type { StatsSeries } from '@nomadware/site-stats';
 import { STAT_WINDOWS } from '@nomadware/site-stats';
 
-import { linePath } from '../chart/trace-geometry';
+import { tracePaths } from '../chart/trace-geometry';
 import { DEFAULT_STAT_WINDOW, STATS_CHART } from '../constants';
 
 interface Props {
@@ -14,10 +14,10 @@ interface Props {
 }
 const { series, generatedAt } = Astro.props;
 const { viewWidth, viewHeight } = STATS_CHART;
-const plots = STAT_WINDOWS.map((range) => ({
-  range,
-  path: linePath(series[range].agentMinutes, viewWidth, viewHeight),
-}));
+const plots = STAT_WINDOWS.map((range) => {
+  const { active, quiet } = tracePaths(series[range].agentMinutes, viewWidth, viewHeight);
+  return { range, active, quiet };
+});
 ---
 
 <div
@@ -35,7 +35,8 @@ const plots = STAT_WINDOWS.map((range) => ({
         data-current={plot.range === DEFAULT_STAT_WINDOW ? '' : undefined}
       >
         <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} preserveAspectRatio="none">
-          <path class="trace" d={plot.path} pathLength="1" />
+          <path class="quiet" d={plot.quiet} />
+          <path class="trace" d={plot.active} pathLength="1" />
         </svg>
         <span class="guide" />
         <span class="mark" />
@@ -57,7 +58,7 @@ const plots = STAT_WINDOWS.map((range) => ({
      the page on touch; horizontal drags scrub the tooltip. */
   .chart {
     position: relative;
-    height: 228px;
+    height: 240px;
     border-bottom: 1px solid var(--line);
     background-image:
       linear-gradient(var(--line) 1px, transparent 1px),
@@ -70,7 +71,7 @@ const plots = STAT_WINDOWS.map((range) => ({
      the top), clear of the trace, whose peaks touch the plot's top. Taller than the chip. */
   .plot {
     position: absolute;
-    inset: 72px 24px 16px;
+    inset: 84px 24px 16px;
   }
 
   .plot:not([data-current]) {
@@ -93,6 +94,24 @@ const plots = STAT_WINDOWS.map((range) => ({
     stroke-dashoffset: 1;
     animation: trace-draw 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.2s forwards;
     filter: drop-shadow(0 0 4px var(--sig-glow));
+  }
+
+  /* Idle stretches: a faint dotted baseline, revealed left → right in step with the trace. */
+  .quiet {
+    fill: none;
+    stroke: var(--sig);
+    stroke-width: 1;
+    stroke-dasharray: 2 5;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.55;
+    clip-path: inset(0 100% 0 0);
+    animation: quiet-reveal 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.2s forwards;
+  }
+
+  @keyframes quiet-reveal {
+    to {
+      clip-path: inset(0 0 0 0);
+    }
   }
 
   @keyframes trace-draw {
@@ -170,11 +189,11 @@ const plots = STAT_WINDOWS.map((range) => ({
 
   @media (max-width: 640px) {
     .chart {
-      height: 192px;
+      height: 204px;
     }
 
     .plot {
-      inset: 72px 14px 16px;
+      inset: 84px 14px 16px;
     }
   }
 </style>

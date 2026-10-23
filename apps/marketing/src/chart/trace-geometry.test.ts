@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { centreChip, linePath, nearestIndex, pointAt } from './trace-geometry';
+import { centreChip, nearestIndex, pointAt, tracePaths } from './trace-geometry';
 
 const BOUNDS = { left: -20, right: 500 };
 const CHIP_WIDTH = 200;
@@ -30,7 +30,21 @@ describe('pointAt', () => {
   });
 
   it('draws the same points the tooltip snaps to', () => {
-    expect(linePath([0, 50, 100], 1000, 100)).toBe('M0.0 100.0 L500.0 50.0 L1000.0 0.0');
+    expect(tracePaths([0, 50, 100], 1000, 100)).toEqual({
+      active: 'M0.0 100.0 L500.0 50.0 L1000.0 0.0',
+      quiet: '',
+    });
+  });
+
+  it('splits runs between empty buckets into the quiet path', () => {
+    expect(tracePaths([10, 0, 0, 0, 10], 400, 10)).toEqual({
+      active: 'M0.0 0.0 L100.0 10.0 M300.0 10.0 L400.0 0.0',
+      quiet: 'M100.0 10.0 L200.0 10.0 L300.0 10.0',
+    });
+  });
+
+  it('draws an all-empty window as quiet only', () => {
+    expect(tracePaths([0, 0], 100, 10)).toEqual({ active: '', quiet: 'M0.0 10.0 L100.0 10.0' });
   });
 });
 
