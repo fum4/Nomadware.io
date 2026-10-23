@@ -4,8 +4,8 @@ import { STAT_WINDOW_DAYS } from './windows.ts';
 
 // The snapshot's time series: what the site's activity chart draws. Optional in the snapshot (an
 // older publisher leaves it out; the card then shows its numbers without the chart), and dropped
-// as a whole when malformed or incomplete (a series from before runs/actions/checks/caught and
-// caughtFixMinutes counts as incomplete) — a chart bug never takes the numbers down with it.
+// as a whole when malformed or incomplete (a series from before runs/actions/checks/caught,
+// caughtFixMinutes and caughtCategories counts as incomplete) — a chart bug never takes the numbers down with it.
 
 const HOUR_MS = 3_600_000;
 const HOURS_PER_DAY = 24;
@@ -40,10 +40,24 @@ export interface StatSeries {
    * or any of its issues isn't fixed yet.
    */
   caughtFixMinutes: (number | null)[];
+  /**
+   * What the bucket's gates caught: per entry of CAUGHT_CATEGORIES, how many of its issues were
+   * of that kind. null when none of them says (it caught nothing, or only before the gates
+   * started recording the failing task); otherwise its counts may sum to less than `caught`.
+   */
+  caughtCategories: (number[] | null)[];
 }
 
+/** What a caught issue was, by the task that failed: the order of every `caughtCategories` entry. */
+export const CAUGHT_CATEGORIES = ['format', 'lint', 'types', 'tests', 'build', 'other'] as const;
+
+export type CaughtCategory = (typeof CAUGHT_CATEGORIES)[number];
+
 /** The per-bucket counts of a series: one entry per bucket, each a non-negative integer. */
-export type SeriesCounts = Exclude<keyof StatSeries, 'bucketHours' | 'caughtFixMinutes'>;
+export type SeriesCounts = Exclude<
+  keyof StatSeries,
+  'bucketHours' | 'caughtFixMinutes' | 'caughtCategories'
+>;
 
 export const SERIES_COUNTS: readonly SeriesCounts[] = [
   'agentMinutes',
@@ -88,6 +102,16 @@ function parseNullableCounts(value: unknown, length: number): (number | null)[] 
     : null;
 }
 
+const isCategoryCountsOrNull = (value: unknown): value is number[] | null =>
+  value === null ||
+  (Array.isArray(value) && value.length === CAUGHT_CATEGORIES.length && value.every(isCount));
+
+function parseCategories(value: unknown, length: number): (number[] | null)[] | null {
+  return Array.isArray(value) && value.length === length && value.every(isCategoryCountsOrNull)
+    ? value
+    : null;
+}
+
 function parseWindowSeries(value: unknown, window: StatWindow): StatSeries | null {
   if (!isRecord(value)) return null;
   const bucketHours = SERIES_BUCKET_HOURS[window];
@@ -106,10 +130,13 @@ function parseWindowSeries(value: unknown, window: StatWindow): StatSeries | nul
     checks: counts('checks'),
     caught: counts('caught'),
     caughtFixMinutes: parseNullableCounts(value['caughtFixMinutes'], count) ?? [],
+    caughtCategories: parseCategories(value['caughtCategories'], count) ?? [],
   };
-  const complete = [...SERIES_COUNTS, 'caughtFixMinutes' as const].every(
-    (key) => series[key].length === count,
-  );
+  const complete = [
+    ...SERIES_COUNTS,
+    'caughtFixMinutes' as const,
+    'caughtCategories' as const,
+  ].every((key) => series[key].length === count);
   return complete ? series : null;
 }
 

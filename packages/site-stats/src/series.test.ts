@@ -19,6 +19,9 @@ const windowSeries = (bucketHours: number, buckets: number) => ({
   caughtFixMinutes: Array.from({ length: buckets }, (_, index): number | null =>
     index === 5 ? 14 : null,
   ),
+  caughtCategories: Array.from({ length: buckets }, (_, index): number[] | null =>
+    index === 5 ? [0, 1, 0, 2, 0, 0] : null,
+  ),
 });
 const SERIES = { '7d': windowSeries(2, 84), '30d': windowSeries(6, 120) };
 
@@ -74,12 +77,25 @@ test('rejects bad lengths, sizes, negatives, fractions, text and a missing array
   fractionFix[5] = 1.5;
   assert.equal(parseStatsSeries(withWeek({ caughtFixMinutes: fractionFix })), null);
   assert.equal(parseStatsSeries(withWeek({ caughtFixMinutes: [14] })), null);
+  const shortCategories = [...SERIES['7d'].caughtCategories];
+  shortCategories[5] = [1, 2];
+  assert.equal(parseStatsSeries(withWeek({ caughtCategories: shortCategories })), null);
+  const negativeCategory = [...SERIES['7d'].caughtCategories];
+  negativeCategory[5] = [0, 0, 0, -1, 0, 0];
+  assert.equal(parseStatsSeries(withWeek({ caughtCategories: negativeCategory })), null);
   assert.equal(parseStatsSeries({ '7d': SERIES['7d'] }), null);
   assert.equal(parseStatsSeries(undefined), null);
 });
 
 test('a series from before the per-stat arrays is dropped whole', () => {
-  for (const key of ['runs', 'actions', 'checks', 'caught', 'caughtFixMinutes']) {
+  for (const key of [
+    'runs',
+    'actions',
+    'checks',
+    'caught',
+    'caughtFixMinutes',
+    'caughtCategories',
+  ]) {
     assert.equal(parseStatsSeries(withWeek({ [key]: undefined })), null);
   }
 });

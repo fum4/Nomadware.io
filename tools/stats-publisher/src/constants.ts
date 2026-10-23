@@ -21,9 +21,14 @@ export const GITHUB_SEARCH_RESULT_CAP = 1_000;
 export const GITHUB_SEARCH_PAGE_SIZE = 50;
 export const GITHUB_FILES_PAGE_SIZE = 100;
 
-/** systemd's own end-of-run lines for the git-hook gate units (`devstack gate`). */
+/**
+ * The git-hook gate units' (`devstack gate`) lines: systemd's own end-of-run lines, and devstack's
+ * failing-task line (sources/gate-events.ts).
+ */
 export const GATE_JOURNAL_PATTERN =
-  '^pc-.*\\.pre-(push|merge)\\.service: (Consumed|Failed with result)';
+  '^pc-.*\\.pre-(push|merge)\\.service: (Consumed|Failed with result)|^gate=';
+/** devstack's failing-task line follows its failure by seconds; past this it pairs with nothing. */
+export const GATE_TASK_PAIRING_MS = MINUTE_MS;
 
 export const TRANSCRIPT_READ_CHUNK_BYTES = 4 * 1024 * 1024;
 

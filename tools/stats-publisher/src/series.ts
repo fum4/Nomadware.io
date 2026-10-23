@@ -1,5 +1,10 @@
 import type { StatSeries, StatsSeries, StatWindow } from '@nomadware/site-stats';
-import { bucketCount, bucketStartMs, SERIES_BUCKET_HOURS } from '@nomadware/site-stats';
+import {
+  bucketCount,
+  bucketStartMs,
+  CAUGHT_CATEGORIES,
+  SERIES_BUCKET_HOURS,
+} from '@nomadware/site-stats';
 
 import { HOUR_MS, MINUTE_MS } from './constants.ts';
 import { fixMinutes } from './fix-times.ts';
@@ -27,6 +32,24 @@ function caughtFixMinutes(
     else longest[index] = Math.max(longest[index] ?? 0, minutes);
   });
   return longest.map((minutes, index) => (unfixed.has(index) ? null : minutes));
+}
+
+/** Per bucket, its caught issues per category (CAUGHT_CATEGORIES order); null if none says. */
+function caughtCategories(
+  state: State,
+  bucketOf: (atMs: number) => number | null,
+  buckets: number,
+): (number[] | null)[] {
+  const counts: (number[] | null)[] = Array.from({ length: buckets }, () => null);
+  for (const { atMs, category } of state.journal.failed) {
+    const index = bucketOf(atMs);
+    if (index === null || !category) continue;
+    const bucket = counts[index] ?? CAUGHT_CATEGORIES.map(() => 0);
+    const slot = CAUGHT_CATEGORIES.indexOf(category);
+    bucket[slot] = (bucket[slot] ?? 0) + 1;
+    counts[index] = bucket;
+  }
+  return counts;
 }
 
 function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeries {
@@ -89,6 +112,7 @@ function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeri
     checks: perBucket(state.journal.checksMs),
     caught: perBucket(state.journal.failed.map((run) => run.atMs)),
     caughtFixMinutes: caughtFixMinutes(state, bucketOf, buckets),
+    caughtCategories: caughtCategories(state, bucketOf, buckets),
   };
 }
 

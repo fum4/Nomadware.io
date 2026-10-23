@@ -29,8 +29,10 @@ test('an empty store gives full-length series of zeros', () => {
       assert.equal(values.length, length);
       assert.ok(values.every((value) => value === 0));
     }
-    assert.equal(series[window].caughtFixMinutes.length, length);
-    assert.ok(series[window].caughtFixMinutes.every((value) => value === null));
+    for (const values of [series[window].caughtFixMinutes, series[window].caughtCategories]) {
+      assert.equal(values.length, length);
+      assert.ok(values.every((value) => value === null));
+    }
   }
 });
 
@@ -175,4 +177,19 @@ test("a bucket's fix time is its longest, and none while any of its issues is un
   assert.equal(week.caughtFixMinutes[82], null);
   assert.equal(week.caughtFixMinutes[80], null);
   assert.deepEqual([week.caught[79], week.caught[82]], [2, 2]);
+});
+
+test('caught issues count per category where devstack named the task; none says → null', () => {
+  const state = emptyState();
+  state.journal.failed = [
+    { ...run('2026-10-22T18:10:00Z', 'a'), category: 'tests' },
+    { ...run('2026-10-22T18:20:00Z', 'a'), category: 'tests' },
+    { ...run('2026-10-22T18:30:00Z', 'b'), category: 'types' },
+    run('2026-10-22T18:40:00Z', 'c'), // before devstack logged tasks: counted, not categorised
+    run('2026-10-22T16:00:00Z', 'c'),
+  ];
+  const { '7d': week } = buildSeries(state, NOW);
+  assert.deepEqual(week.caughtCategories[83], [0, 0, 1, 2, 0, 0]);
+  assert.equal(week.caughtCategories[82], null);
+  assert.deepEqual([week.caught[83], week.caught[82]], [4, 1]);
 });

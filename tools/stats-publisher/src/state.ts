@@ -1,6 +1,8 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import type { CaughtCategory } from '@nomadware/site-stats';
+
 import { STATE_FILE_NAME } from './constants.ts';
 import { log } from './logger.ts';
 
@@ -29,6 +31,8 @@ export interface MergedPr {
 export interface GateRun {
   atMs: number;
   unit: string;
+  /** A failed run's kind, when devstack logged the failing task (sources/gate-events.ts). */
+  category?: CaughtCategory;
 }
 
 export interface JournalState {
