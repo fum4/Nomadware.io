@@ -79,4 +79,17 @@ describe('createPulseQueue', () => {
     queue.cancel(); // the range is toggled away mid-pulse
     expect(running.pulsing()).toBe(false);
   });
+
+  it('a burst pulses every marker at once, dropping a ripple still waiting', () => {
+    const starts: number[] = [];
+    const queue = createPulseQueue();
+    const rippled = fakeMarker(starts);
+    queue.add([fakeMarker(starts).marker, rippled.marker]);
+    const burst = [fakeMarker(starts), fakeMarker(starts), fakeMarker(starts)];
+    queue.burst(burst.map((fake) => fake.marker));
+    vi.runAllTimers();
+    expect(starts).toEqual([0, 0, 0]);
+    expect(rippled.pulsing()).toBe(false);
+    expect(burst.every((fake) => fake.pulsing())).toBe(true);
+  });
 });

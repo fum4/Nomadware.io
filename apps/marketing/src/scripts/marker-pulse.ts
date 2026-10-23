@@ -1,19 +1,20 @@
 import { MARKER_PULSE } from '../constants';
 
-// The caught markers' pulse (stats-chart.astro: data-pulse runs one ring-pulse), one after
-// another: each starts at least `spacingMs` after the one before, so a dense stretch ripples
-// instead of flashing at once. A long queue tightens the spacing so it drains within
-// `maxRippleMs`. data-pulse lives only while its pulse runs: a CSS animation starts over when its
+// The caught markers' pulse (stats-chart.astro: data-pulse runs one ring-pulse). While the line
+// draws, one after another: each starts at least `spacingMs` after the one before, so a dense
+// stretch ripples instead of flashing at once (a long queue tightens the spacing so it drains
+// within `maxRippleMs`). A drawn range shown again pulses all its markers at once (`burst`). data-pulse lives only while its pulse runs: a CSS animation starts over when its
 // plot is shown again (display: none → block), so a lingering one would pulse a second time.
 
 const PULSE_ATTRIBUTE = 'data-pulse';
 
 /**
- * The chart's one queue of pulses: markers join it in order; cancel drops whatever waits and ends
- * whatever runs.
+ * The chart's one queue of pulses: markers join it in order (`add`) or all pulse now (`burst`,
+ * after a cancel); cancel drops whatever waits and ends whatever runs.
  */
 export interface PulseQueue {
   add: (markers: readonly HTMLElement[]) => void;
+  burst: (markers: readonly HTMLElement[]) => void;
   cancel: () => void;
 }
 
@@ -56,18 +57,28 @@ export function createPulseQueue(): PulseQueue {
     schedule();
   };
 
+  const cancel = (): void => {
+    if (timer !== null) clearTimeout(timer);
+    timer = null;
+    waiting = [];
+    started.forEach((marker) => marker.removeAttribute(PULSE_ATTRIBUTE));
+    started.clear();
+  };
+
   return {
     add: (markers) => {
       waiting.push(...markers);
       spacing = Math.min(spacingMs, maxRippleMs / waiting.length);
       schedule();
     },
-    cancel: () => {
-      if (timer !== null) clearTimeout(timer);
-      timer = null;
-      waiting = [];
-      started.forEach((marker) => marker.removeAttribute(PULSE_ATTRIBUTE));
-      started.clear();
+    burst: (markers) => {
+      cancel();
+      markers.forEach((marker) => {
+        pulse(marker);
+        started.add(marker);
+      });
+      lastStartMs = performance.now();
     },
+    cancel,
   };
 }

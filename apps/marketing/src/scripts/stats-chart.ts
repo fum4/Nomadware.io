@@ -26,7 +26,7 @@ const HOUR_MS = 3_600_000;
 export interface StatsChart {
   series: StatsSeries | null;
   draw: (range: StatWindow, onReach: (reach: number) => void) => TraceDraw;
-  /** Ripple a drawn range's caught markers left to right (it shows again on a toggle). */
+  /** Pulse a drawn range's caught markers all at once (it shows again on a toggle). */
   pulse: (range: StatWindow) => void;
   reset: () => void;
 }
@@ -166,10 +166,8 @@ export function initStatsChart(root: HTMLElement): StatsChart {
     pulses.cancel();
     return plot ? drawPlot(plot, pulses, onReach) : drawNothing(onReach);
   };
-  const pulse = (range: StatWindow): void => {
-    pulses.cancel();
-    pulses.add([...(plotOf(range)?.querySelectorAll<HTMLElement>('[data-catch]') ?? [])]);
-  };
+  const pulse = (range: StatWindow): void =>
+    pulses.burst([...(plotOf(range)?.querySelectorAll<HTMLElement>('[data-catch]') ?? [])]);
 
   chart.addEventListener('pointerdown', follow);
   chart.addEventListener('pointermove', (event) => {
