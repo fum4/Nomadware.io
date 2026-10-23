@@ -7,20 +7,18 @@ import type { StatWindow } from '@nomadware/site-stats';
 export const MOBILE_QUERY = '(max-width: 640px)';
 /** A device where hovering a mouse is the primary input (no auto-focus, no cursor effects otherwise). */
 export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
-/** On <html> in dev only: the send button's surge ignores reduced motion (README § Motion). */
-export const FULL_MOTION_CLASS = 'full-motion';
 
 export const SHA_LENGTH = 7;
 
 /**
- * Intro (scripts/intro-sequence.ts): headline scramble → gap → stats count-up → gap → wordmark;
- * the hero tags power on INTRO_TAGS_LEAD_MS before the scramble starts.
+ * Intro (scripts/intro-sequence.ts): tags power on → headline scramble → gap → stats count-up →
+ * gap → wordmark. The first two at fixed times from navigation start (performance.now()), so
+ * they land the same however long the scripts took to load.
  */
 export const INTRO_GAP_MS = 500;
-/** The headline shows as plain text for this long, then the scramble runs over it. */
-export const INTRO_HEADLINE_DELAY_MS = 2_500;
-/** The tags start powering on this long before the headline scramble (≤ INTRO_HEADLINE_DELAY_MS). */
-export const INTRO_TAGS_LEAD_MS = 500;
+export const INTRO_TAGS_AT_MS = 2_000;
+/** The headline shows as plain text until then, and the scramble runs over it. */
+export const INTRO_HEADLINE_AT_MS = 2_500;
 /**
  * Latest the wordmark starts, counted from the headline settling, when the stats card is below
  * the fold and never scrolled into view. The in-view path takes 500 + 1600 + 500 = 2.6 s, so 4 s
@@ -29,7 +27,7 @@ export const INTRO_TAGS_LEAD_MS = 500;
 export const INTRO_WORDMARK_MAX_WAIT_MS = 4_000;
 
 /**
- * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started INTRO_TAGS_LEAD_MS
+ * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started at INTRO_TAGS_AT_MS,
  * before the headline scramble and over well before the stats start, so the sequence timing never
  * moves.
  * Each tag starts a random stagger after the last and flickers on over a random duration; a slash

@@ -4,16 +4,12 @@ import { Font } from 'astro:assets';
 import ConsentBanner from '../components/consent-banner.astro';
 import JsonLd from '../components/json-ld.astro';
 import SeoHead from '../components/seo-head.astro';
-import { FULL_MOTION_CLASS } from '../constants';
 import '../styles/global.css';
 
-// The dev server ignores prefers-reduced-motion, so every effect can be judged as designed
-// (styles/contact-terminal.css reads the class; production never gets it).
-const fullMotion = import.meta.env.DEV;
 ---
 
 <!doctype html>
-<html lang="en" class={fullMotion ? FULL_MOTION_CLASS : undefined}>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

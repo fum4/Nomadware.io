@@ -56,9 +56,6 @@
      would shift the layout (CLS). Every font shorthand carries it; body passes it down. */
   --leading: 1.28;
 
-  /* What the send button's surge becomes under prefers-reduced-motion (README § Motion). */
-  --flash-fallback-fade: 180ms;
-
   --radius: 12px;
   --radius-sm: 6px;
   /* The content column (.wrap, padding included); the column halo is centred on it. */
