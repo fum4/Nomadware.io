@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { CONTACT } from '../constants';
 import { cleanDraft, contactProblems, isComplete, isEmail } from './validation';
 
-const valid = { name: 'Ada Lovelace', email: 'ada@example.com', brief: 'An engine for numbers.' };
+const valid = {
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  brief: 'An analytical engine for numbers, with a printer for the results.',
+};
 
 describe('isEmail', () => {
   it.each(['ada@example.com', 'a.b+tag@sub.example.co.uk', '  ada@example.com  '])(
@@ -38,8 +42,8 @@ describe('isComplete', () => {
   });
 
   it('needs a brief between the bounds', () => {
-    expect(isComplete({ ...valid, brief: 'abc' })).toBe(false);
-    expect(isComplete({ ...valid, brief: 'abcd' })).toBe(true);
+    expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.minBriefLength - 1) })).toBe(false);
+    expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.minBriefLength) })).toBe(true);
     expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.maxBriefLength) })).toBe(true);
     expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.maxBriefLength + 1) })).toBe(false);
   });
@@ -101,12 +105,12 @@ describe('cleanDraft', () => {
     const cleaned = cleanDraft({
       name: ' Ada\r\nBcc: evil@x.com\u0000 ',
       email: 'ada@example.com\u0007',
-      brief: 'line one\r\nline\ttwo\u0000\u001b[31m',
+      brief: 'line one\r\nline\ttwo\u0000\u001b[31m — a booking app for clinics, with payments',
     });
     expect(cleaned).toEqual({
       name: 'AdaBcc: evil@x.com',
       email: 'ada@example.com',
-      brief: 'line one\nline\ttwo[31m',
+      brief: 'line one\nline\ttwo[31m — a booking app for clinics, with payments',
     });
   });
 

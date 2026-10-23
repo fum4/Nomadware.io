@@ -4,7 +4,11 @@ import { CONTACT } from '../../constants';
 import { contactProblems } from '../../contact/validation';
 import { problemMessage } from './problem-message';
 
-const valid = { name: 'Ada Lovelace', email: 'ada@example.com', brief: 'An engine for numbers.' };
+const valid = {
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  brief: 'An analytical engine for numbers, with a printer for the results.',
+};
 const say = (draft: Partial<typeof valid>): string =>
   problemMessage(contactProblems({ ...valid, ...draft }));
 
@@ -29,7 +33,9 @@ describe('problemMessage', () => {
   });
 
   it('names the limits from CONTACT', () => {
-    expect(say({ brief: 'abc' })).toBe(`the brief needs ${CONTACT.minBriefLength}+ characters`);
+    expect(say({ brief: 'abc' })).toBe(
+      `tell us a bit more about the project (${CONTACT.minBriefLength}+ characters)`,
+    );
     expect(say({ brief: 'x'.repeat(CONTACT.maxBriefLength + 1) })).toBe(
       'trim the brief to 4,000 characters',
     );
@@ -40,7 +46,7 @@ describe('problemMessage', () => {
 
   it('mixes kinds in one line', () => {
     expect(say({ name: '', email: 'nope', brief: 'ab' })).toBe(
-      "add your name · that email doesn't look right · the brief needs 4+ characters",
+      "add your name · that email doesn't look right · tell us a bit more about the project (40+ characters)",
     );
   });
 });

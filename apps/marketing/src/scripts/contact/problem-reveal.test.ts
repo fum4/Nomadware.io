@@ -31,8 +31,12 @@ describe('before a send attempt', () => {
 
   it('a revealed field stays live: fixed drops out, broken again comes back', () => {
     const reveal = revealField(QUIET, 'brief', { ...EMPTY, brief: 'ab' });
-    expect(shown({ ...EMPTY, brief: 'ab' }, reveal)).toBe('the brief needs 4+ characters');
-    expect(shown({ ...EMPTY, brief: 'abcd' }, reveal)).toBe('');
+    expect(shown({ ...EMPTY, brief: 'ab' }, reveal)).toBe(
+      'tell us a bit more about the project (40+ characters)',
+    );
+    expect(
+      shown({ ...EMPTY, brief: 'A booking app for clinics, with payments and reminders.' }, reveal),
+    ).toBe('');
     expect(shown({ ...EMPTY, brief: '' }, reveal)).toBe("tell us what you're building");
   });
 });
@@ -48,8 +52,18 @@ describe('after a send attempt', () => {
         "that email doesn't look right · tell us what you're building",
       ],
       [{ name: 'Ada', email: 'ada@example.com', brief: '' }, "tell us what you're building"],
-      [{ name: 'Ada', email: 'ada@example.com', brief: 'ab' }, 'the brief needs 4+ characters'],
-      [{ name: 'Ada', email: 'ada@example.com', brief: 'an app' }, ''],
+      [
+        { name: 'Ada', email: 'ada@example.com', brief: 'ab' },
+        'tell us a bit more about the project (40+ characters)',
+      ],
+      [
+        {
+          name: 'Ada',
+          email: 'ada@example.com',
+          brief: 'A booking app for clinics, with payments and reminders.',
+        },
+        '',
+      ],
     ];
     steps.forEach(([draft, message]) => expect(shown(draft, reveal)).toBe(message));
   });

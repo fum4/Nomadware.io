@@ -15,7 +15,7 @@ const COPY: { [P in ContactProblem as P['field']]: Record<P['kind'], string> } =
   },
   brief: {
     missing: "tell us what you're building",
-    too_short: `the brief needs ${count(CONTACT.minBriefLength)}+ characters`,
+    too_short: `tell us a bit more about the project (${count(CONTACT.minBriefLength)}+ characters)`,
     too_long: `trim the brief to ${count(CONTACT.maxBriefLength)} characters`,
   },
 };

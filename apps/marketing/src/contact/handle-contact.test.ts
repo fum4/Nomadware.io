@@ -15,7 +15,7 @@ const config = {
 const request: ContactRequest = {
   name: 'Ada',
   email: 'ada@example.com',
-  brief: 'An engine for numbers.',
+  brief: 'An analytical engine for numbers, with a printer for the results.',
   website: '',
   token: 'tok',
 };

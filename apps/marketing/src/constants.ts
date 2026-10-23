@@ -271,7 +271,8 @@ export const CONTACT = {
   maxNameLength: 120,
   /** RFC 5321's practical ceiling for a whole address. */
   maxEmailLength: 254,
-  minBriefLength: 4,
+  /** A sentence or two: enough to tell a real project from a drive-by "hi". Shared with the endpoint. */
+  minBriefLength: 40,
   maxBriefLength: 4000,
   subjectPrefix: 'New project — ',
   /** The on-demand route the form posts to (src/pages/api/contact.ts). */
