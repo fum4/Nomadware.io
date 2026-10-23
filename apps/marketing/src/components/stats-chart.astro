@@ -60,6 +60,7 @@ const plots = STAT_WINDOWS.map((range) => {
           </span>
           <span class="issues" data-tip-issues hidden>
             <span data-tip="caught" />
+            <span data-tip="kinds" />
             <span class="fixed" data-tip="fixed" />
           </span>
         </span>
@@ -211,7 +212,7 @@ const plots = STAT_WINDOWS.map((range) => {
   }
 
   .issues[hidden],
-  .fixed[hidden] {
+  .issues [hidden] {
     display: none;
   }
 

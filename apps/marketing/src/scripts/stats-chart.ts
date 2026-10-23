@@ -6,6 +6,7 @@ import { STATS_CHART } from '../constants';
 import {
   formatAgentTime,
   formatBucketRange,
+  formatCaughtKinds,
   formatCount,
   formatFixedIn,
   formatIssuesCaught,
@@ -50,7 +51,7 @@ const setTip = (plot: HTMLElement, name: string, text: string): void => {
 
 /**
  * Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines, and the
- * issues caught with their kinds and time to fix (each only if known).
+ * issues caught: by which gate, of what kind and how fast fixed (each only if known).
  */
 function describe(
   plot: HTMLElement,
@@ -76,9 +77,12 @@ function describe(
     ?.toggleAttribute('hidden', added + deleted === 0);
   const caught = series.caught[index] ?? 0;
   const fixMinutes = series.caughtFixMinutes[index] ?? null;
-  setTip(plot, 'caught', formatIssuesCaught(caught, series.caughtCategories[index] ?? null));
+  const kinds = formatCaughtKinds(series.caughtCategories[index] ?? null);
+  setTip(plot, 'caught', formatIssuesCaught(caught, series.caughtByGate[index] ?? null));
+  setTip(plot, 'kinds', kinds);
   setTip(plot, 'fixed', fixMinutes === null ? '' : formatFixedIn(fixMinutes));
   plot.querySelector('[data-tip-issues]')?.toggleAttribute('hidden', caught === 0);
+  plot.querySelector('[data-tip="kinds"]')?.toggleAttribute('hidden', kinds === '');
   plot.querySelector('[data-tip="fixed"]')?.toggleAttribute('hidden', fixMinutes === null);
 }
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatAgentTime,
   formatBucketRange,
+  formatCaughtKinds,
   formatFixedIn,
   formatIssuesCaught,
   formatPrsMerged,
@@ -47,10 +48,18 @@ describe('formatIssuesCaught', () => {
     expect(formatIssuesCaught(3, null)).toBe('3 issues caught');
   });
 
-  it('adds the known categories, most first, ties in category order', () => {
-    expect(formatIssuesCaught(5, [0, 0, 2, 3, 0, 0])).toBe('5 issues caught · 3 tests, 2 types');
-    expect(formatIssuesCaught(4, [1, 1, 0, 0, 0, 0])).toBe('4 issues caught · 1 format, 1 lint');
-    expect(formatIssuesCaught(2, [0, 0, 0, 0, 0, 0])).toBe('2 issues caught');
+  it('says which gates caught them, most first', () => {
+    expect(formatIssuesCaught(5, [2, 3])).toBe('5 issues caught · 3 at merge, 2 at push');
+    expect(formatIssuesCaught(4, [2, 2])).toBe('4 issues caught · 2 at push, 2 at merge');
+    expect(formatIssuesCaught(3, [3, 0])).toBe('3 issues caught · at push');
+  });
+});
+
+describe('formatCaughtKinds', () => {
+  it('lists the known categories, most first, ties in category order', () => {
+    expect(formatCaughtKinds([0, 0, 2, 3, 0, 0])).toBe('3 tests, 2 types');
+    expect(formatCaughtKinds([1, 1, 0, 0, 0, 0])).toBe('1 format, 1 lint');
+    expect(formatCaughtKinds(null)).toBe('');
   });
 });
 
