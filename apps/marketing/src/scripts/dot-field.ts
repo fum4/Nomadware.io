@@ -1,7 +1,7 @@
 import { CURSOR_FIELD, DOT_FIELD } from '../constants';
 import type { BlackHole } from './black-hole';
 import { createBlackHole } from './black-hole';
-import { cursorPull, releaseEnvelope } from './dot-forces';
+import { cursorPull, releaseEnvelope, ringRadius } from './dot-forces';
 import type { Body } from './dot-separation';
 import { SeparationGrid } from './dot-separation';
 import { hasFinePointer, isMobileViewport } from './motion';
@@ -12,6 +12,9 @@ interface Dot extends Body {
   captured: boolean;
   /** When it last left the field (performance.now()), -Infinity if never. */
   releasedAt: number;
+  /** Its own ring radius around the cursor: a fixed nudge and a wobble phase (ringRadius). */
+  ringOffsetPx: number;
+  ringPhase: number;
   /** How long its fade-in on load takes, from the field's first frame. */
   appearMs: number;
 }
@@ -74,6 +77,8 @@ export function initDotField(): void {
         highlight: Math.random() < DOT_FIELD.highlightShare,
         captured: false,
         releasedAt: Number.NEGATIVE_INFINITY,
+        ringOffsetPx: (Math.random() * 2 - 1) * DOT_FIELD.ringScatterPx,
+        ringPhase: Math.random() * 2 * Math.PI,
         appearMs:
           DOT_FIELD.appearMinMs + Math.random() * (DOT_FIELD.appearMaxMs - DOT_FIELD.appearMinMs),
       }));
@@ -85,7 +90,10 @@ export function initDotField(): void {
     const dx = dot.x - pointer.x;
     const dy = dot.y - pointer.y;
     const distance = Math.hypot(dx, dy);
-    const pull = dot.captured && distance > 0 ? cursorPull(distance / scale) : 0;
+    const pull =
+      dot.captured && distance > 0
+        ? cursorPull(distance / scale, ringRadius(dot.ringOffsetPx, dot.ringPhase, now))
+        : 0;
     if (pull !== 0) {
       dot.vx += (dx / distance) * pull * dt;
       dot.vy += (dy / distance) * pull * dt;

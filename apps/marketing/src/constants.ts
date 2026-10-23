@@ -154,6 +154,11 @@ export const DOT_FIELD = {
    */
   gatherCorePx: 44,
   gatherCorePush: 3,
+  /** Each dot's ring radius is gatherCorePx ± up to this (CSS px), fixed per dot: a loose band. */
+  ringScatterPx: 5,
+  /** …and drifts ± this (CSS px) on a slow sine of its own phase, so the band breathes. */
+  ringWobblePx: 2,
+  ringWobbleMs: 2_400,
   /**
    * Dots closer than this (CSS px) push each other apart (scripts/dot-separation.ts): what packs
    * the gathered dots into an even ring instead of a heap on the side they came from.
