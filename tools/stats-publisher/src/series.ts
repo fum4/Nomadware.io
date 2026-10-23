@@ -20,13 +20,31 @@ function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeri
     return index >= 0 && index < buckets ? index : null;
   };
 
+  // Per minute: its active time and tool calls; per transcript, a run in its first active bucket.
   const activeMs = zeros(buckets);
+  const actions = zeros(buckets);
+  const runs = zeros(buckets);
   for (const file of Object.values(state.transcripts)) {
-    for (const [minute, [ms]] of Object.entries(file.minutes)) {
+    let firstIndex: number | null = null;
+    for (const [minute, [ms, toolUses]] of Object.entries(file.minutes)) {
       const index = bucketOf(Number(minute) * MINUTE_MS);
-      if (index !== null) activeMs[index] = (activeMs[index] ?? 0) + ms;
+      if (index === null) continue;
+      activeMs[index] = (activeMs[index] ?? 0) + ms;
+      actions[index] = (actions[index] ?? 0) + toolUses;
+      if (firstIndex === null || index < firstIndex) firstIndex = index;
     }
+    if (firstIndex !== null) runs[firstIndex] = (runs[firstIndex] ?? 0) + 1;
   }
+
+  /** How many of `timesMs` fall in each bucket. */
+  const perBucket = (timesMs: readonly number[]): number[] => {
+    const counts = zeros(buckets);
+    for (const atMs of timesMs) {
+      const index = bucketOf(atMs);
+      if (index !== null) counts[index] = (counts[index] ?? 0) + 1;
+    }
+    return counts;
+  };
 
   // A PR and its lines count in the bucket it merged in.
   const prsMerged = zeros(buckets);
@@ -46,6 +64,10 @@ function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeri
     prsMerged,
     linesAdded,
     linesDeleted,
+    runs,
+    actions,
+    checks: perBucket(state.journal.checksMs),
+    caught: perBucket(state.journal.caughtMs),
   };
 }
 

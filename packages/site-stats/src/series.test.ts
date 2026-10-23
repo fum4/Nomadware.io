@@ -12,6 +12,10 @@ const windowSeries = (bucketHours: number, buckets: number) => ({
   prsMerged: counts(buckets, () => 1),
   linesAdded: counts(buckets, (index) => index * 10),
   linesDeleted: counts(buckets, () => 0),
+  runs: counts(buckets, (index) => index % 3),
+  actions: counts(buckets, (index) => index * 7),
+  checks: counts(buckets, () => 2),
+  caught: counts(buckets, (index) => (index === 5 ? 3 : 0)),
 });
 const SERIES = { '7d': windowSeries(2, 84), '30d': windowSeries(6, 120) };
 
@@ -59,8 +63,18 @@ test('rejects bad lengths, sizes, negatives, fractions, text and a missing array
   const negativeLines = [...SERIES['7d'].linesDeleted];
   negativeLines[83] = -1;
   assert.equal(parseStatsSeries(withWeek({ linesDeleted: negativeLines })), null);
+  assert.equal(parseStatsSeries(withWeek({ caught: SERIES['7d'].caught.slice(1) })), null);
+  const negativeRuns = [...SERIES['7d'].runs];
+  negativeRuns[0] = -1;
+  assert.equal(parseStatsSeries(withWeek({ runs: negativeRuns })), null);
   assert.equal(parseStatsSeries({ '7d': SERIES['7d'] }), null);
   assert.equal(parseStatsSeries(undefined), null);
+});
+
+test('a series from before the per-stat arrays is dropped whole', () => {
+  for (const key of ['runs', 'actions', 'checks', 'caught']) {
+    assert.equal(parseStatsSeries(withWeek({ [key]: undefined })), null);
+  }
 });
 
 test('a snapshot without a series is still valid', () => {

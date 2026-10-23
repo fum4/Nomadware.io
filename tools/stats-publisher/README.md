@@ -27,6 +27,9 @@ Each run logs one logfmt line per source and a `run done` line with `duration_ms
 | `series.agentMinutes` | transcripts | the same per-minute active time as `agentHours`, summed per chart bucket (UTC-aligned, `@nomadware/site-stats` § Series), rounded to whole minutes |
 | `series.prsMerged` | GitHub | the same merged PRs as `prs`, per bucket of their merge time |
 | `series.linesAdded`, `series.linesDeleted` | per-PR file stats | each PR's `linesAdded` / `linesDeleted` in its merge bucket; a bucket with no merge is 0 |
+| `series.runs` | transcripts | each transcript once, in the bucket of its first activity inside the series |
+| `series.actions` | transcripts | the per-minute `tool_use` counts behind `actions`, summed per bucket |
+| `series.checks`, `series.caught` | user journal | the same gate runs / failures as `checks` / `caught`, per bucket they finished in |
 
 The series (`src/series.ts`) is aligned to UTC buckets, not to the rolling window, so its totals can differ slightly from the window's numbers at the edges.
 

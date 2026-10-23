@@ -4,7 +4,8 @@ import { STAT_WINDOW_DAYS } from './windows.ts';
 
 // The snapshot's time series: what the site's activity chart draws. Optional in the snapshot (an
 // older publisher leaves it out; the card then shows its numbers without the chart), and dropped
-// as a whole when malformed — a chart bug never takes the numbers down with it.
+// as a whole when malformed or incomplete (a series from before runs/actions/checks/caught
+// counts as incomplete) — a chart bug never takes the numbers down with it.
 
 const HOUR_MS = 3_600_000;
 const HOURS_PER_DAY = 24;
@@ -26,7 +27,28 @@ export interface StatSeries {
   /** Lines added / deleted by the PRs merged in the bucket (same exclusions as the window's). */
   linesAdded: number[];
   linesDeleted: number[];
+  /** Agent runs, each counted once: in the bucket of its first activity inside the series. */
+  runs: number[];
+  /** tool_use blocks per bucket (the window's `actions`). */
+  actions: number[];
+  /** Gate runs that finished / failed per bucket (the window's `checks` / `caught`). */
+  checks: number[];
+  caught: number[];
 }
+
+/** Every per-bucket array of a series: one entry per bucket, each a non-negative integer. */
+export type SeriesCounts = Exclude<keyof StatSeries, 'bucketHours'>;
+
+export const SERIES_COUNTS: readonly SeriesCounts[] = [
+  'agentMinutes',
+  'prsMerged',
+  'linesAdded',
+  'linesDeleted',
+  'runs',
+  'actions',
+  'checks',
+  'caught',
+];
 
 export type StatsSeries = Record<StatWindow, StatSeries>;
 
@@ -54,15 +76,23 @@ function parseCounts(value: unknown, length: number): number[] | null {
 
 function parseWindowSeries(value: unknown, window: StatWindow): StatSeries | null {
   if (!isRecord(value)) return null;
-  if (value['bucketHours'] !== SERIES_BUCKET_HOURS[window]) return null;
-  const count = bucketCount(window);
-  const agentMinutes = parseCounts(value['agentMinutes'], count);
-  const prsMerged = parseCounts(value['prsMerged'], count);
-  const linesAdded = parseCounts(value['linesAdded'], count);
-  const linesDeleted = parseCounts(value['linesDeleted'], count);
-  if (!agentMinutes || !prsMerged || !linesAdded || !linesDeleted) return null;
   const bucketHours = SERIES_BUCKET_HOURS[window];
-  return { bucketHours, agentMinutes, prsMerged, linesAdded, linesDeleted };
+  if (value['bucketHours'] !== bucketHours) return null;
+  const count = bucketCount(window);
+  // An empty array marks a missing or malformed one: a valid one has `count` entries.
+  const counts = (key: SeriesCounts): number[] => parseCounts(value[key], count) ?? [];
+  const series: StatSeries = {
+    bucketHours,
+    agentMinutes: counts('agentMinutes'),
+    prsMerged: counts('prsMerged'),
+    linesAdded: counts('linesAdded'),
+    linesDeleted: counts('linesDeleted'),
+    runs: counts('runs'),
+    actions: counts('actions'),
+    checks: counts('checks'),
+    caught: counts('caught'),
+  };
+  return SERIES_COUNTS.every((key) => series[key].length === count) ? series : null;
 }
 
 /** Every window's series from untrusted JSON, or null when absent or anything is malformed. */

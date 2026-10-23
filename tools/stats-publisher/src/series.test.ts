@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { DAY_MS, HOUR_MS, MINUTE_MS } from './constants.ts';
+import { SERIES_COUNTS } from '@nomadware/site-stats';
+
 import { buildSeries } from './series.ts';
 import type { MergedPr } from './state.ts';
 import { emptyState } from './state.ts';
@@ -20,9 +22,9 @@ const pr = (mergedAt: string, linesAdded: number, linesDeleted: number): MergedP
 test('an empty store gives full-length series of zeros', () => {
   const series = buildSeries(emptyState(), NOW);
   for (const window of ['7d', '30d'] as const) {
-    const { agentMinutes, prsMerged, linesAdded, linesDeleted } = series[window];
     const length = window === '7d' ? 84 : 120;
-    for (const values of [agentMinutes, prsMerged, linesAdded, linesDeleted]) {
+    for (const key of SERIES_COUNTS) {
+      const values = series[window][key];
       assert.equal(values.length, length);
       assert.ok(values.every((value) => value === 0));
     }
@@ -90,4 +92,60 @@ test('nothing older than the window or newer than now leaks in', () => {
   const { '30d': month } = buildSeries(state, NOW);
   assert.ok(month.prsMerged.every((value) => value === 0));
   assert.ok(month.linesAdded.every((value) => value === 0));
+});
+
+test('tool calls land per minute; a run counts once, in its first bucket inside the series', () => {
+  const state = emptyState();
+  state.transcripts['a'] = {
+    offset: 1,
+    lastActivityMs: 0,
+    minutes: {
+      [minuteKey('2026-10-22T18:10:00Z')]: [MINUTE_MS, 4],
+      [minuteKey('2026-10-22T16:05:00Z')]: [MINUTE_MS, 3], // its first bucket in the 7d series
+      [minuteKey('2026-10-15T17:59:00Z')]: [MINUTE_MS, 9], // before the 7d series: 30d only
+    },
+  };
+  state.transcripts['b'] = {
+    offset: 1,
+    lastActivityMs: 0,
+    minutes: { [minuteKey('2026-10-22T18:30:00Z')]: [MINUTE_MS, 1] },
+  };
+  state.transcripts['old'] = {
+    offset: 1,
+    lastActivityMs: 0,
+    minutes: { [minuteKey('2026-09-01T00:00:00Z')]: [MINUTE_MS, 1] },
+  };
+  const { '7d': week, '30d': month } = buildSeries(state, NOW);
+  assert.deepEqual([week.actions[83], week.actions[82]], [5, 3]);
+  assert.deepEqual([week.runs[83], week.runs[82]], [1, 1]);
+  assert.equal(
+    week.runs.reduce((sum, value) => sum + value, 0),
+    2,
+  );
+  // 30d: a's first bucket is 15 Oct 12:00–18:00 (the 91st), b's the last.
+  assert.deepEqual([month.runs[90], month.runs[118], month.runs[119]], [1, 0, 1]);
+  assert.equal(month.actions[90], 9);
+  assert.equal(
+    month.actions.reduce((sum, value) => sum + value, 0),
+    17,
+  );
+});
+
+test('gate runs and failures count in the bucket they finished in', () => {
+  const state = emptyState();
+  state.journal.checksMs = [
+    at('2026-10-22T18:00:00Z'),
+    at('2026-10-22T19:00:00Z'),
+    at('2026-10-22T17:59:59Z'),
+    at('2026-09-01T00:00:00Z'), // before every series
+  ];
+  state.journal.caughtMs = [at('2026-10-22T19:00:00Z'), at('2026-10-15T10:00:00Z')];
+  const { '7d': week, '30d': month } = buildSeries(state, NOW);
+  assert.deepEqual([week.checks[83], week.checks[82]], [2, 1]);
+  assert.equal(
+    week.checks.reduce((sum, value) => sum + value, 0),
+    3,
+  );
+  assert.deepEqual([week.caught[83], week.caught.reduce((sum, value) => sum + value, 0)], [1, 1]);
+  assert.deepEqual([month.caught[119], month.caught[89]], [1, 1]);
 });
