@@ -29,8 +29,10 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 >
   <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
   <div class="head">
-    <span>agent activity · last</span>
-    <span class="seg" role="group" aria-label="Time range">
+    <span>agent activity</span>
+    <span class="range"
+      >last
+      <span class="seg" role="group" aria-label="Time range">
       {
         STAT_WINDOWS.map((range) => (
           <button
@@ -42,7 +44,8 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
           </button>
         ))
       }
-    </span>
+      </span></span
+    >
     <span class="live"
       ><span class="dot" aria-hidden="true"></span>updated <RelativeTime
         iso={snapshot.generatedAt}
@@ -80,6 +83,13 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     color: var(--dim);
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  /* "last" travels with its toggle: they read as one control ("last 7d / 30d"). */
+  .range {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .live {
@@ -175,6 +185,10 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
   }
 
   @media (max-width: 640px) {
+    .range {
+      margin-left: auto;
+    }
+
     /* Room for the "updated" footer (.live) under the legend. */
     .stats {
       position: relative;
