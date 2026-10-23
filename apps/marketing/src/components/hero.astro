@@ -40,12 +40,26 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
     padding: 96px 0 60px;
   }
 
+  /* Full bleed (the frame clips the overhang sideways), reaching up behind the nav and down past
+     the hero, faded out at both ends so the field never stops at an edge. Absolutely positioned,
+     so it never affects layout. A canvas is a replaced element: insets alone don't size it (it
+     would fall back to its intrinsic size), so width and height are explicit. */
   .dots {
+    --dots-above: 96px;
+    --dots-below: 200px;
+
     position: absolute;
-    inset: 0;
+    top: calc(var(--dots-above) * -1);
+    left: calc(50% - 50vw);
     z-index: -1;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: calc(100% + var(--dots-above) + var(--dots-below));
+    mask-image: linear-gradient(
+      transparent,
+      #000 var(--dots-above),
+      #000 calc(100% - var(--dots-below)),
+      transparent
+    );
   }
 
   /* The text halo: an ink veil hugging the copy (fit-content: the widest line, so the text sets

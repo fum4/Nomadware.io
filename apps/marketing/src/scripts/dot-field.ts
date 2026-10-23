@@ -36,7 +36,8 @@ export function initDotField(): void {
     canvas.width = width;
     canvas.height = height;
     if (dots.length === 0) {
-      const count = isMobileViewport() ? DOT_FIELD.countMobile : DOT_FIELD.countDesktop;
+      const density = isMobileViewport() ? DOT_FIELD.densityMobile : DOT_FIELD.densityDesktop;
+      const count = Math.round(((width / scale) * (height / scale) * density) / 10_000);
       dots = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,

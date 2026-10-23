@@ -112,8 +112,9 @@ export const GRID_WARP = {
 } as const;
 
 export const DOT_FIELD = {
-  countDesktop: 253,
-  countMobile: 120,
+  /** Dots per 10,000 CSS px² of canvas: the field keeps its density at any size. */
+  densityDesktop: 5.6,
+  densityMobile: 9,
   /** Canvas pixels per CSS pixel; sizes and speeds below are in canvas px. */
   canvasScale: 2,
   highlightShare: 0.15,
