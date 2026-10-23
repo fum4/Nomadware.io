@@ -37,7 +37,8 @@ export function initGridWarp(): void {
   /** The bent stretches only: stroked a second time with the glow. */
   let bentPath = new Path2D();
   let ratio = 1;
-  let lastMove = -Infinity;
+  // The well holds while the cursor is on the page, still or not; it drains only once it leaves.
+  let present = false;
   let frameId = 0;
 
   const readStyle = (): void => {
@@ -125,15 +126,18 @@ export function initGridWarp(): void {
   const tick = (now: number): void => {
     const elapsed = lastTick === 0 ? 16 : now - lastTick;
     lastTick = now;
-    const moving = now - lastMove < GRID_WARP.idleMs;
     well.x += (pointer.x - well.x) * GRID_WARP.follow;
     well.y += (pointer.y - well.y) * GRID_WARP.follow;
     // Filling: a quick ease toward full. Draining: exponential, so it reaches restDepth exactly
-    // fadeOutMs after the pointer stopped — fast at first, ever slower (an ease-out).
-    if (moving) well.depth += (1 - well.depth) * GRID_WARP.ease;
+    // fadeOutMs after the pointer left — fast at first, ever slower (an ease-out).
+    if (present) well.depth += (1 - well.depth) * GRID_WARP.ease;
     else well.depth *= GRID_WARP.restDepth ** (elapsed / GRID_WARP.fadeOutMs);
     draw();
-    const settled = !moving && well.depth <= GRID_WARP.restDepth;
+    // Settled either way the loop has nothing left to animate: full and on the cursor, or drained.
+    const settled = present
+      ? 1 - well.depth <= GRID_WARP.restDepth &&
+        Math.hypot(pointer.x - well.x, pointer.y - well.y) < GRID_WARP.settlePx
+      : well.depth <= GRID_WARP.restDepth;
     if (settled) lastTick = 0;
     frameId = settled ? 0 : requestAnimationFrame(tick);
   };
@@ -154,12 +158,15 @@ export function initGridWarp(): void {
       pointer.y = event.clientY;
       // Arriving from outside: the well starts under the cursor rather than sweeping in.
       if (well.depth <= GRID_WARP.restDepth) Object.assign(well, { x: pointer.x, y: pointer.y });
-      lastMove = performance.now();
+      present = true;
       wake();
     },
     { passive: true },
   );
-  document.documentElement.addEventListener('pointerleave', () => (lastMove = -Infinity));
+  document.documentElement.addEventListener('pointerleave', () => {
+    present = false;
+    wake();
+  });
   window.addEventListener('scroll', redraw, { passive: true });
   window.addEventListener('resize', () => {
     resize();
