@@ -12,6 +12,7 @@ import { emptyState } from './state.ts';
 const NOW = Date.parse('2026-10-22T19:23:00Z');
 const at = (iso: string): number => Date.parse(iso);
 const minuteKey = (iso: string): string => String(Math.floor(at(iso) / MINUTE_MS));
+const run = (iso: string, unit: string) => ({ atMs: at(iso), unit });
 const pr = (mergedAt: string, linesAdded: number, linesDeleted: number): MergedPr => ({
   mergedAtMs: at(mergedAt),
   repo: 'o/r',
@@ -28,6 +29,8 @@ test('an empty store gives full-length series of zeros', () => {
       assert.equal(values.length, length);
       assert.ok(values.every((value) => value === 0));
     }
+    assert.equal(series[window].caughtFixMinutes.length, length);
+    assert.ok(series[window].caughtFixMinutes.every((value) => value === null));
   }
 });
 
@@ -139,7 +142,10 @@ test('gate runs and failures count in the bucket they finished in', () => {
     at('2026-10-22T17:59:59Z'),
     at('2026-09-01T00:00:00Z'), // before every series
   ];
-  state.journal.caughtMs = [at('2026-10-22T19:00:00Z'), at('2026-10-15T10:00:00Z')];
+  state.journal.failed = [
+    { atMs: at('2026-10-22T19:00:00Z'), unit: 'pc-a.pre-push.service' },
+    { atMs: at('2026-10-15T10:00:00Z'), unit: 'pc-b.pre-push.service' },
+  ];
   const { '7d': week, '30d': month } = buildSeries(state, NOW);
   assert.deepEqual([week.checks[83], week.checks[82]], [2, 1]);
   assert.equal(
@@ -148,4 +154,25 @@ test('gate runs and failures count in the bucket they finished in', () => {
   );
   assert.deepEqual([week.caught[83], week.caught.reduce((sum, value) => sum + value, 0)], [1, 1]);
   assert.deepEqual([month.caught[119], month.caught[89]], [1, 1]);
+});
+
+test("a bucket's fix time is its longest, and none while any of its issues is unfixed", () => {
+  const state = emptyState();
+  state.journal.failed = [
+    run('2026-10-22T10:00:00Z', 'a'), // fixed 10:30 → 30 min
+    run('2026-10-22T11:00:00Z', 'b'), // fixed 13:00 → 120 min, same bucket
+    run('2026-10-22T16:10:00Z', 'a'), // fixed 16:20 → 10 min
+    run('2026-10-22T16:40:00Z', 'c'), // never passes: unfixed
+  ];
+  state.journal.passed = [
+    run('2026-10-22T10:30:00Z', 'a'),
+    run('2026-10-22T13:00:00Z', 'b'),
+    run('2026-10-22T16:20:00Z', 'a'),
+  ];
+  const { '7d': week } = buildSeries(state, NOW);
+  // 2h buckets: 10–12 is 79, 16–18 is 82.
+  assert.equal(week.caughtFixMinutes[79], 120);
+  assert.equal(week.caughtFixMinutes[82], null);
+  assert.equal(week.caughtFixMinutes[80], null);
+  assert.deepEqual([week.caught[79], week.caught[82]], [2, 2]);
 });

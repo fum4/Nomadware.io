@@ -4,8 +4,8 @@ import { STAT_WINDOW_DAYS } from './windows.ts';
 
 // The snapshot's time series: what the site's activity chart draws. Optional in the snapshot (an
 // older publisher leaves it out; the card then shows its numbers without the chart), and dropped
-// as a whole when malformed or incomplete (a series from before runs/actions/checks/caught
-// counts as incomplete) — a chart bug never takes the numbers down with it.
+// as a whole when malformed or incomplete (a series from before runs/actions/checks/caught and
+// caughtFixMinutes counts as incomplete) — a chart bug never takes the numbers down with it.
 
 const HOUR_MS = 3_600_000;
 const HOURS_PER_DAY = 24;
@@ -34,10 +34,16 @@ export interface StatSeries {
   /** Gate runs that finished / failed per bucket (the window's `checks` / `caught`). */
   checks: number[];
   caught: number[];
+  /**
+   * How long the bucket's caught issues took to fix, in minutes: the longest among them, from its
+   * gate's first failure in a row to that gate's next pass. null when the bucket caught nothing
+   * or any of its issues isn't fixed yet.
+   */
+  caughtFixMinutes: (number | null)[];
 }
 
-/** Every per-bucket array of a series: one entry per bucket, each a non-negative integer. */
-export type SeriesCounts = Exclude<keyof StatSeries, 'bucketHours'>;
+/** The per-bucket counts of a series: one entry per bucket, each a non-negative integer. */
+export type SeriesCounts = Exclude<keyof StatSeries, 'bucketHours' | 'caughtFixMinutes'>;
 
 export const SERIES_COUNTS: readonly SeriesCounts[] = [
   'agentMinutes',
@@ -74,6 +80,14 @@ function parseCounts(value: unknown, length: number): number[] | null {
   return Array.isArray(value) && value.length === length && value.every(isCount) ? value : null;
 }
 
+const isCountOrNull = (value: unknown): value is number | null => value === null || isCount(value);
+
+function parseNullableCounts(value: unknown, length: number): (number | null)[] | null {
+  return Array.isArray(value) && value.length === length && value.every(isCountOrNull)
+    ? value
+    : null;
+}
+
 function parseWindowSeries(value: unknown, window: StatWindow): StatSeries | null {
   if (!isRecord(value)) return null;
   const bucketHours = SERIES_BUCKET_HOURS[window];
@@ -91,8 +105,12 @@ function parseWindowSeries(value: unknown, window: StatWindow): StatSeries | nul
     actions: counts('actions'),
     checks: counts('checks'),
     caught: counts('caught'),
+    caughtFixMinutes: parseNullableCounts(value['caughtFixMinutes'], count) ?? [],
   };
-  return SERIES_COUNTS.every((key) => series[key].length === count) ? series : null;
+  const complete = [...SERIES_COUNTS, 'caughtFixMinutes' as const].every(
+    (key) => series[key].length === count,
+  );
+  return complete ? series : null;
 }
 
 /** Every window's series from untrusted JSON, or null when absent or anything is malformed. */

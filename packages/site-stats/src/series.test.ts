@@ -16,6 +16,9 @@ const windowSeries = (bucketHours: number, buckets: number) => ({
   actions: counts(buckets, (index) => index * 7),
   checks: counts(buckets, () => 2),
   caught: counts(buckets, (index) => (index === 5 ? 3 : 0)),
+  caughtFixMinutes: Array.from({ length: buckets }, (_, index): number | null =>
+    index === 5 ? 14 : null,
+  ),
 });
 const SERIES = { '7d': windowSeries(2, 84), '30d': windowSeries(6, 120) };
 
@@ -67,12 +70,16 @@ test('rejects bad lengths, sizes, negatives, fractions, text and a missing array
   const negativeRuns = [...SERIES['7d'].runs];
   negativeRuns[0] = -1;
   assert.equal(parseStatsSeries(withWeek({ runs: negativeRuns })), null);
+  const fractionFix = [...SERIES['7d'].caughtFixMinutes];
+  fractionFix[5] = 1.5;
+  assert.equal(parseStatsSeries(withWeek({ caughtFixMinutes: fractionFix })), null);
+  assert.equal(parseStatsSeries(withWeek({ caughtFixMinutes: [14] })), null);
   assert.equal(parseStatsSeries({ '7d': SERIES['7d'] }), null);
   assert.equal(parseStatsSeries(undefined), null);
 });
 
 test('a series from before the per-stat arrays is dropped whole', () => {
-  for (const key of ['runs', 'actions', 'checks', 'caught']) {
+  for (const key of ['runs', 'actions', 'checks', 'caught', 'caughtFixMinutes']) {
     assert.equal(parseStatsSeries(withWeek({ [key]: undefined })), null);
   }
 });

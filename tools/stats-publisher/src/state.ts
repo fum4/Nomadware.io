@@ -5,7 +5,7 @@ import { STATE_FILE_NAME } from './constants.ts';
 import { log } from './logger.ts';
 
 // The incremental store: everything a run needs so it reads only what is new since the last one.
-// Local to the box, never published (it names files and repos; only aggregates leave).
+// Local to the box, never published (it names files, repos and gate units; only aggregates leave).
 
 /** Per-minute totals of one transcript: [active ms, tool_use count], keyed by epoch minute. */
 export type MinuteTotals = Record<string, [number, number]>;
@@ -25,22 +25,39 @@ export interface MergedPr {
   linesDeleted: number;
 }
 
+/** A gate run's end: when, and which gate unit (`pc-<worktree>.pre-push|pre-merge`, local only). */
+export interface GateRun {
+  atMs: number;
+  unit: string;
+}
+
+export interface JournalState {
+  cursor: string | null;
+  /** Every gate run that finished, failed or not (`checks`). */
+  checksMs: number[];
+  /** Failed gate runs (`caught`) and passing ones: what a failure's time to fix is measured to. */
+  failed: GateRun[];
+  passed: GateRun[];
+  /** Units whose failure is logged but whose run's end ("Consumed") isn't yet: it isn't a pass. */
+  failing: string[];
+}
+
 export interface State {
   version: typeof STATE_VERSION;
   transcripts: Record<string, TranscriptState>;
-  journal: { cursor: string | null; checksMs: number[]; caughtMs: number[] };
+  journal: JournalState;
   /** Merged PRs are immutable, so each one's file stats are fetched once and kept until it ages out. */
   github: { syncedThroughMs: number | null; prs: Record<string, MergedPr> };
 }
 
 /** Bump on any shape change: an older store is discarded and the next run backfills. */
-const STATE_VERSION = 1;
+const STATE_VERSION = 2;
 
 export function emptyState(): State {
   return {
     version: STATE_VERSION,
     transcripts: {},
-    journal: { cursor: null, checksMs: [], caughtMs: [] },
+    journal: { cursor: null, checksMs: [], failed: [], passed: [], failing: [] },
     github: { syncedThroughMs: null, prs: {} },
   };
 }

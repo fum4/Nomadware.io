@@ -1,16 +1,18 @@
 import { spawnSync } from 'node:child_process';
 
 import { GATE_JOURNAL_PATTERN } from '../constants.ts';
-import type { State } from '../state.ts';
+import type { JournalState, State } from '../state.ts';
 
-// Git-hook gate runs from the user journal: systemd logs "<unit>: Consumed …" when a gate unit
-// finishes (a run) and "<unit>: Failed with result …" when it failed (a catch). Only timestamps
-// are kept; unit names (they carry worktree slugs) never leave this function.
+// Git-hook gate runs from the user journal: systemd logs "<unit>: Failed with result …" when a gate
+// unit failed (a catch), then "<unit>: Consumed …" as any run ends (a check). A run that ends
+// without a failure logged first is a pass. Unit names (they carry worktree slugs) stay in the
+// local store, to pair a failure with its unit's next pass; they are never published.
 
 const JOURNAL_MAX_BYTES = 256 * 1024 * 1024;
 
-interface GateEvent {
+export interface GateEvent {
   atMs: number;
+  unit: string;
   failed: boolean;
   cursor: string;
 }
@@ -39,7 +41,25 @@ export function parseGateEvent(line: string): GateEvent | null {
   }
   const atMs = Math.floor(Number(realtimeUs) / 1000);
   if (!Number.isFinite(atMs)) return null;
-  return { atMs, failed: message.includes(': Failed with result'), cursor };
+  const unit = message.slice(0, message.indexOf(': '));
+  if (!unit) return null;
+  return { atMs, unit, failed: message.includes(': Failed with result'), cursor };
+}
+
+/** One gate line into the store: a failure, or a run's end (a pass unless its unit just failed). */
+export function foldGateEvent(journal: JournalState, event: GateEvent): void {
+  const { atMs, unit } = event;
+  if (event.failed) {
+    journal.failed.push({ atMs, unit });
+    if (!journal.failing.includes(unit)) journal.failing.push(unit);
+    return;
+  }
+  journal.checksMs.push(atMs);
+  if (journal.failing.includes(unit)) {
+    journal.failing = journal.failing.filter((other) => other !== unit);
+  } else {
+    journal.passed.push({ atMs, unit });
+  }
 }
 
 export interface JournalScan {
@@ -75,7 +95,7 @@ function sinceSeconds(ms: number): string {
 }
 
 function latestEventMs(state: State): number {
-  return Math.max(0, ...state.journal.checksMs, ...state.journal.caughtMs);
+  return Math.max(0, ...state.journal.checksMs, ...state.journal.failed.map((run) => run.atMs));
 }
 
 /** Read gate events since the saved cursor (first run: since `cutoffMs`); drop older ones. */
@@ -98,10 +118,11 @@ export function updateJournal(state: State, cutoffMs: number): JournalScan {
     const event = parseGateEvent(line);
     if (!event) continue;
     events += 1;
-    (event.failed ? journal.caughtMs : journal.checksMs).push(event.atMs);
+    foldGateEvent(journal, event);
     journal.cursor = event.cursor;
   }
   journal.checksMs = journal.checksMs.filter((atMs) => atMs >= cutoffMs);
-  journal.caughtMs = journal.caughtMs.filter((atMs) => atMs >= cutoffMs);
+  journal.failed = journal.failed.filter((run) => run.atMs >= cutoffMs);
+  journal.passed = journal.passed.filter((run) => run.atMs >= cutoffMs);
   return { events };
 }

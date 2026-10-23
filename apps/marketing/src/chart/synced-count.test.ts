@@ -14,6 +14,7 @@ const series = (patch: Partial<StatSeries>): StatSeries => ({
   actions: [0, 0, 0, 0, 0],
   checks: [0, 0, 0, 0, 0],
   caught: [0, 0, 0, 0, 0],
+  caughtFixMinutes: [null, null, null, null, null],
   ...patch,
 });
 
