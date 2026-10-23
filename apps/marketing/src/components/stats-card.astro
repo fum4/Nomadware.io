@@ -175,24 +175,59 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
   }
 
   @media (max-width: 640px) {
+    /* Room for the "updated" footer (.live) under the legend. */
+    .stats {
+      position: relative;
+      padding-bottom: 40px;
+    }
+
     .head {
-      flex-wrap: wrap;
       padding: 11px 14px;
     }
 
-    /* Its own row on phones, whatever the font: a wrap that depends on glyph widths shifts the
-       card when the web font swaps in. */
+    /* A footer row on phones, so the header keeps to one line whatever the font (a wrap that
+       depends on glyph widths shifts the card when the web font swaps in). */
     .live {
-      flex-basis: 100%;
+      position: absolute;
+      left: 14px;
+      bottom: 13px;
       margin-left: 0;
+    }
+
+    /* A thumb-sized toggle: a bigger chip, and a hit area 6px taller than it on each side (the
+       ::after). Its corners are the buttons' own, so the group doesn't clip that area. */
+    .seg {
+      overflow: visible;
+    }
+
+    .seg button {
+      position: relative;
+      padding: 6px 13px;
+      font-size: 12px;
+    }
+
+    .seg button::after {
+      content: '';
+      position: absolute;
+      inset: -6px 0;
+    }
+
+    .seg button:first-child {
+      border-radius: calc(var(--radius-sm) - 1px) 0 0 calc(var(--radius-sm) - 1px);
+    }
+
+    .seg button:last-child {
+      border-radius: 0 calc(var(--radius-sm) - 1px) calc(var(--radius-sm) - 1px) 0;
     }
 
     .legend {
       grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--line);
     }
 
     .legend div {
-      padding: 12px 14px;
+      gap: 2px;
+      padding: 13px 12px;
     }
 
     .legend div:nth-child(3n) {
@@ -204,7 +239,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     }
 
     .legend dd {
-      font-size: 18px;
+      font-size: 26px;
     }
 
     .legend dt {
