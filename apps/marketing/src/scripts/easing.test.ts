@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { easeInCubic, easeOutCubic, easeOutExpo } from './easing';
+import { easeInOutQuint, easeOutCubic, easeOutExpo } from './easing';
 
 describe('easeOutCubic', () => {
   it('runs 0 → 1, most of the way early', () => {
@@ -10,11 +10,13 @@ describe('easeOutCubic', () => {
   });
 });
 
-describe('easeInCubic', () => {
-  it('runs 0 → 1, most of the way late', () => {
-    expect(easeInCubic(0)).toBe(0);
-    expect(easeInCubic(1)).toBe(1);
-    expect(easeInCubic(0.5)).toBe(0.125);
+describe('easeInOutQuint', () => {
+  it('crawls at both ends, half way at the midpoint', () => {
+    expect(easeInOutQuint(0)).toBe(0);
+    expect(easeInOutQuint(0.5)).toBe(0.5);
+    expect(easeInOutQuint(1)).toBe(1);
+    expect(easeInOutQuint(0.1)).toBeLessThan(0.001);
+    expect(easeInOutQuint(0.9)).toBeGreaterThan(0.999);
   });
 });
 
