@@ -244,7 +244,7 @@ html:not(.js) .term-send {
 }
 
 /* The surge flashes: under reduced motion the hover glow fades in plainly instead. The one CSS
-   copy of the motion policy's query (scripts/motion-policy.ts); the dev server opts out
+   reduced-motion exception left on the site (README § Motion); the dev server opts out
    (.full-motion, FULL_MOTION_CLASS). */
 @media (prefers-reduced-motion: reduce) {
   html:not(.full-motion) .term-send:hover {

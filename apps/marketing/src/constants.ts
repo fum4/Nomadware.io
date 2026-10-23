@@ -7,9 +7,7 @@ import type { StatWindow } from '@nomadware/site-stats';
 export const MOBILE_QUERY = '(max-width: 640px)';
 /** A device where hovering a mouse is the primary input (no auto-focus, no cursor effects otherwise). */
 export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
-/** Only the flashing effects listen to it (scripts/motion-policy.ts). */
-export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-/** On <html> in dev only: the motion policy ignores reduced motion (base-layout.astro). */
+/** On <html> in dev only: the send button's surge ignores reduced motion (README § Motion). */
 export const FULL_MOTION_CLASS = 'full-motion';
 
 export const SHA_LENGTH = 7;
@@ -20,7 +18,7 @@ export const SHA_LENGTH = 7;
  */
 export const INTRO_GAP_MS = 500;
 /** The headline shows as plain text for this long, then the scramble runs over it. */
-export const INTRO_HEADLINE_DELAY_MS = 800;
+export const INTRO_HEADLINE_DELAY_MS = 1_300;
 /** The tags start powering on this long before the headline scramble (≤ INTRO_HEADLINE_DELAY_MS). */
 export const INTRO_TAGS_LEAD_MS = 500;
 /**
@@ -138,10 +136,10 @@ export const DOT_FIELD = {
    * On load every dot starts fading in (0 → its colour) on the field's first frame, each over its
    * own random span between appearMinMs and appearMaxMs, eased out (bright early): the field
    * condenses rather than pops in.
-   * A fade, not a flash, so it plays whatever prefers-reduced-motion says (scripts/motion-policy.ts).
+   * Plays whatever prefers-reduced-motion says (README § Motion).
    */
-  appearMinMs: 400,
-  appearMaxMs: 1_600,
+  appearMinMs: 800,
+  appearMaxMs: 3_200,
   /** How far past the content column the dots' home reaches, CSS px. */
   homeSpillPx: 96,
   /** Per frame, the share of its distance outside home a dot's speed gains back toward it. */

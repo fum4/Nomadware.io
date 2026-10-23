@@ -22,8 +22,7 @@ const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
  * tags rotate. The tags power on INTRO_TAGS_LEAD_MS before the scramble, never lengthening
  * anything. The wordmark never waits
  * on a card nobody scrolls to: it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at the
- * latest. Plays whatever
- * `prefers-reduced-motion` says; only the tags' flicker swaps for a fade (scripts/motion-policy.ts).
+ * latest. Plays whatever `prefers-reduced-motion` says (README § Motion).
  */
 export async function playIntro(): Promise<void> {
   const countUp = initStats();

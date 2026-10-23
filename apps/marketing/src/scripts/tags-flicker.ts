@@ -1,5 +1,4 @@
 import { TAGS_FLICKER } from '../constants';
-import { flashFallbackFadeMs, flashingAllowed } from './motion-policy';
 
 const GLOW = '0 0 6px currentColor';
 const NO_GLOW = 'none';
@@ -67,21 +66,15 @@ export const flickerDuration = (): number =>
 
 /**
  * Switch one element on from dark like a neon tube with a bad power supply, after `delay` ms;
- * resolves when it is steady, left at full opacity with no animation attached. It flashes, so
- * under reduced motion it is a plain fade at once instead (scripts/motion-policy.ts).
+ * resolves when it is steady, left at full opacity with no animation attached. Plays under reduced
+ * motion too (owner's call; README § Motion).
  */
 export async function powerOn(
   element: HTMLElement,
   delay: number,
   duration: number,
 ): Promise<void> {
-  const animation = flashingAllowed()
-    ? element.animate(flickerKeyframes(), { delay, duration, fill: 'forwards' })
-    : element.animate([{ opacity: 0 }, { opacity: 1 }], {
-        duration: flashFallbackFadeMs(),
-        easing: 'ease-out',
-        fill: 'forwards',
-      });
+  const animation = element.animate(flickerKeyframes(), { delay, duration, fill: 'forwards' });
   await animation.finished;
   // Settle explicitly: commitStyles() would freeze a `steps()` segment at its start value.
   element.style.opacity = '1';

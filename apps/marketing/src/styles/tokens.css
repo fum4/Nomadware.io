@@ -56,7 +56,7 @@
      would shift the layout (CLS). Every font shorthand carries it; body passes it down. */
   --leading: 1.28;
 
-  /* What a flashing effect becomes under prefers-reduced-motion (scripts/motion-policy.ts). */
+  /* What the send button's surge becomes under prefers-reduced-motion (README § Motion). */
   --flash-fallback-fade: 180ms;
 
   --radius: 12px;
