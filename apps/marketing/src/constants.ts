@@ -143,7 +143,7 @@ export const DOT_FIELD = {
   /**
    * Inside this many CSS px of the cursor a dot is pushed back out, hard enough that the pull and
    * the crowd behind can't press it in: the gathered dots settle as a ring round an empty core.
-   * The one source of the ring's radius: the black hole's horizon derives from it (BLACK_HOLE).
+   * The ring's radius, black hole or not (BLACK_HOLE sits inside it).
    */
   gatherCorePx: 44,
   gatherCorePush: 3,
@@ -187,25 +187,22 @@ export const DOT_FIELD = {
 export const BLACK_HOLE = {
   /** The pointer must rest (DOT_FIELD.stillPx) this long before the hole starts to form. */
   appearAfterMs: 1_000,
-  /** It grows in over growMs (ease-out) and fades over fadeMs once the pointer moves or leaves. */
-  growMs: 2_000,
+  /** It seeps in over growMs (ease-out) and fades over fadeMs once the pointer moves or leaves. */
+  growMs: 4_500,
   fadeMs: 500,
-  /** Horizon radius as a share of DOT_FIELD.gatherCorePx: the gathered dots' ring is its edge. */
-  horizonShare: 0.92,
-  /** The horizon starts at this share of its size and grows to full with the hole. */
+  /**
+   * Horizon radius at full size, well inside the dots' ring (DOT_FIELD.gatherCorePx), so empty
+   * page shows between them; it starts at horizonStartShare of it and grows with the hole.
+   */
+  horizonPx: 15,
   horizonStartShare: 0.4,
-  /** The dark falloff round it reaches this many horizon radii, starting at haloAlpha. */
+  /**
+   * The stain: solid black to coreShare of the horizon, haloAlpha at the horizon, fading to
+   * nothing at haloShare horizons out.
+   */
+  coreShare: 0.7,
+  haloAlpha: 0.6,
   haloShare: 2.6,
-  haloAlpha: 0.55,
-  /** The photon ring: just outside the horizon (share of its radius), thin, faint, softly glowing. */
-  photonRingShare: 1.08,
-  photonRingWidthPx: 0.75,
-  photonRingColor: 'rgba(255, 244, 228, 0.32)',
-  photonGlowColor: 'rgba(198, 255, 74, 0.35)',
-  photonGlowPx: 6,
-  /** What a dot freezing at the horizon fades to (gravitational redshift), in this many steps. */
-  redshiftColor: 'rgba(150, 40, 30, 0.16)',
-  redshiftLevels: 8,
 } as const;
 
 export const CONTACT = {

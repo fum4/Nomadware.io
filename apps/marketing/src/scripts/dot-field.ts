@@ -12,16 +12,14 @@ interface Dot extends Body {
   captured: boolean;
   /** When it last left the field (performance.now()), -Infinity if never. */
   releasedAt: number;
-  /** How freely it moves near the black hole this frame (1 = freely, 0 = frozen at the horizon). */
-  dilation: number;
 }
 
 const OFF_SCREEN = -9_999;
 
 /**
  * Drifting dots behind the hero. On a mouse-first desktop the cursor gathers the dots near it;
- * when it stops they settle into an even ring around it, and when it rests a black hole forms
- * there (scripts/black-hole.ts) whose horizon freezes them; when it leaves the clump diffuses
+ * when it stops they settle into an even ring around it, and when it rests a small black hole
+ * seeps in at its centre, inside the ring (scripts/black-hole.ts); when it leaves the clump diffuses
  * slowly back into the drift. The loop runs only while the hero is on screen and the tab is
  * visible.
  */
@@ -37,7 +35,7 @@ export function initDotField(): void {
   // Where the pointer last moved more than stillPx from, and when: it is still once stillMs pass.
   const anchor = { x: OFF_SCREEN, y: OFF_SCREEN, at: 0 };
   const grid = new SeparationGrid();
-  const hole: BlackHole | null = chase ? createBlackHole(context, scale) : null;
+  const hole: BlackHole | null = chase ? createBlackHole(scale) : null;
   let dots: Dot[] = [];
   // Where dots live and drift back to (canvas px): the content column, barely spilling past it,
   // over the hero's own height. The canvas reaches past it so a pushed dot can fly to the edge.
@@ -71,7 +69,6 @@ export function initDotField(): void {
         highlight: Math.random() < DOT_FIELD.highlightShare,
         captured: false,
         releasedAt: Number.NEGATIVE_INFINITY,
-        dilation: 1,
       }));
     }
   };
@@ -112,11 +109,9 @@ export function initDotField(): void {
       dot.vx *= DOT_FIELD.maxSpeed / speed;
       dot.vy *= DOT_FIELD.maxSpeed / speed;
     }
-    // Near the black hole its motion slows as an observer far away sees it, to a stop at the
-    // horizon. The canvas edge stops a dot; home pulls it back from there.
-    dot.dilation = hole ? hole.dilationAt(dot.x, dot.y) : 1;
-    dot.x = Math.min(canvas.width, Math.max(0, dot.x + dot.vx * dt * dot.dilation));
-    dot.y = Math.min(canvas.height, Math.max(0, dot.y + dot.vy * dt * dot.dilation));
+    // The canvas edge stops a dot; home pulls it back from there.
+    dot.x = Math.min(canvas.width, Math.max(0, dot.x + dot.vx * dt));
+    dot.y = Math.min(canvas.height, Math.max(0, dot.y + dot.vy * dt));
   };
 
   // A dot's separation radius (canvas px): the packing distance, widened while it diffuses.
@@ -151,11 +146,7 @@ export function initDotField(): void {
     hole?.draw(context);
     for (const dot of dots) {
       const size = dot.highlight ? DOT_FIELD.highlightSize : DOT_FIELD.size;
-      context.fillStyle = hole
-        ? hole.dotColor(dot.highlight, dot.dilation)
-        : dot.highlight
-          ? DOT_FIELD.highlightColor
-          : DOT_FIELD.color;
+      context.fillStyle = dot.highlight ? DOT_FIELD.highlightColor : DOT_FIELD.color;
       context.fillRect(dot.x, dot.y, size, size);
     }
   };

@@ -15,9 +15,10 @@ describe('releaseEnvelope', () => {
 
 describe('cursorPull', () => {
   it('pushes out inside the core and pulls in beyond it, harder when closer', () => {
-    expect(cursorPull(DOT_FIELD.gatherCorePx / 2)).toBeGreaterThan(0);
-    const near = cursorPull(DOT_FIELD.gatherCorePx + 10);
-    const far = cursorPull(DOT_FIELD.gatherCorePx + 100);
+    const core = DOT_FIELD.gatherCorePx;
+    expect(cursorPull(core / 2)).toBeGreaterThan(0);
+    const near = cursorPull(core + 10);
+    const far = cursorPull(core + 100);
     expect(near).toBeLessThan(far);
     expect(far).toBeLessThan(0);
   });
