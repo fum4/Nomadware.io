@@ -91,7 +91,10 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     white-space: nowrap;
   }
 
+  /* Centred on the text's x-height, not its line box: flex centring leaves it 1px high. */
   .dot {
+    position: relative;
+    top: 1px;
     width: 6px;
     height: 6px;
     border-radius: 50%;
