@@ -1,33 +1,20 @@
 import { CURSOR_FIELD, DOT_FIELD } from '../constants';
 import type { BlackHole } from './black-hole';
 import { createBlackHole } from './black-hole';
-import type { FlungBody } from './dot-burst';
 import { burst, isFlung } from './dot-burst';
 import { cursorPull, releaseEnvelope, ringRadius } from './dot-forces';
+import { NO_POINTER, trackPointer } from './dot-pointer';
 import { SeparationGrid } from './dot-separation';
+import type { Dot, Home } from './dot-spawn';
+import { appearAlpha, spawnDots } from './dot-spawn';
 import { hasFinePointer, isMobileViewport } from './motion';
-
-interface Dot extends FlungBody {
-  highlight: boolean;
-  /** Inside the cursor's field this frame. */
-  captured: boolean;
-  /** When it last left the field (performance.now()), -Infinity if never. */
-  releasedAt: number;
-  /** Its own ring radius around the cursor: a fixed nudge and a wobble phase (ringRadius). */
-  ringOffsetPx: number;
-  ringPhase: number;
-  /** How long its fade-in on load takes, from the field's first frame. */
-  appearMs: number;
-}
-
-const OFF_SCREEN = -9_999;
 
 /**
  * Drifting dots behind the hero. On a mouse-first desktop the cursor gathers the dots near it;
  * when it stops they settle into an even ring around it, and when it rests a small black hole
- * seeps in at its centre, inside the ring (scripts/black-hole.ts); when it leaves the clump diffuses
- * slowly back into the drift. The loop runs only while the hero is on screen and the tab is
- * visible.
+ * seeps in at its centre, inside the ring (scripts/black-hole.ts); when it leaves the clump
+ * diffuses slowly back into the drift. The loop runs only while the hero is on screen and the tab
+ * is visible.
  */
 export function initDotField(): void {
   const canvas = document.querySelector<HTMLCanvasElement>('[data-dot-field]');
@@ -37,9 +24,8 @@ export function initDotField(): void {
 
   const chase = hasFinePointer() && !isMobileViewport();
   const scale = DOT_FIELD.canvasScale;
-  const pointer = { x: OFF_SCREEN, y: OFF_SCREEN };
-  // Where the pointer last moved more than stillPx from, and when: it is still once stillMs pass.
-  const anchor = { x: OFF_SCREEN, y: OFF_SCREEN, at: 0 };
+  const tracked = chase ? trackPointer(host, canvas, scale) : NO_POINTER;
+  const pointer = tracked.position;
   const grid = new SeparationGrid();
   let dots: Dot[] = [];
   // Its collapse is a blast: the dots near it fly out, then drift home (scripts/dot-burst.ts).
@@ -50,7 +36,7 @@ export function initDotField(): void {
     : null;
   // Where dots live and drift back to (canvas px): the content column, barely spilling past it,
   // over the hero's own height. The canvas reaches past it so a pushed dot can fly to the edge.
-  const home = { left: 0, right: 0, top: 0, bottom: 0 };
+  const home: Home = { left: 0, right: 0, top: 0, bottom: 0 };
   let onScreen = true;
   let frame = 0;
   let lastStep = 0;
@@ -73,22 +59,7 @@ export function initDotField(): void {
     home.bottom = (column.bottom - box.top) * scale;
     if (dots.length === 0) {
       const density = isMobileViewport() ? DOT_FIELD.densityMobile : DOT_FIELD.densityDesktop;
-      const area = ((home.right - home.left) / scale) * ((home.bottom - home.top) / scale);
-      const count = Math.round((area * density) / 10_000);
-      dots = Array.from({ length: count }, () => ({
-        x: home.left + Math.random() * (home.right - home.left),
-        y: home.top + Math.random() * (home.bottom - home.top),
-        vx: (Math.random() - 0.5) * DOT_FIELD.initialSpeed,
-        vy: (Math.random() - 0.5) * DOT_FIELD.initialSpeed,
-        highlight: Math.random() < DOT_FIELD.highlightShare,
-        captured: false,
-        releasedAt: Number.NEGATIVE_INFINITY,
-        flungAt: Number.NEGATIVE_INFINITY,
-        ringOffsetPx: (Math.random() * 2 - 1) * DOT_FIELD.ringScatterPx,
-        ringPhase: Math.random() * 2 * Math.PI,
-        appearMs:
-          DOT_FIELD.appearMinMs + Math.random() * (DOT_FIELD.appearMaxMs - DOT_FIELD.appearMinMs),
-      }));
+      dots = spawnDots(home, density, scale);
     }
   };
 
@@ -148,10 +119,11 @@ export function initDotField(): void {
   };
 
   const step = (now: number, dt: number): void => {
-    const active = pointer.x !== OFF_SCREEN;
-    const still = active && now - anchor.at > DOT_FIELD.stillMs;
+    const active = tracked.active();
+    const stillFor = tracked.stillForMs(now);
+    const still = active && stillFor > DOT_FIELD.stillMs;
     const reach = CURSOR_FIELD.radiusPx * scale;
-    hole?.update(now, active ? pointer : null, active ? now - anchor.at : 0);
+    hole?.update(now, active ? pointer : null, active ? stillFor : 0);
     for (const dot of dots) {
       const captured = active && Math.hypot(dot.x - pointer.x, dot.y - pointer.y) < reach;
       if (dot.captured && !captured) dot.releasedAt = now;
@@ -170,12 +142,10 @@ export function initDotField(): void {
     context.clearRect(0, 0, canvas.width, canvas.height);
     hole?.draw(context);
     const sinceFirst = now - firstFrame;
-    const appearing = sinceFirst < DOT_FIELD.appearMaxMs;
     for (const dot of dots) {
       const size = dot.highlight ? DOT_FIELD.highlightSize : DOT_FIELD.size;
-      if (appearing) {
-        context.globalAlpha = Math.min(1, sinceFirst / dot.appearMs);
-      }
+      const alpha = appearAlpha(dot, sinceFirst);
+      if (alpha !== null) context.globalAlpha = alpha;
       context.fillStyle = dot.highlight ? DOT_FIELD.highlightColor : DOT_FIELD.color;
       context.fillRect(dot.x, dot.y, size, size);
     }
@@ -206,21 +176,5 @@ export function initDotField(): void {
   }).observe(host);
   document.addEventListener('visibilitychange', resume);
 
-  if (chase) {
-    host.addEventListener('pointermove', (event) => {
-      const bounds = canvas.getBoundingClientRect();
-      pointer.x = (event.clientX - bounds.left) * scale;
-      pointer.y = (event.clientY - bounds.top) * scale;
-      if (Math.hypot(pointer.x - anchor.x, pointer.y - anchor.y) > DOT_FIELD.stillPx * scale) {
-        anchor.x = pointer.x;
-        anchor.y = pointer.y;
-        anchor.at = event.timeStamp;
-      }
-    });
-    host.addEventListener('pointerleave', () => {
-      pointer.x = OFF_SCREEN;
-      pointer.y = OFF_SCREEN;
-    });
-  }
   resume();
 }
