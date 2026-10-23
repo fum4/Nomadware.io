@@ -8,7 +8,7 @@
 }
 
 /* Taking focus, the frame powers on like the send button's neon: a one-shot flicker of the same
-   1px border that settles lit (each time focus enters the form; moving between its fields doesn't
+   1px border, a faint glow only while it flickers, that settles lit (each time focus enters the form; moving between its fields doesn't
    replay it). Losing focus, it flickers off the same way, once it has been lit (.was-lit,
    scripts/contact/term-frame.ts; otherwise it would play on load). */
 .term:focus-within {
@@ -23,40 +23,56 @@
 @keyframes term-frame-on {
   0% {
     border-color: var(--line);
+    box-shadow: none;
   }
   5% {
     border-color: var(--sig-soft);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--sig-glow) 45%, transparent);
   }
   8% {
     border-color: var(--line);
+    box-shadow: none;
   }
   12% {
     border-color: var(--sig-soft);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--sig-glow) 45%, transparent);
   }
   15% {
     border-color: var(--line);
+    box-shadow: none;
   }
   26% {
     border-color: var(--sig-soft);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--sig-glow) 45%, transparent);
   }
   31% {
     border-color: var(--line);
+    box-shadow: none;
   }
   35% {
     border-color: var(--sig-soft);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--sig-glow) 45%, transparent);
   }
   47% {
     border-color: var(--line);
+    box-shadow: none;
   }
   50% {
     border-color: var(--sig-soft);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--sig-glow) 45%, transparent);
   }
   63% {
     border-color: var(--line);
+    box-shadow: none;
   }
-  66%,
+  66% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--sig-glow) 45%, transparent);
+  }
+  80%,
   100% {
     border-color: var(--sig-soft);
+    box-shadow: none;
   }
 }
 
