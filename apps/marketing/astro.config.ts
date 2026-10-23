@@ -42,9 +42,6 @@ export default defineConfig({
         access: 'secret',
         optional: true,
       }),
-      // TEMPORARY (NWARE-82): the stats-card variants and their switcher, for the owner to compare
-      // on a local preview. Never set on Vercel; read only in src/config/stats-variants.ts.
-      STATS_VARIANTS: envField.boolean({ context: 'server', access: 'public', default: false }),
     },
   },
   fonts: [

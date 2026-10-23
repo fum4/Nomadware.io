@@ -1,3 +1,5 @@
+import type { StatWindow } from '@nomadware/site-stats';
+
 // Tunables shared by components and client scripts. Copy lives in the components (except copy a
 // script also cycles through, like HERO_TAGS); identity in config/site.ts; data in data/.
 
@@ -18,7 +20,7 @@ export const INTRO_GAP_MS = 500;
 /** Share of the headline revealed when the tags start powering on (overlapping the scramble). */
 export const INTRO_TAGS_AT_SCRAMBLE_SHARE = 0.25;
 /**
- * Latest the wordmark starts, counted from the headline settling, when the stats strip is below
+ * Latest the wordmark starts, counted from the headline settling, when the stats card is below
  * the fold and never scrolled into view. The in-view path takes 500 + 1600 + 500 = 2.6 s, so 4 s
  * still lets a visitor who scrolls straight down see the full order before the nav gives up.
  */
@@ -181,6 +183,21 @@ export const TURNSTILE = {
   /** Shows UI only when Cloudflare needs an interaction; otherwise invisible. */
   appearance: 'interaction-only',
   action: 'contact',
+} as const;
+
+/** The range the stats card opens on. */
+export const DEFAULT_STAT_WINDOW: StatWindow = '7d';
+
+/** The stats card's activity chart (components/stats-chart.astro, scripts/stats-chart.ts). */
+export const STATS_CHART = {
+  /** The trace's SVG viewBox; stretched to the plot (preserveAspectRatio none). */
+  viewWidth: 1000,
+  viewHeight: 140,
+  /** The resting peak callout's centre stays this far (% of the plot) from either side. */
+  peakEdgePercent: 15,
+  /** The hover tooltip: px between it and the snapped point, and kept clear of the chart's edges. */
+  tipGapPx: 10,
+  tipEdgePx: 6,
 } as const;
 
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */

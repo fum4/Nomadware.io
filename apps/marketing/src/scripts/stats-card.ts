@@ -1,12 +1,16 @@
-import { COUNT_UP_DURATION_MS, COUNT_UP_VISIBLE_THRESHOLD } from '../constants';
 import type { StatKey, StatWindow } from '@nomadware/site-stats';
 import { isStatKey, isStatWindow } from '@nomadware/site-stats';
 
-import { DEFAULT_STAT_WINDOW } from '../data/stats-snapshot';
+import {
+  COUNT_UP_DURATION_MS,
+  COUNT_UP_VISIBLE_THRESHOLD,
+  DEFAULT_STAT_WINDOW,
+} from '../constants';
 import { formatStat } from '../format/format-stat';
 import { STATS_VIEWED_THRESHOLD } from './analytics/constants';
 import { track } from './analytics/track';
 import { onceVisible } from './motion';
+import { initStatsChart } from './stats-chart';
 
 interface StatElement {
   element: HTMLElement;
@@ -104,9 +108,9 @@ function show(stats: StatElement[], range: StatWindow): Promise<void> {
 }
 
 /**
- * Wire the 7d/30d toggle and hold the numbers at 0 for the intro. Returns the intro's count-up:
- * it waits until the strip is in view, then resolves when the count settles (at once if the
- * visitor already picked a range).
+ * Wire the 7d/30d toggle (numbers and chart; the chart's tooltip goes back to the peak) and hold
+ * the numbers at 0 for the intro. Returns the intro's count-up: it waits until the card is in
+ * view, then resolves when the count settles (at once if the visitor already picked a range).
  */
 export function initStats(): () => Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-stats]');
@@ -116,6 +120,7 @@ export function initStats(): () => Promise<void> {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-range]')];
   let picked = false;
   let current: StatWindow = DEFAULT_STAT_WINDOW;
+  const chart = initStatsChart(root);
 
   // Analytics only: independent of the intro's count-up, which has its own visibility gate.
   onceVisible(root, STATS_VIEWED_THRESHOLD, () => track('stats_viewed', { window: current }));
@@ -139,6 +144,7 @@ export function initStats(): () => Promise<void> {
         label.toggleAttribute('data-current', label.dataset.rangeLabel === range),
       );
       current = range;
+      chart.reset();
       track('stats_window_toggled', { window: range });
       void show(stats, range);
     }),

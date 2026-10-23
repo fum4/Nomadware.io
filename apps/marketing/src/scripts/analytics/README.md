@@ -21,8 +21,8 @@ The choice lives in `localStorage['nw-consent']` (`granted` / `denied`). "no tha
 
 | Event | Fired from |
 |---|---|
-| `stats_viewed` {window} | `stats-strip.ts`, once the strip is ≥50% in view |
-| `stats_window_toggled` {window} | `stats-strip.ts`, 7d/30d click |
+| `stats_viewed` {window} | `stats-card.ts`, once the card is ≥50% in view |
+| `stats_window_toggled` {window} | `stats-card.ts`, 7d/30d click |
 | `contact_nav_clicked` | `site-nav.astro` |
 | `contact_form_focused` | `contact-form.ts`, first focus / click / key in the form (the desktop auto-focus doesn't count) |
 | `contact_form_started` | `contact-form.ts`, first character typed |

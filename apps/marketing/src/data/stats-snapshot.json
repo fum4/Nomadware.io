@@ -1,0 +1,250 @@
+{
+  "generatedAt": "2026-10-23T07:38:05.613Z",
+  "windows": {
+    "7d": {
+      "prs": 185,
+      "runs": 267,
+      "agentHours": 87,
+      "checks": 543,
+      "caught": 29,
+      "actions": 15821,
+      "linesAdded": 80929,
+      "linesDeleted": 13911,
+      "repos": 9
+    },
+    "30d": {
+      "prs": 558,
+      "runs": 1553,
+      "agentHours": 380,
+      "checks": 833,
+      "caught": 58,
+      "actions": 95563,
+      "linesAdded": 433306,
+      "linesDeleted": 80897,
+      "repos": 11
+    }
+  },
+  "series": {
+    "7d": {
+      "bucketHours": 2,
+      "agentMinutes": [
+        65, 1, 0, 0, 169, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 53, 179, 416, 146, 139, 311, 136, 223, 318, 86, 232,
+        249, 234, 298, 238, 157, 22, 4, 0, 0, 74, 0, 0, 0, 0, 0, 0, 0, 0, 0, 181, 247, 63, 7, 216,
+        141, 222, 178, 56, 52, 0, 59
+      ],
+      "prsMerged": [
+        2, 0, 0, 0, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7, 2, 3, 9, 5, 4, 12, 3, 5, 5, 2, 9, 15, 2, 0, 2, 0,
+        4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 15, 11, 0, 11, 8, 14, 5, 3, 1, 0, 0
+      ],
+      "days": [
+        {
+          "date": "2026-10-17",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-18",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-19",
+          "linesAdded": 814,
+          "linesDeleted": 132
+        },
+        {
+          "date": "2026-10-20",
+          "linesAdded": 42846,
+          "linesDeleted": 5681
+        },
+        {
+          "date": "2026-10-21",
+          "linesAdded": 16946,
+          "linesDeleted": 1807
+        },
+        {
+          "date": "2026-10-22",
+          "linesAdded": 18447,
+          "linesDeleted": 3738
+        },
+        {
+          "date": "2026-10-23",
+          "linesAdded": 189,
+          "linesDeleted": 16
+        }
+      ]
+    },
+    "30d": {
+      "bucketHours": 6,
+      "agentMinutes": [
+        150, 56, 36, 221, 121, 455, 118, 8, 53, 101, 1, 0, 44, 0, 0, 0, 0, 37, 0, 0, 0, 81, 1088,
+        232, 936, 930, 305, 3, 31, 641, 396, 2, 90, 315, 1231, 516, 49, 341, 70, 76, 64, 10, 0, 0,
+        0, 0, 0, 0, 8, 16, 0, 0, 55, 485, 537, 267, 244, 639, 1295, 443, 428, 393, 683, 177, 40,
+        612, 228, 59, 125, 0, 1, 0, 0, 0, 0, 0, 162, 167, 0, 0, 1, 60, 37, 185, 0, 2, 0, 291, 294,
+        222, 245, 116, 169, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 233, 700, 670, 636, 781, 417, 4,
+        74, 0, 0, 428, 286, 541, 108, 59
+      ],
+      "prsMerged": [
+        5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 9, 2, 13, 22, 6, 0, 0, 11,
+        15, 0, 3, 4, 38, 37, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 22, 7, 3, 17,
+        25, 10, 4, 7, 8, 6, 2, 10, 9, 1, 9, 0, 0, 0, 0, 0, 0, 0, 2, 10, 0, 0, 0, 5, 0, 0, 0, 0, 0,
+        0, 4, 20, 6, 3, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12, 18, 20, 16, 17, 6, 7, 0, 0,
+        26, 22, 27, 4, 0
+      ],
+      "days": [
+        {
+          "date": "2026-09-24",
+          "linesAdded": 1353,
+          "linesDeleted": 267
+        },
+        {
+          "date": "2026-09-25",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-09-26",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-09-27",
+          "linesAdded": 6821,
+          "linesDeleted": 3857
+        },
+        {
+          "date": "2026-09-28",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-09-29",
+          "linesAdded": 67614,
+          "linesDeleted": 8272
+        },
+        {
+          "date": "2026-09-30",
+          "linesAdded": 12958,
+          "linesDeleted": 3988
+        },
+        {
+          "date": "2026-10-01",
+          "linesAdded": 19265,
+          "linesDeleted": 7937
+        },
+        {
+          "date": "2026-10-02",
+          "linesAdded": 45316,
+          "linesDeleted": 6521
+        },
+        {
+          "date": "2026-10-03",
+          "linesAdded": 2340,
+          "linesDeleted": 1374
+        },
+        {
+          "date": "2026-10-04",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-05",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-06",
+          "linesAdded": 13898,
+          "linesDeleted": 467
+        },
+        {
+          "date": "2026-10-07",
+          "linesAdded": 49304,
+          "linesDeleted": 10614
+        },
+        {
+          "date": "2026-10-08",
+          "linesAdded": 32799,
+          "linesDeleted": 5512
+        },
+        {
+          "date": "2026-10-09",
+          "linesAdded": 46109,
+          "linesDeleted": 3837
+        },
+        {
+          "date": "2026-10-10",
+          "linesAdded": 14275,
+          "linesDeleted": 3229
+        },
+        {
+          "date": "2026-10-11",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-12",
+          "linesAdded": 7836,
+          "linesDeleted": 635
+        },
+        {
+          "date": "2026-10-13",
+          "linesAdded": 319,
+          "linesDeleted": 159
+        },
+        {
+          "date": "2026-10-14",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-15",
+          "linesAdded": 10803,
+          "linesDeleted": 3385
+        },
+        {
+          "date": "2026-10-16",
+          "linesAdded": 2718,
+          "linesDeleted": 3444
+        },
+        {
+          "date": "2026-10-17",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-18",
+          "linesAdded": 0,
+          "linesDeleted": 0
+        },
+        {
+          "date": "2026-10-19",
+          "linesAdded": 814,
+          "linesDeleted": 132
+        },
+        {
+          "date": "2026-10-20",
+          "linesAdded": 42846,
+          "linesDeleted": 5681
+        },
+        {
+          "date": "2026-10-21",
+          "linesAdded": 16946,
+          "linesDeleted": 1807
+        },
+        {
+          "date": "2026-10-22",
+          "linesAdded": 18447,
+          "linesDeleted": 3738
+        },
+        {
+          "date": "2026-10-23",
+          "linesAdded": 189,
+          "linesDeleted": 16
+        }
+      ]
+    }
+  }
+}

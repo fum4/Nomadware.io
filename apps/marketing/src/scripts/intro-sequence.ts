@@ -4,7 +4,7 @@ import {
   INTRO_WORDMARK_MAX_WAIT_MS,
 } from '../constants';
 import { scrambleHeadline } from './headline-scramble';
-import { initStats } from './stats-strip';
+import { initStats } from './stats-card';
 import { flickerTags } from './tags-flicker';
 import { rotateTags } from './tags-rotate';
 import { expandWordmark } from './wordmark-expand';
@@ -16,10 +16,10 @@ const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
 
 /**
  * The page-load choreography, each step started by the previous one finishing: headline scramble
- * → gap → stats count-up (once the strip is in view) → gap → nav wordmark, and from then on the
+ * → gap → stats count-up (once the card is in view) → gap → nav wordmark, and from then on the
  * tags rotate. The tags power on alongside, from INTRO_TAGS_AT_SCRAMBLE_SHARE of the scramble
  * (or when it ends, if it never reports), never lengthening anything. The wordmark never waits
- * on a strip nobody scrolls to: it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at the
+ * on a card nobody scrolls to: it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at the
  * latest. Plays whatever
  * `prefers-reduced-motion` says; only the tags' flicker swaps for a fade (scripts/motion-policy.ts).
  */

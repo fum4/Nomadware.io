@@ -1,10 +1,10 @@
 ---
 import type { StatKey, StatsSnapshot } from '@nomadware/site-stats';
 
-import { DEFAULT_STAT_WINDOW } from '../data/stats-snapshot';
+import { DEFAULT_STAT_WINDOW } from '../constants';
 import { formatStat } from '../format/format-stat';
 
-// One number in the stats strip. The final value is in the HTML (crawlers, no-JS, no layout
+// One number in the stats card. The final value is in the HTML (crawlers, no-JS, no layout
 // shift); every window's value rides along in data-values for the 7d/30d toggle and count-up.
 interface Props {
   stat: StatKey;

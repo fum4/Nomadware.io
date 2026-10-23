@@ -1,15 +1,14 @@
 ---
-// TEMPORARY (NWARE-82) variant d, "Heartbeat": the window's agent activity as a seismograph line,
-// drawn left to right on reveal, the busiest moment and the latest one called out on the line,
-// the stats as a compact legend underneath.
+// The live stats card: the window's agent activity as a seismograph line (stats-chart.astro), the
+// numbers as a compact legend underneath, a 7d/30d toggle and the snapshot's age on top. Behaviour:
+// scripts/stats-card.ts (toggle, count-up) and scripts/stats-chart.ts (hover tooltip).
 import { STAT_WINDOWS } from '@nomadware/site-stats';
 
-import type { LoadedStats } from '../../data/load-stats';
-import { STATS_SERIES } from '../../data/load-series';
-import { DEFAULT_STAT_WINDOW } from '../../data/stats-snapshot';
-import RelativeTime from '../relative-time.astro';
-import StatValue from '../stat-value.astro';
-import { linePath, peakOf } from './spark-path';
+import { DEFAULT_STAT_WINDOW, STATS_STALE_AFTER_MS } from '../constants';
+import type { LoadedStats } from '../data/load-stats';
+import RelativeTime from './relative-time.astro';
+import StatValue from './stat-value.astro';
+import StatsChart from './stats-chart.astro';
 
 interface Props {
   stats: LoadedStats;
@@ -17,26 +16,16 @@ interface Props {
 }
 const { stats, renderedAt } = Astro.props;
 const { snapshot, source } = stats;
-const W = 1000;
-const H = 140;
-const charts = STAT_WINDOWS.map((range) => {
-  const values = STATS_SERIES?.agentMinutes[range] ?? [];
-  const peak = peakOf(values);
-  const max = Math.max(1, ...values);
-  return {
-    range,
-    path: linePath(values, W, H),
-    // Callout positions in % of the chart box, so they follow the SVG's stretch.
-    // Kept off the edges so the label never hangs outside the card.
-    peakX: Math.min(85, Math.max(15, values.length > 1 ? (peak.index / (values.length - 1)) * 100 : 0)),
-    peakY: 100 - (peak.value / max) * 100,
-    peakHours: Math.round(peak.value / 60),
-    bucketHours: range === '7d' ? 2 : 6,
-  };
-});
+// Over a day old (the publisher stopped, or this is the bundled fallback): no live dot.
+const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_STALE_AFTER_MS;
 ---
 
-<section class="beat" aria-labelledby="stats-title" data-stats data-stats-source={source}>
+<section
+  class:list={['stats', { stale }]}
+  aria-labelledby="stats-title"
+  data-stats
+  data-stats-source={source}
+>
   <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
   <div class="head">
     <span>agent activity · last</span>
@@ -60,25 +49,7 @@ const charts = STAT_WINDOWS.map((range) => {
       /></span
     >
   </div>
-  <div class="chart" aria-hidden="true">
-    {
-      charts.map((chart) => (
-        <div
-          class="plot"
-          data-range-label={chart.range}
-          data-current={chart.range === DEFAULT_STAT_WINDOW ? '' : undefined}
-        >
-          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-            <path class="trace" d={chart.path} pathLength="1" />
-          </svg>
-          <span class="callout" style={`left: ${chart.peakX}%; top: ${chart.peakY}%`}>
-            peak · {chart.peakHours}h of agent work in {chart.bucketHours}h
-          </span>
-          <span class="now">now</span>
-        </div>
-      ))
-    }
-  </div>
+  {snapshot.series && <StatsChart series={snapshot.series} generatedAt={snapshot.generatedAt} />}
   <dl class="legend">
     <div><dt>PRs merged</dt><dd><StatValue stat="prs" snapshot={snapshot} /></dd></div>
     <div><dt>agent runs</dt><dd><StatValue stat="runs" snapshot={snapshot} /></dd></div>
@@ -90,7 +61,7 @@ const charts = STAT_WINDOWS.map((range) => {
 </section>
 
 <style>
-  .beat {
+  .stats {
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--term);
@@ -116,6 +87,7 @@ const charts = STAT_WINDOWS.map((range) => {
     margin-left: auto;
     letter-spacing: 0;
     text-transform: none;
+    white-space: nowrap;
   }
 
   .dot {
@@ -123,6 +95,23 @@ const charts = STAT_WINDOWS.map((range) => {
     height: 6px;
     border-radius: 50%;
     background: var(--sig);
+    animation: pulse 2s infinite;
+  }
+
+  /* Same box, so nothing moves: only the colour and the pulse go. */
+  .stale .dot {
+    background: var(--faint);
+    animation: none;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 var(--sig-glow);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 6px transparent;
+    }
   }
 
   .seg {
@@ -146,77 +135,18 @@ const charts = STAT_WINDOWS.map((range) => {
     color: var(--fg);
   }
 
-  /* Paper ruled like a seismograph: the page grid's own cell, finer. */
-  .chart {
-    position: relative;
-    height: 180px;
-    margin: 0;
-    background-image:
-      linear-gradient(var(--line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size: 32px 32px;
+  .seg button:focus-visible {
+    outline-offset: -2px;
   }
 
-  .plot {
-    position: absolute;
-    inset: 24px 24px 16px;
-  }
-
-  .plot:not([data-current]) {
+  :global(html:not(.js)) .seg {
     display: none;
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  /* Drawn left → right whenever it is shown (display: none → block restarts the animation). */
-  .trace {
-    fill: none;
-    stroke: var(--sig);
-    stroke-width: 1.5;
-    vector-effect: non-scaling-stroke;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: trace-draw 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.2s forwards;
-    filter: drop-shadow(0 0 4px var(--sig-glow));
-  }
-
-  @keyframes trace-draw {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
-  .callout,
-  .now {
-    position: absolute;
-    font: 400 11px/var(--leading) var(--mono);
-    white-space: nowrap;
-  }
-
-  .callout {
-    transform: translate(-50%, -150%);
-    padding: 2px 6px;
-    border: 1px solid var(--sig-soft);
-    border-radius: 4px;
-    background: var(--ink);
-    color: var(--fg);
-  }
-
-  .now {
-    right: -4px;
-    bottom: -14px;
-    color: var(--faint);
   }
 
   .legend {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     margin: 0;
-    border-top: 1px solid var(--line);
   }
 
   .legend div {
@@ -259,14 +189,6 @@ const charts = STAT_WINDOWS.map((range) => {
     .live {
       flex-basis: 100%;
       margin-left: 0;
-    }
-
-    .chart {
-      height: 150px;
-    }
-
-    .plot {
-      inset: 30px 14px 16px;
     }
 
     .legend {
