@@ -24,7 +24,8 @@ export function initDotField(): void {
 
   const chase = hasFinePointer() && !isMobileViewport();
   // TEMPORARY (NWARE-82): dev-only test of dots gathering to the cursor instead of scattering.
-  const gather = import.meta.env.DEV && new URLSearchParams(location.search).get('dots') === 'gravity';
+  const gather =
+    import.meta.env.DEV && new URLSearchParams(location.search).get('dots') === 'gravity';
   const scale = DOT_FIELD.canvasScale;
   const pointer = { x: OFF_SCREEN, y: OFF_SCREEN };
   let dots: Dot[] = [];
