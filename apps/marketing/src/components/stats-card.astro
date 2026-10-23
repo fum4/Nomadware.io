@@ -65,7 +65,8 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--term);
-    overflow: hidden;
+    /* No overflow clip: the chart's tooltip may overhang the card. Nothing inside paints into the
+       rounded corners (the head and legend have no background), so none is needed. */
   }
 
   .head {

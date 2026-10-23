@@ -30,15 +30,13 @@ export function nearestIndex(share: number, count: number): number {
 }
 
 /**
- * The chip's left edge for a point at `x`: `gap` to its right, or to its left when it would
- * pass `bounds.right` there, never past `bounds.left`. All lengths in the same px space.
+ * The chip's left edge, centred on a point at `x` and pushed back inside `bounds` (where both
+ * fit; on a box narrower than the chip, its left edge wins). All lengths in the same px space.
  */
-export function placeChip(
+export function centreChip(
   x: number,
   chipWidth: number,
   bounds: { left: number; right: number },
-  gap: number,
 ): number {
-  const right = x + gap;
-  return right + chipWidth <= bounds.right ? right : Math.max(bounds.left, x - gap - chipWidth);
+  return Math.max(bounds.left, Math.min(x - chipWidth / 2, bounds.right - chipWidth));
 }

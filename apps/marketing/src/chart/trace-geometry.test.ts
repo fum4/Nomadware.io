@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { linePath, nearestIndex, placeChip, pointAt } from './trace-geometry';
+import { centreChip, linePath, nearestIndex, pointAt } from './trace-geometry';
 
 const BOUNDS = { left: -20, right: 500 };
 const CHIP_WIDTH = 200;
@@ -34,16 +34,17 @@ describe('pointAt', () => {
   });
 });
 
-describe('placeChip', () => {
-  it('sits right of the point', () => {
-    expect(placeChip(100, CHIP_WIDTH, BOUNDS, 10)).toBe(110);
+describe('centreChip', () => {
+  it('centres on the point', () => {
+    expect(centreChip(250, CHIP_WIDTH, BOUNDS)).toBe(150);
   });
 
-  it('flips left near the right edge', () => {
-    expect(placeChip(400, CHIP_WIDTH, BOUNDS, 10)).toBe(190);
+  it('stays inside the bounds near either edge', () => {
+    expect(centreChip(10, CHIP_WIDTH, BOUNDS)).toBe(-20);
+    expect(centreChip(490, CHIP_WIDTH, BOUNDS)).toBe(300);
   });
 
-  it('never leaves the left edge on a box too narrow for either side', () => {
-    expect(placeChip(120, CHIP_WIDTH, { ...BOUNDS, right: 250 }, 10)).toBe(-20);
+  it('keeps its left edge in on a box narrower than the chip', () => {
+    expect(centreChip(100, CHIP_WIDTH, { left: 0, right: 150 })).toBe(0);
   });
 });

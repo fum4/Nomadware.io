@@ -220,9 +220,9 @@ export const STATS_CHART = {
   /** The trace's SVG viewBox; stretched to the plot (preserveAspectRatio none). */
   viewWidth: 1000,
   viewHeight: 140,
-  /** The hover tooltip: px between it and the snapped point's guide, and from the chart's edges. */
-  tipGapPx: 10,
-  tipEdgePx: 6,
+  /** The hover tooltip: px below the chart's top edge, and kept from the viewport's sides. */
+  tipTopPx: 6,
+  tipViewportMarginPx: 8,
 } as const;
 
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */

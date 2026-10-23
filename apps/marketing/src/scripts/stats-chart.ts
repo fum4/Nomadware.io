@@ -1,7 +1,7 @@
 import type { StatSeries, StatsSeries } from '@nomadware/site-stats';
 import { bucketStartMs, isStatWindow, parseStatsSeries } from '@nomadware/site-stats';
 
-import { nearestIndex, placeChip, pointAt } from '../chart/trace-geometry';
+import { centreChip, nearestIndex, pointAt } from '../chart/trace-geometry';
 import { STATS_CHART } from '../constants';
 import {
   formatAgentTime,
@@ -50,7 +50,7 @@ function describe(
   setTip(plot, 'deleted', `−${formatCount(series.linesDeleted[index] ?? 0)}`);
 }
 
-/** Snap to the bucket nearest the pointer: guide, dot, and the tooltip beside the guide, on top. */
+/** Snap to the bucket nearest the pointer: guide, dot, and the tooltip centred over the guide. */
 function snap(
   chart: HTMLElement,
   plot: HTMLElement,
@@ -68,21 +68,17 @@ function snap(
   plot.style.setProperty('--hover-y', `${point.y * 100}%`);
   plot.toggleAttribute('data-hover', true);
 
-  // Measured once data-hover shows it: its width depends on the text.
+  // Measured once data-hover shows it: its width depends on the text. Centred on the guide,
+  // free to overhang the card, never the screen.
   const tip = plot.querySelector<HTMLElement>('.tip');
   if (!tip) return;
-  const { tipGapPx, tipEdgePx } = STATS_CHART;
-  const left = placeChip(
-    point.x * plotBox.width,
-    tip.offsetWidth,
-    {
-      left: chartBox.left - plotBox.left + tipEdgePx,
-      right: chartBox.right - plotBox.left - tipEdgePx,
-    },
-    tipGapPx,
-  );
+  const { tipTopPx, tipViewportMarginPx } = STATS_CHART;
+  const left = centreChip(point.x * plotBox.width, tip.offsetWidth, {
+    left: tipViewportMarginPx - plotBox.left,
+    right: document.documentElement.clientWidth - tipViewportMarginPx - plotBox.left,
+  });
   plot.style.setProperty('--tip-left', `${left}px`);
-  plot.style.setProperty('--tip-top', `${chartBox.top - plotBox.top + tipEdgePx}px`);
+  plot.style.setProperty('--tip-top', `${chartBox.top - plotBox.top + tipTopPx}px`);
 }
 
 /**
