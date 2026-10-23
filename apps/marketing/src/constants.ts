@@ -295,8 +295,12 @@ export const STATS_CHART = {
 } as const;
 
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */
-export const STATS_FETCH_TIMEOUT_MS = 1500;
+export const STATS_FETCH_TIMEOUT_MS = 800;
 /** Older than this, the snapshot reads as stale: the live dot goes grey and stops pulsing. */
 export const STATS_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
-/** The page renders on demand with live stats; Vercel's CDN serves it for a minute, then revalidates in the background. */
-export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=300';
+/**
+ * The page renders on demand with live stats; Vercel's CDN serves it fresh for a minute, then for
+ * up to a day it still answers at once from the cached copy while revalidating in the background:
+ * a visitor never waits on a render (stats only move every 5 minutes anyway).
+ */
+export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
