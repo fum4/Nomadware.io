@@ -26,8 +26,8 @@ const { renderedAt } = Astro.props;
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    /* One grid cell more than the base gap, so the contact form has room to breathe. */
-    margin-top: calc(48px + var(--grid));
+    /* Whole grid cells on top of the base gap, so the contact form has room to breathe. */
+    margin-top: calc(48px + var(--grid) * 3);
     padding-top: 16px;
     border-top: 1px solid var(--line);
     font: 400 11px/var(--leading) var(--mono);
@@ -70,7 +70,7 @@ const { renderedAt } = Astro.props;
     .footer {
       flex-direction: column;
       gap: 14px;
-      margin-top: calc(36px + var(--grid) * 0.75);
+      margin-top: calc(36px + var(--grid) * 2);
     }
 
     .studio {
