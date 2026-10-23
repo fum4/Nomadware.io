@@ -260,7 +260,7 @@ export const TURNSTILE = {
 } as const;
 
 /** The range the stats card opens on. */
-export const DEFAULT_STAT_WINDOW: StatWindow = '7d';
+export const DEFAULT_STAT_WINDOW: StatWindow = '30d';
 
 /** The stats card's activity chart (components/stats-chart.astro, scripts/stats-chart.ts). */
 export const STATS_CHART = {
