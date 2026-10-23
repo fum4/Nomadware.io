@@ -42,7 +42,12 @@ describe('formatPrsMerged', () => {
 
 describe('formatIssuesCaught', () => {
   it('says issue for one, issues otherwise', () => {
-    expect(formatIssuesCaught(1)).toBe('1 issue caught');
-    expect(formatIssuesCaught(3)).toBe('3 issues caught');
+    expect(formatIssuesCaught(1, null)).toBe('1 issue caught');
+    expect(formatIssuesCaught(3, null)).toBe('3 issues caught');
+  });
+
+  it("adds the time to fix, in the tooltip's own hours and minutes", () => {
+    expect(formatIssuesCaught(3, 14)).toBe('3 issues caught · fixed in 14m');
+    expect(formatIssuesCaught(1, 80)).toBe('1 issue caught · fixed in 1h 20m');
   });
 });

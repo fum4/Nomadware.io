@@ -45,7 +45,7 @@ const setTip = (plot: HTMLElement, name: string, text: string): void => {
 
 /**
  * Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines and the
- * issues caught (each row only if any).
+ * issues caught with their time to fix (each row only if any).
  */
 function describe(
   plot: HTMLElement,
@@ -70,7 +70,7 @@ function describe(
     .querySelector<HTMLElement>('[data-tip-lines]')
     ?.toggleAttribute('hidden', added + deleted === 0);
   const caught = series.caught[index] ?? 0;
-  setTip(plot, 'caught', formatIssuesCaught(caught));
+  setTip(plot, 'caught', formatIssuesCaught(caught, series.caughtFixMinutes[index] ?? null));
   plot.querySelector<HTMLElement>('[data-tip="caught"]')?.toggleAttribute('hidden', caught === 0);
 }
 
