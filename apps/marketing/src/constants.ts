@@ -143,6 +143,7 @@ export const DOT_FIELD = {
   /**
    * Inside this many CSS px of the cursor a dot is pushed back out, hard enough that the pull and
    * the crowd behind can't press it in: the gathered dots settle as a ring round an empty core.
+   * The one source of the ring's radius: the black hole's horizon derives from it (BLACK_HOLE).
    */
   gatherCorePx: 44,
   gatherCorePush: 3,
@@ -177,6 +178,34 @@ export const DOT_FIELD = {
   highlightSize: 4,
   color: 'rgba(236, 235, 243, 0.28)',
   highlightColor: 'rgba(198, 255, 74, 0.9)',
+} as const;
+
+/**
+ * The black hole that forms where the cursor rests over the hero (scripts/black-hole.ts), drawn
+ * on the dot canvas. Mouse-first desktops only, like the dots. Times in ms, lengths in CSS px.
+ */
+export const BLACK_HOLE = {
+  /** The pointer must rest (DOT_FIELD.stillPx) this long before the hole starts to form. */
+  appearAfterMs: 1_000,
+  /** It grows in over growMs (ease-out) and fades over fadeMs once the pointer moves or leaves. */
+  growMs: 2_000,
+  fadeMs: 500,
+  /** Horizon radius as a share of DOT_FIELD.gatherCorePx: the gathered dots' ring is its edge. */
+  horizonShare: 0.92,
+  /** The horizon starts at this share of its size and grows to full with the hole. */
+  horizonStartShare: 0.4,
+  /** The dark falloff round it reaches this many horizon radii, starting at haloAlpha. */
+  haloShare: 2.6,
+  haloAlpha: 0.55,
+  /** The photon ring: just outside the horizon (share of its radius), thin, faint, softly glowing. */
+  photonRingShare: 1.08,
+  photonRingWidthPx: 0.75,
+  photonRingColor: 'rgba(255, 244, 228, 0.32)',
+  photonGlowColor: 'rgba(198, 255, 74, 0.35)',
+  photonGlowPx: 6,
+  /** What a dot freezing at the horizon fades to (gravitational redshift), in this many steps. */
+  redshiftColor: 'rgba(150, 40, 30, 0.16)',
+  redshiftLevels: 8,
 } as const;
 
 export const CONTACT = {

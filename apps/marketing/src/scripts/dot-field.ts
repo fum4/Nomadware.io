@@ -1,5 +1,7 @@
 import { CURSOR_FIELD, DOT_FIELD } from '../constants';
-import { fieldStrength } from './cursor-field';
+import type { BlackHole } from './black-hole';
+import { createBlackHole } from './black-hole';
+import { cursorPull, releaseEnvelope } from './dot-forces';
 import type { Body } from './dot-separation';
 import { SeparationGrid } from './dot-separation';
 import { hasFinePointer, isMobileViewport } from './motion';
@@ -10,36 +12,16 @@ interface Dot extends Body {
   captured: boolean;
   /** When it last left the field (performance.now()), -Infinity if never. */
   releasedAt: number;
+  /** How freely it moves near the black hole this frame (1 = freely, 0 = frozen at the horizon). */
+  dilation: number;
 }
 
 const OFF_SCREEN = -9_999;
 
 /**
- * How far into its diffusion a released dot is, 0 → 1 → 0: rises over releaseRampMs (so the clump
- * loosens gradually, never bursts), then falls back to 0 by releaseMs (DOT_FIELD).
- */
-function releaseEnvelope(ageMs: number): number {
-  const { releaseRampMs, releaseMs } = DOT_FIELD;
-  if (ageMs <= 0 || ageMs >= releaseMs) return 0;
-  return ageMs < releaseRampMs
-    ? ageMs / releaseRampMs
-    : 1 - (ageMs - releaseRampMs) / (releaseMs - releaseRampMs);
-}
-
-/**
- * Negative pulls toward the cursor; inside the core it pushes out, so the cursor stays clear.
- * The pull is gravity's inverse square (softened, so it stays finite), faded to 0 at the field's
- * edge: a dot drifts in slowly from afar and falls in ever faster.
- */
-function cursorPull(distance: number): number {
-  const { gatherCorePx, gatherCorePush, gravity, gravitySofteningPx } = DOT_FIELD;
-  if (distance < gatherCorePx) return gatherCorePush * (1 - distance / gatherCorePx);
-  return (-gravity / (distance ** 2 + gravitySofteningPx ** 2)) * fieldStrength(distance);
-}
-
-/**
  * Drifting dots behind the hero. On a mouse-first desktop the cursor gathers the dots near it;
- * when it stops they settle into an even ring around it, and when it leaves the clump diffuses
+ * when it stops they settle into an even ring around it, and when it rests a black hole forms
+ * there (scripts/black-hole.ts) whose horizon freezes them; when it leaves the clump diffuses
  * slowly back into the drift. The loop runs only while the hero is on screen and the tab is
  * visible.
  */
@@ -55,6 +37,7 @@ export function initDotField(): void {
   // Where the pointer last moved more than stillPx from, and when: it is still once stillMs pass.
   const anchor = { x: OFF_SCREEN, y: OFF_SCREEN, at: 0 };
   const grid = new SeparationGrid();
+  const hole: BlackHole | null = chase ? createBlackHole(context, scale) : null;
   let dots: Dot[] = [];
   // Where dots live and drift back to (canvas px): the content column, barely spilling past it,
   // over the hero's own height. The canvas reaches past it so a pushed dot can fly to the edge.
@@ -88,6 +71,7 @@ export function initDotField(): void {
         highlight: Math.random() < DOT_FIELD.highlightShare,
         captured: false,
         releasedAt: Number.NEGATIVE_INFINITY,
+        dilation: 1,
       }));
     }
   };
@@ -128,9 +112,11 @@ export function initDotField(): void {
       dot.vx *= DOT_FIELD.maxSpeed / speed;
       dot.vy *= DOT_FIELD.maxSpeed / speed;
     }
-    // The canvas edge stops a dot; home pulls it back from there.
-    dot.x = Math.min(canvas.width, Math.max(0, dot.x + dot.vx * dt));
-    dot.y = Math.min(canvas.height, Math.max(0, dot.y + dot.vy * dt));
+    // Near the black hole its motion slows as an observer far away sees it, to a stop at the
+    // horizon. The canvas edge stops a dot; home pulls it back from there.
+    dot.dilation = hole ? hole.dilationAt(dot.x, dot.y) : 1;
+    dot.x = Math.min(canvas.width, Math.max(0, dot.x + dot.vx * dt * dot.dilation));
+    dot.y = Math.min(canvas.height, Math.max(0, dot.y + dot.vy * dt * dot.dilation));
   };
 
   // A dot's separation radius (canvas px): the packing distance, widened while it diffuses.
@@ -145,6 +131,7 @@ export function initDotField(): void {
     const active = pointer.x !== OFF_SCREEN;
     const still = active && now - anchor.at > DOT_FIELD.stillMs;
     const reach = CURSOR_FIELD.radiusPx * scale;
+    hole?.update(now, active ? pointer : null, active ? now - anchor.at : 0);
     for (const dot of dots) {
       const captured = active && Math.hypot(dot.x - pointer.x, dot.y - pointer.y) < reach;
       if (dot.captured && !captured) dot.releasedAt = now;
@@ -161,9 +148,14 @@ export function initDotField(): void {
 
   const draw = (): void => {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    hole?.draw(context);
     for (const dot of dots) {
       const size = dot.highlight ? DOT_FIELD.highlightSize : DOT_FIELD.size;
-      context.fillStyle = dot.highlight ? DOT_FIELD.highlightColor : DOT_FIELD.color;
+      context.fillStyle = hole
+        ? hole.dotColor(dot.highlight, dot.dilation)
+        : dot.highlight
+          ? DOT_FIELD.highlightColor
+          : DOT_FIELD.color;
       context.fillRect(dot.x, dot.y, size, size);
     }
   };
