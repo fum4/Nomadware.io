@@ -17,25 +17,16 @@ const pr = (mergedAt: string, linesAdded: number, linesDeleted: number): MergedP
   linesDeleted,
 });
 
-test('an empty store gives full-length series of zeros, days ending today (UTC)', () => {
+test('an empty store gives full-length series of zeros', () => {
   const series = buildSeries(emptyState(), NOW);
-  assert.equal(series['7d'].agentMinutes.length, 84);
-  assert.equal(series['30d'].prsMerged.length, 120);
-  assert.ok(series['7d'].agentMinutes.every((value) => value === 0));
-  assert.deepEqual(
-    series['7d'].days.map((day) => day.date),
-    [
-      '2026-10-16',
-      '2026-10-17',
-      '2026-10-18',
-      '2026-10-19',
-      '2026-10-20',
-      '2026-10-21',
-      '2026-10-22',
-    ],
-  );
-  assert.equal(series['30d'].days[0]?.date, '2026-09-23');
-  assert.ok(series['30d'].days.every((day) => day.linesAdded === 0 && day.linesDeleted === 0));
+  for (const window of ['7d', '30d'] as const) {
+    const { agentMinutes, prsMerged, linesAdded, linesDeleted } = series[window];
+    const length = window === '7d' ? 84 : 120;
+    for (const values of [agentMinutes, prsMerged, linesAdded, linesDeleted]) {
+      assert.equal(values.length, length);
+      assert.ok(values.every((value) => value === 0));
+    }
+  }
 });
 
 test('agent time lands in its bucket by minute: boundaries are inclusive at the start', () => {
@@ -68,25 +59,25 @@ test('agent time lands in its bucket by minute: boundaries are inclusive at the 
   assert.equal(month.agentMinutes[90], 60);
 });
 
-test('a PR counts in its merge bucket, its lines on its merge day (UTC)', () => {
+test('a PR and its lines count in its merge bucket: boundaries inclusive at the start', () => {
   const state = emptyState();
   state.github.prs = {
-    a: pr('2026-10-22T00:00:00Z', 10, 1), // first instant of today
-    b: pr('2026-10-21T23:59:59Z', 5, 2), // last second of yesterday
-    c: pr('2026-10-21T12:00:00Z', 7, 0),
-    d: pr('2026-10-15T10:00:00Z', 100, 100), // in the 30d series only
+    a: pr('2026-10-22T18:00:00Z', 10, 1), // first instant of the last bucket
+    b: pr('2026-10-22T17:59:59Z', 5, 2), // last second of the one before
+    c: pr('2026-10-22T16:30:00Z', 7, 0), // same 2h bucket as b
+    d: pr('2026-10-15T10:00:00Z', 100, 100), // before the 7d buckets: 30d only
   };
   const { '7d': week, '30d': month } = buildSeries(state, NOW);
-  assert.deepEqual(week.days.at(-1), { date: '2026-10-22', linesAdded: 10, linesDeleted: 1 });
-  assert.deepEqual(week.days.at(-2), { date: '2026-10-21', linesAdded: 12, linesDeleted: 2 });
-  assert.deepEqual(week.days.at(-3), { date: '2026-10-20', linesAdded: 0, linesDeleted: 0 });
+  assert.deepEqual([week.prsMerged[83], week.linesAdded[83], week.linesDeleted[83]], [1, 10, 1]);
+  assert.deepEqual([week.prsMerged[82], week.linesAdded[82], week.linesDeleted[82]], [2, 12, 2]);
+  assert.equal(week.linesAdded[81], 0);
   assert.equal(
     week.prsMerged.reduce((sum, value) => sum + value, 0),
     3,
   );
-  assert.equal(week.prsMerged[83 - 9], 1); // 00:00–02:00 today
-  assert.equal(week.prsMerged[83 - 10], 1); // 22:00–24:00 yesterday
-  assert.deepEqual(month.days.at(-8), { date: '2026-10-15', linesAdded: 100, linesDeleted: 100 });
+  // 6h buckets: 12:00–18:00 holds b and c; 15 Oct 06:00–12:00 holds d.
+  assert.deepEqual([month.linesAdded[119], month.linesAdded[118]], [10, 12]);
+  assert.equal(month.linesDeleted[89], 100);
   assert.equal(
     month.prsMerged.reduce((sum, value) => sum + value, 0),
     4,
@@ -98,5 +89,5 @@ test('nothing older than the window or newer than now leaks in', () => {
   state.github.prs = { old: pr(new Date(NOW - 31 * DAY_MS).toISOString(), 1, 1) };
   const { '30d': month } = buildSeries(state, NOW);
   assert.ok(month.prsMerged.every((value) => value === 0));
-  assert.ok(month.days.every((day) => day.linesAdded === 0));
+  assert.ok(month.linesAdded.every((value) => value === 0));
 });

@@ -26,9 +26,9 @@ Each run logs one logfmt line per source and a `run done` line with `duration_ms
 | `checks`, `caught` | user journal | systemd's `pc-*.pre-push/pre-merge.service: Consumed …` (a gate run finished) / `… Failed with result …` (it failed) |
 | `series.agentMinutes` | transcripts | the same per-minute active time as `agentHours`, summed per chart bucket (UTC-aligned, `@nomadware/site-stats` § Series), rounded to whole minutes |
 | `series.prsMerged` | GitHub | the same merged PRs as `prs`, per bucket of their merge time |
-| `series.days` | per-PR file stats | each PR's `linesAdded` / `linesDeleted` on its merge day (UTC); a day with no merge is 0 |
+| `series.linesAdded`, `series.linesDeleted` | per-PR file stats | each PR's `linesAdded` / `linesDeleted` in its merge bucket; a bucket with no merge is 0 |
 
-The series (`src/series.ts`) is aligned to buckets and UTC days, not to the rolling window, so its totals can differ slightly from the window's numbers at the edges.
+The series (`src/series.ts`) is aligned to UTC buckets, not to the rolling window, so its totals can differ slightly from the window's numbers at the edges.
 
 **Incremental store:** `~/.local/state/nomadware-site-stats/state.json` (`src/state.ts`; local only — it holds file paths and repo names, never published). Per transcript a byte offset and per-minute totals; the journal cursor and gate timestamps; every merged PR's line counts (merged PRs are immutable, so each is fetched once). Anything older than 31 days is dropped. A run reads only appended bytes, journal entries after the cursor and PRs merged since the last sync (minus a 1 h overlap for search-index lag). Delete the file to force a backfill; a `STATE_VERSION` bump does the same. A lock (`run.lock`, pid-checked) keeps a manual run and the timer's apart.
 
