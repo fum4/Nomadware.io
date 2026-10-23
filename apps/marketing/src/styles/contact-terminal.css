@@ -7,8 +7,59 @@
   transition: border-color 0.3s;
 }
 
+/* Taking focus, the frame powers on like the send button's neon: a one-shot flicker that settles
+   lit (each time focus enters the form; moving between its fields doesn't replay it). */
 .term:focus-within {
   border-color: var(--sig-soft);
+  animation: term-frame-surge 0.9s steps(1, end) 1 forwards;
+}
+
+@keyframes term-frame-surge {
+  0% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  6% {
+    border-color: var(--sig);
+    box-shadow: 0 0 10px var(--sig-glow);
+  }
+  9% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  14% {
+    border-color: var(--sig);
+    box-shadow: 0 0 14px var(--sig-glow);
+  }
+  17% {
+    border-color: var(--sig-soft);
+    box-shadow: none;
+  }
+  31% {
+    border-color: var(--line);
+  }
+  34% {
+    border-color: var(--sig);
+    box-shadow: 0 0 16px var(--sig-glow);
+  }
+  38% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  41% {
+    border-color: var(--sig-soft);
+  }
+  62% {
+    border-color: var(--line);
+  }
+  64% {
+    border-color: var(--sig);
+    box-shadow: 0 0 12px var(--sig-glow);
+  }
+  100% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 8px var(--sig-glow);
+  }
 }
 
 .term-bar {

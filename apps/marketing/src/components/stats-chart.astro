@@ -71,7 +71,6 @@ const plots = STAT_WINDOWS.map((range) => {
             </span>
           </span>
         </span>
-        <span class="now">now</span>
       </div>
     ))
   }
@@ -199,8 +198,7 @@ const plots = STAT_WINDOWS.map((range) => {
     opacity: 0.55;
   }
 
-  .tip,
-  .now {
+  .tip {
     position: absolute;
     font: 400 11px/var(--leading) var(--mono);
     white-space: nowrap;
@@ -332,11 +330,6 @@ const plots = STAT_WINDOWS.map((range) => {
     pointer-events: none;
   }
 
-  .now {
-    right: -4px;
-    bottom: -14px;
-    color: var(--faint);
-  }
 
   @media (max-width: 640px) {
     .chart {
