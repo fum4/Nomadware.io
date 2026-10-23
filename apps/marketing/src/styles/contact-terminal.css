@@ -13,7 +13,7 @@
    scripts/contact/term-frame.ts; otherwise it would play on load). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 0.9s steps(1, end) 1 forwards;
+  animation: term-frame-on 1.2s steps(1, end) 1 forwards;
 }
 
 .term.was-lit:not(:focus-within) {
@@ -24,25 +24,37 @@
   0% {
     border-color: var(--line);
   }
-  6% {
+  5% {
     border-color: var(--sig-soft);
   }
-  9% {
+  8% {
     border-color: var(--line);
   }
-  14% {
+  12% {
     border-color: var(--sig-soft);
   }
-  17% {
+  15% {
     border-color: var(--line);
+  }
+  26% {
+    border-color: var(--sig-soft);
   }
   31% {
-    border-color: var(--sig-soft);
-  }
-  38% {
     border-color: var(--line);
   }
-  41%,
+  35% {
+    border-color: var(--sig-soft);
+  }
+  47% {
+    border-color: var(--line);
+  }
+  50% {
+    border-color: var(--sig-soft);
+  }
+  63% {
+    border-color: var(--line);
+  }
+  66%,
   100% {
     border-color: var(--sig-soft);
   }

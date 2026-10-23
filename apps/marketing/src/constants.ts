@@ -252,7 +252,7 @@ export const BLACK_HOLE = {
 
 export const CONTACT = {
   /** Form auto-focuses "name" once this share of it is on screen (desktop only). */
-  autoFocusThreshold: 0.6,
+  autoFocusThreshold: 0.9,
   typingIdleMs: 500,
   /** Field limits, enforced by the client (maxlength, readiness) and the endpoint alike. */
   maxNameLength: 120,
