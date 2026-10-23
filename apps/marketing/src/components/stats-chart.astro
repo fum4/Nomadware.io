@@ -327,8 +327,11 @@ const plots = STAT_WINDOWS.map((range) => {
 
 
   @media (max-width: 640px) {
+    /* The chart alone runs edge to edge on phones: out past the card's border and the page
+       column's padding (--wrap-inline); the card around it keeps its frame. */
     .chart {
       height: 144px;
+      margin-inline: calc((var(--wrap-inline) + 1px) * -1);
     }
 
     .plot {
