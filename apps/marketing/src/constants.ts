@@ -132,17 +132,23 @@ export const DOT_FIELD = {
   homeSpillPx: 96,
   /** Per frame, the share of its distance outside home a dot's speed gains back toward it. */
   homePull: 0.0004,
-  /** Pull toward the cursor at its strongest; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's. */
-  gatherForce: 0.25,
+  /**
+   * The cursor's pull is gravity / (d² + softening²) at d CSS px, faded to 0 at
+   * CURSOR_FIELD.radiusPx like the grid's: about 0.1 halfway out, about 1 at the ring.
+   */
+  gravity: 2_200,
+  gravitySofteningPx: 20,
+  /** Canvas px per frame: a falling dot's top speed. */
+  maxSpeed: 14,
   /**
    * Inside this many CSS px of the cursor a dot is pushed back out, hard enough that the pull and
    * the crowd behind can't press it in: the gathered dots settle as a ring round an empty core.
    */
   gatherCorePx: 44,
-  gatherCorePush: 1.5,
+  gatherCorePush: 3,
   /**
    * Dots closer than this (CSS px) push each other apart (scripts/dot-separation.ts): what packs
-   * the gathered dots into an even disc instead of a heap on the side they came from.
+   * the gathered dots into an even ring instead of a heap on the side they came from.
    */
   separationPx: 12,
   /** Per frame, the push at zero distance; falls off linearly to 0 at the separation radius. */

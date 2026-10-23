@@ -26,17 +26,20 @@ function releaseEnvelope(ageMs: number): number {
     : 1 - (ageMs - releaseRampMs) / (releaseMs - releaseRampMs);
 }
 
-/** Negative pulls toward the cursor; inside the core it pushes out, so the cursor stays clear. */
+/**
+ * Negative pulls toward the cursor; inside the core it pushes out, so the cursor stays clear.
+ * The pull is gravity's inverse square (softened, so it stays finite), faded to 0 at the field's
+ * edge: a dot drifts in slowly from afar and falls in ever faster.
+ */
 function cursorPull(distance: number): number {
-  if (distance < DOT_FIELD.gatherCorePx) {
-    return DOT_FIELD.gatherCorePush * (1 - distance / DOT_FIELD.gatherCorePx);
-  }
-  return -DOT_FIELD.gatherForce * fieldStrength(distance);
+  const { gatherCorePx, gatherCorePush, gravity, gravitySofteningPx } = DOT_FIELD;
+  if (distance < gatherCorePx) return gatherCorePush * (1 - distance / gatherCorePx);
+  return (-gravity / (distance ** 2 + gravitySofteningPx ** 2)) * fieldStrength(distance);
 }
 
 /**
  * Drifting dots behind the hero. On a mouse-first desktop the cursor gathers the dots near it;
- * when it stops they settle into an even disc around it, and when it leaves the clump diffuses
+ * when it stops they settle into an even ring around it, and when it leaves the clump diffuses
  * slowly back into the drift. The loop runs only while the hero is on screen and the tab is
  * visible.
  */
@@ -119,6 +122,12 @@ export function initDotField(): void {
       : DOT_FIELD.jitter * Math.sqrt(dt) * (1 + DOT_FIELD.releaseJitter * releaseEnvelope(age));
     dot.vx = dot.vx * friction + (Math.random() - 0.5) * jitter;
     dot.vy = dot.vy * friction + (Math.random() - 0.5) * jitter;
+    // A speed limit, so a dot falling in fast can't tunnel through the core in one frame.
+    const speed = Math.hypot(dot.vx, dot.vy);
+    if (speed > DOT_FIELD.maxSpeed) {
+      dot.vx *= DOT_FIELD.maxSpeed / speed;
+      dot.vy *= DOT_FIELD.maxSpeed / speed;
+    }
     // The canvas edge stops a dot; home pulls it back from there.
     dot.x = Math.min(canvas.width, Math.max(0, dot.x + dot.vx * dt));
     dot.y = Math.min(canvas.height, Math.max(0, dot.y + dot.vy * dt));
