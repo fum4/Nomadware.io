@@ -251,6 +251,12 @@ const plots = STAT_WINDOWS.map((range) => {
     top: 1px;
   }
 
+  /* Optical, not geometric: its body sits low in the box under the antenna, so centred it reads
+     low. */
+  .activity :global(.icon-robot) {
+    top: 0;
+  }
+
   :is(.when, .activity) :global(.icon) {
     color: var(--fg);
   }

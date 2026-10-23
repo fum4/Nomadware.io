@@ -7,7 +7,7 @@ interface Props {
 const { name } = Astro.props;
 ---
 
-<svg class="icon" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+<svg class={`icon icon-${name}`} viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
   {
     name === 'calendar' && (
       <>
