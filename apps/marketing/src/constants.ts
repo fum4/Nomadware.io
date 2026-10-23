@@ -18,7 +18,7 @@ export const SHA_LENGTH = 7;
  */
 export const INTRO_GAP_MS = 500;
 /** The headline shows as plain text for this long, then the scramble runs over it. */
-export const INTRO_HEADLINE_DELAY_MS = 1_300;
+export const INTRO_HEADLINE_DELAY_MS = 2_500;
 /** The tags start powering on this long before the headline scramble (≤ INTRO_HEADLINE_DELAY_MS). */
 export const INTRO_TAGS_LEAD_MS = 500;
 /**
