@@ -14,13 +14,13 @@ export const SHA_LENGTH = 7;
 
 /**
  * Intro (scripts/intro-sequence.ts): headline scramble → gap → stats count-up → gap → wordmark;
- * the hero tags power on from INTRO_TAGS_AT_SCRAMBLE_SHARE of the way through the scramble.
+ * the hero tags power on INTRO_TAGS_LEAD_MS before the scramble starts.
  */
 export const INTRO_GAP_MS = 500;
 /** The headline shows as plain text for this long, then the scramble runs over it. */
 export const INTRO_HEADLINE_DELAY_MS = 800;
-/** Share of the headline revealed when the tags start powering on (overlapping the scramble). */
-export const INTRO_TAGS_AT_SCRAMBLE_SHARE = 0.25;
+/** The tags start powering on this long before the headline scramble (≤ INTRO_HEADLINE_DELAY_MS). */
+export const INTRO_TAGS_LEAD_MS = 500;
 /**
  * Latest the wordmark starts, counted from the headline settling, when the stats card is below
  * the fold and never scrolled into view. The in-view path takes 500 + 1600 + 500 = 2.6 s, so 4 s
@@ -29,8 +29,8 @@ export const INTRO_TAGS_AT_SCRAMBLE_SHARE = 0.25;
 export const INTRO_WORDMARK_MAX_WAIT_MS = 4_000;
 
 /**
- * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started a quarter of the way
- * into the headline scramble and over well before the stats start, so the sequence timing never
+ * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started INTRO_TAGS_LEAD_MS
+ * before the headline scramble and over well before the stats start, so the sequence timing never
  * moves.
  * Each tag starts a random stagger after the last and flickers on over a random duration; a slash
  * lights a random lag after the tag that follows it. The whole run is scaled down if needed so it
