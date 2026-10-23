@@ -121,7 +121,7 @@ export const DOT_FIELD = {
   canvasScale: 2,
   highlightShare: 0.15,
   /** How far past the content column the dots' home reaches, CSS px. */
-  homeSpillPx: 32,
+  homeSpillPx: 96,
   /** Per frame, the share of its distance outside home a dot's speed gains back toward it. */
   homePull: 0.0004,
   /** At the cursor; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's pull. */
