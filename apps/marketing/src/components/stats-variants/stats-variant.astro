@@ -8,6 +8,7 @@ import type { StatsVariantId } from '../../config/stats-variants';
 import Board from './stats-board.astro';
 import Headline from './stats-headline.astro';
 import Heartbeat from './stats-heartbeat.astro';
+import Pulse from './stats-pulse.astro';
 import Receipt from './stats-receipt.astro';
 import Sentence from './stats-sentence.astro';
 
@@ -17,7 +18,7 @@ interface Props {
   renderedAt: string;
 }
 const { variant, stats, renderedAt } = Astro.props;
-const VARIANTS = { a: Headline, b: Board, c: Sentence, d: Heartbeat, e: Receipt };
+const VARIANTS = { a: Headline, b: Board, c: Sentence, d: Heartbeat, e: Receipt, f: Pulse };
 const Variant = VARIANTS[variant];
 ---
 

@@ -1,0 +1,389 @@
+---
+// TEMPORARY (NWARE-82) variant f, "Pulse" (a + d): the headline number beside the window's agent
+// activity trace, each bucket's merged PRs as lime ticks under it, then the rest as a slim row.
+import { STAT_WINDOWS } from '@nomadware/site-stats';
+
+import type { LoadedStats } from '../../data/load-stats';
+import { STATS_SERIES } from '../../data/load-series';
+import { DEFAULT_STAT_WINDOW } from '../../data/stats-snapshot';
+import RelativeTime from '../relative-time.astro';
+import StatValue from '../stat-value.astro';
+import { pulseChart } from './pulse-chart';
+
+interface Props {
+  stats: LoadedStats;
+  renderedAt: string;
+}
+const { stats, renderedAt } = Astro.props;
+const { snapshot, source } = stats;
+const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
+const W = 1000;
+const H = 120;
+const series = STATS_SERIES;
+const charts = series ? STAT_WINDOWS.map((range) => pulseChart(series, range, W, H)) : [];
+---
+
+<section class="pulse" aria-labelledby="stats-title" data-stats data-stats-source={source}>
+  <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
+  <div class="lead">
+    <p class="big"><StatValue stat="prs" snapshot={snapshot} /></p>
+    <p class="caption">pull requests merged in the last</p>
+    <span class="seg" role="group" aria-label="Time range">
+      {
+        STAT_WINDOWS.map((range) => (
+          <button
+            type="button"
+            data-range={range}
+            aria-pressed={range === DEFAULT_STAT_WINDOW ? 'true' : 'false'}
+          >
+            {days(range)}
+          </button>
+        ))
+      }
+    </span>
+    <p class="live">
+      <span class="dot" aria-hidden="true"></span>updated <RelativeTime
+        iso={snapshot.generatedAt}
+        renderedAt={renderedAt}
+      />
+    </p>
+  </div>
+  <div class="chart" aria-hidden="true">
+    {
+      charts.map((chart) => (
+        <div
+          class="plot"
+          data-range-label={chart.range}
+          data-current={chart.range === DEFAULT_STAT_WINDOW ? '' : undefined}
+        >
+          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+            <path class="trace" d={chart.path} pathLength="1" />
+          </svg>
+          <span
+            class="callout"
+            style={`left: ${chart.peak.x}%; top: ${chart.peak.y}%; --x: ${chart.peak.x}`}
+          >
+            peak · {chart.peak.hours}h of agent work in {chart.peak.bucketHours}h
+          </span>
+          <span class="ticks">
+            {chart.ticks.map((tick) => (
+              <i style={`left: ${tick.x}%; height: ${tick.height}px; --at: ${tick.x / 100}`} />
+            ))}
+          </span>
+          <span class="days">
+            {chart.days.map((day) => (
+              <span style={`left: ${day.x}%`}>{day.label}</span>
+            ))}
+          </span>
+        </div>
+      ))
+    }
+    <p class="key"><i></i> agent activity <b></b> merged PRs</p>
+  </div>
+  <dl class="row">
+    <div><dt>agent runs</dt><dd><StatValue stat="runs" snapshot={snapshot} /></dd></div>
+    <div><dt>agent-hours</dt><dd><StatValue stat="agentHours" snapshot={snapshot} />h</dd></div>
+    <div><dt>tool calls</dt><dd><StatValue stat="actions" snapshot={snapshot} /></dd></div>
+    <div>
+      <dt>checks · <span class="warm">issues caught</span></dt>
+      <dd>
+        <StatValue stat="checks" snapshot={snapshot} /> · <span class="warm"
+          ><StatValue stat="caught" snapshot={snapshot} /></span
+        >
+      </dd>
+    </div>
+    <div>
+      <dt>lines</dt>
+      <dd>
+        +<StatValue stat="linesAdded" snapshot={snapshot} /> <span class="minus"
+          >−<StatValue stat="linesDeleted" snapshot={snapshot} /></span
+        >
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<style>
+  .pulse {
+    display: grid;
+    /* A fixed lead column: sized by the number's glyphs it would move when the font swaps. */
+    grid-template-columns: 300px 1fr;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    backdrop-filter: blur(6px);
+  }
+
+  .lead {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 26px 28px;
+    border-right: 1px solid var(--line);
+  }
+
+  .lead p {
+    margin: 0;
+  }
+
+  .big {
+    font: 500 96px/0.9 var(--sans);
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .caption,
+  .live {
+    white-space: nowrap;
+  }
+
+  .caption {
+    margin-top: 6px;
+    font: 400 12px/var(--leading) var(--mono);
+    color: var(--dim);
+  }
+
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .seg button {
+    padding: 3px 9px;
+    border: 0;
+    background: none;
+    color: var(--dim);
+    font: 500 11px/var(--leading) var(--mono);
+    cursor: pointer;
+  }
+
+  .seg button[aria-pressed='true'] {
+    background: var(--chip);
+    color: var(--fg);
+  }
+
+  .live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--faint);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sig);
+  }
+
+  /* Seismograph ruling: the page grid's cell, halved. */
+  .chart {
+    position: relative;
+    min-height: 220px;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .plot {
+    position: absolute;
+    inset: 40px 28px 66px;
+  }
+
+  .plot:not([data-current]) {
+    display: none;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Redrawn left → right whenever it is shown (display: none → block restarts it). */
+  .trace {
+    fill: none;
+    stroke: var(--sig);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: pulse-draw 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.15s forwards;
+    filter: drop-shadow(0 0 4px var(--sig-glow));
+  }
+
+  @keyframes pulse-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Anchored by its own x share: left-aligned at the left edge, right-aligned at the right, so it
+     never hangs out of the card however narrow. */
+  .callout {
+    position: absolute;
+    transform: translate(calc(var(--x) * -1%), -150%);
+    padding: 2px 6px;
+    border: 1px solid var(--sig-soft);
+    border-radius: 4px;
+    background: var(--ink);
+    color: var(--fg);
+    font: 400 11px/var(--leading) var(--mono);
+    white-space: nowrap;
+  }
+
+  /* Merged PRs: a lime tick per bucket under the baseline, taller for more; they drop in behind
+     the pen, each as the trace passes its spot. */
+  .ticks {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    height: 14px;
+  }
+
+  .ticks i {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--sig);
+    opacity: 0;
+    transform: translateY(-6px);
+    animation: tick-drop 0.3s ease-out forwards;
+    animation-delay: calc(0.15s + var(--at) * 1.4s);
+  }
+
+  @keyframes tick-drop {
+    to {
+      opacity: 0.85;
+      transform: none;
+    }
+  }
+
+  .days {
+    position: absolute;
+    top: calc(100% + 26px);
+    left: 0;
+    right: 0;
+    font: 400 10px/var(--leading) var(--mono);
+    color: var(--faint);
+  }
+
+  .days span {
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  /* Under the day labels, clear of the peak callout wherever the peak falls. */
+  .key {
+    position: absolute;
+    bottom: 10px;
+    right: 28px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font: 400 10px/var(--leading) var(--mono);
+    color: var(--faint);
+  }
+
+  .key i,
+  .key b {
+    display: inline-block;
+    background: var(--sig);
+  }
+
+  .key i {
+    width: 14px;
+    height: 1.5px;
+  }
+
+  .key b {
+    width: 2px;
+    height: 9px;
+    margin-left: 8px;
+  }
+
+  .row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin: 0;
+    padding: 14px 28px;
+    border-top: 1px solid var(--line);
+  }
+
+  .row div {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .row dt {
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .row dd {
+    margin: 0;
+    font: 500 18px/var(--leading) var(--sans);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .warm {
+    color: var(--warm);
+  }
+
+  .minus {
+    color: var(--dim);
+  }
+
+  @media (max-width: 640px) {
+    .pulse {
+      grid-template-columns: 1fr;
+    }
+
+    .lead {
+      padding: 20px 16px 16px;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .big {
+      font-size: 72px;
+    }
+
+    .chart {
+      min-height: 190px;
+    }
+
+    .plot {
+      inset: 40px 16px 64px;
+    }
+
+    .key {
+      right: 16px;
+    }
+
+    .row {
+      grid-template-columns: 1fr 1fr;
+      padding: 14px 16px;
+    }
+
+    .row dd {
+      font-size: 16px;
+    }
+  }
+</style>

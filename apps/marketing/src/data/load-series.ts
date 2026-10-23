@@ -6,10 +6,14 @@ import type { StatWindow } from '@nomadware/site-stats';
 // the published snapshot (packages/site-stats) instead.
 
 export interface StatsSeries {
+  /** When the buckets end (the newest bucket closes here). */
+  generatedAt: string;
   /** Merged PRs per UTC day, oldest first: 7 or 30 points. */
   prsPerDay: Record<StatWindow, number[]>;
   /** Agent-minutes of activity per bucket, oldest first (7d: 2h buckets, 30d: 6h). */
   agentMinutes: Record<StatWindow, number[]>;
+  /** Merged PRs per bucket, aligned with agentMinutes. */
+  prsPerBucket: Record<StatWindow, number[]>;
 }
 
 const files = import.meta.glob<StatsSeries>('./stats-series.preview.json', {

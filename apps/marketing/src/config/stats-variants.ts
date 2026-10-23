@@ -4,7 +4,7 @@ import { STATS_VARIANTS } from 'astro:env/server';
 // STATS_VARIANTS is set (a local preview's .env.local; never on Vercel). `?stats=<id>` picks one;
 // production always renders the current card. Delete with the losing variants once one is chosen.
 
-export const STATS_VARIANT_IDS = ['current', 'a', 'b', 'c', 'd', 'e'] as const;
+export const STATS_VARIANT_IDS = ['current', 'a', 'b', 'c', 'd', 'e', 'f'] as const;
 export type StatsVariantId = (typeof STATS_VARIANT_IDS)[number];
 
 export const STATS_VARIANT_NAMES: Record<StatsVariantId, string> = {
@@ -14,6 +14,7 @@ export const STATS_VARIANT_NAMES: Record<StatsVariantId, string> = {
   c: 'sentence',
   d: 'heartbeat',
   e: 'receipt',
+  f: 'pulse',
 };
 
 export const statsVariantsOn = STATS_VARIANTS;
