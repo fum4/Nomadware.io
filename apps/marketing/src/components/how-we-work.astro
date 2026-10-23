@@ -76,10 +76,10 @@ const PRINCIPLES = [
     color: var(--soft);
   }
 
-  /* 1ch wider than the subtitle: the smallest step that sets each detail in three lines at
-     desktop widths (60.25ch would do, with ~2px to spare: too tight across font renderers). */
+  /* 3ch wider than the subtitle: sets the longest detail (Product mindset) in three lines at
+     desktop widths. 62.5ch is the threshold; 63ch leaves ~4px across font renderers. */
   .detail {
-    max-width: 61ch;
+    max-width: 63ch;
     margin-top: 10px;
     color: var(--subdued);
   }
