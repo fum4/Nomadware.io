@@ -2,7 +2,7 @@
 
 **What:** product analytics for the site (PostHog EU cloud, org Nomadware, project 316793) and the consent banner that decides how much of it runs.
 
-**Depends on:** `posthog-js` (imported dynamically on the first interaction or 3 s after `load`, then on idle: evaluating it is one ~100 ms task that must stay out of start-up and Lighthouse's blocking time), `config/analytics.ts` (token, hosts, `enabled` = production builds only), the `/ingest/*` rewrites in `apps/marketing/vercel.json`, `components/consent-banner.astro` (markup + styles, mounted by the base layout) and the footer's `data-consent-open` button.
+**Depends on:** `posthog-js` (imported dynamically on the first interaction or 3 s after `load`, then on idle: evaluating it is one ~100 ms task that must stay out of start-up and Lighthouse's blocking time), `config/analytics.ts` (token, hosts, `enabled` = production builds only, `hostname` = and only when served from `nomadware.io`, so a local or tailnet `marketing:preview` never sends), the `/ingest/*` rewrites in `apps/marketing/vercel.json`, `components/consent-banner.astro` (markup + styles, mounted by the base layout) and the footer's `data-consent-open` button.
 
 **Consent model** (owner-approved, NWARE-82):
 
@@ -21,8 +21,8 @@ The choice lives in `localStorage['nw-consent']` (`granted` / `denied`). "no tha
 
 | Event | Fired from |
 |---|---|
-| `stats_viewed` {window} | `stats-strip.ts`, once the strip is ≥50% in view |
-| `stats_window_toggled` {window} | `stats-strip.ts`, 7d/30d click |
+| `stats_viewed` {window} | `stats-card.ts`, once the card is ≥50% in view |
+| `stats_window_toggled` {window} | `stats-card.ts`, 7d/30d click |
 | `contact_nav_clicked` | `site-nav.astro` |
 | `contact_form_focused` | `contact-form.ts`, first focus / click / key in the form (the desktop auto-focus doesn't count) |
 | `contact_form_started` | `contact-form.ts`, first character typed |

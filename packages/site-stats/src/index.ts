@@ -1,11 +1,8 @@
 export type { S3Credentials } from './sigv4.ts';
-export type { StatKey, StatsSnapshot, StatWindow, StatWindowValues } from './snapshot.ts';
-export {
-  isStatKey,
-  isStatWindow,
-  parseStatsSnapshot,
-  STAT_KEYS,
-  STAT_WINDOW_DAYS,
-  STAT_WINDOWS,
-} from './snapshot.ts';
+export type { StatSeries, StatsSeries } from './series.ts';
+export { bucketCount, bucketStartMs, parseStatsSeries, SERIES_BUCKET_HOURS } from './series.ts';
+export type { StatKey, StatsSnapshot, StatWindowValues } from './snapshot.ts';
+export { isStatKey, parseStatsSnapshot, STAT_KEYS } from './snapshot.ts';
 export { getStatsObject, putStatsObject, STATS_OBJECT } from './stats-object.ts';
+export type { StatWindow } from './windows.ts';
+export { isStatWindow, STAT_WINDOW_DAYS, STAT_WINDOWS } from './windows.ts';

@@ -2,6 +2,7 @@ import type { StatsSnapshot, StatWindow, StatWindowValues } from '@nomadware/sit
 import { STAT_WINDOW_DAYS } from '@nomadware/site-stats';
 
 import { DAY_MS, HOUR_MS, MINUTE_MS } from './constants.ts';
+import { buildSeries } from './series.ts';
 import type { State } from './state.ts';
 
 // The store → the published snapshot: rolling windows ending now. Aggregates only, by design —
@@ -54,5 +55,6 @@ export function buildSnapshot(state: State, nowMs: number): StatsSnapshot {
   return {
     generatedAt: new Date(nowMs).toISOString(),
     windows: { '7d': values('7d'), '30d': values('30d') },
+    series: buildSeries(state, nowMs),
   };
 }

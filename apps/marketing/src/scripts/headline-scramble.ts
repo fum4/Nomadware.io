@@ -1,5 +1,4 @@
 import { SCRAMBLE_GLYPHS, SCRAMBLE_STEP_MS } from '../constants';
-import { prefersReducedMotion } from './motion';
 
 const SCRAMBLING = 'is-scrambling';
 const OVERLAY = 'scramble-glyphs';
@@ -17,7 +16,7 @@ const randomGlyph = (): string =>
 export function scrambleHeadline(): Promise<void> {
   const target = document.querySelector<HTMLElement>('[data-scramble]');
   const text = target?.firstChild;
-  if (!target || !(text instanceof Text) || prefersReducedMotion()) return Promise.resolve();
+  if (!target || !(text instanceof Text)) return Promise.resolve();
 
   const ink = getComputedStyle(target).color;
   const range = document.createRange();

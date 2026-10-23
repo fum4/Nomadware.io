@@ -1,36 +1,43 @@
 ---
 import PageSection from './page-section.astro';
 
+// `detail` is a list of runs; every second run (odd index) is set in italics.
 const PRINCIPLES = [
   {
     title: 'Product mindset',
-    subtitle: 'We build for your users, not for the ticket, we ship what moves the needle.',
-    detail:
-      "Software is for people. A feature only matters if it makes someone's day easier, so that's what we measure our work by. The best products disappear into someone's routine — they feel obvious, they just work — and that kind of simple is never an accident.",
+    subtitle: 'We build for our users, not for the ticket. We ship what moves the needle.',
+    detail: [
+      "Software is for people. A feature only matters if it makes someone's day easier, so that's what we measure our work by. The best products disappear into someone's routine, they feel obvious, they just work — that kind of ",
+      'simple',
+      ' is never an accident.',
+    ],
   },
   {
     title: 'Always in motion',
-    subtitle: 'Agents work around the clock. You wake up to progress, not questions.',
-    detail:
-      "Most projects don't fail, they stall, so our agents keep the work moving around the clock. We build the pipelines, workflows and guardrails that keep them in check: every change is thoroughly tested, reviewed and gated before it gets out of our lab.",
+    subtitle: 'Agents work around the clock. Every morning starts with progress.',
+    detail: [
+      "Most projects don't fail, they stall, so our agents keep the work moving around the clock. We build the pipelines, workflows and guardrails that keep them in check: every change is tested, reviewed and gated before it gets out of our lab.",
+    ],
   },
   {
     title: 'Zero friction',
     subtitle: 'No calls, no tickets to babysit. New builds show up on your phone as they land.',
-    detail:
-      'Meetings describe progress; a working build shows it. So we send you something you can tap, not something you have to sit through. Your time is better spent running your business than managing us.',
+    detail: [
+      'Less talking about the work, more looking at it. The fastest feedback loop is a link. Every change lands as a build we can all tap through, and one comment is enough to steer the next one. Nothing gets lost between what we talked about and what we built.',
+    ],
   },
 ];
 ---
 
-<PageSection id="how-we-work" title="How we work" band>
+<!-- One extra cell above: more air under the stats card. -->
+<PageSection id="how-we-work" title="How we work" band extraCells={1}>
   <ul class="rows">
     {
       PRINCIPLES.map(({ title, subtitle, detail }) => (
         <li>
           <h3>{title}</h3>
           <p class="subtitle">{subtitle}</p>
-          <p class="detail">{detail}</p>
+          <p class="detail">{detail.map((run, index) => (index % 2 === 1 ? <em>{run}</em> : run))}</p>
         </li>
       ))
     }
@@ -56,21 +63,23 @@ const PRINCIPLES = [
     letter-spacing: -0.02em;
   }
 
+  /* pretty: the browser avoids a lone word on the last line (no-op where unsupported). */
   p {
     max-width: 60ch;
     margin: 0;
     font-size: 14px;
     line-height: 1.55;
+    text-wrap: pretty;
   }
 
   .subtitle {
     color: var(--soft);
   }
 
-  /* 1ch wider than the subtitle: the smallest step that sets each detail in three lines at
-     desktop widths (60.25ch would do, with ~2px to spare: too tight across font renderers). */
+  /* 3ch wider than the subtitle: sets the longest detail (Product mindset) in three lines at
+     desktop widths. 62.5ch is the threshold; 63ch leaves ~4px across font renderers. */
   .detail {
-    max-width: 61ch;
+    max-width: 63ch;
     margin-top: 10px;
     color: var(--subdued);
   }

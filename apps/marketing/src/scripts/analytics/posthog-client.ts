@@ -1,6 +1,6 @@
 import type { PostHog, PostHogConfig, PostHogInterface } from 'posthog-js';
 
-import { ANALYTICS } from '../../config/analytics';
+import { ANALYTICS, analyticsOn } from '../../config/analytics';
 import { whenIdle } from '../motion';
 import { clearTrackingStorage } from './clear-tracking-storage';
 import type { Consent } from './consent-store';
@@ -67,7 +67,7 @@ function importWhenIdle(): void {
  * of the page's start-up (and out of Lighthouse's blocking time). Events tracked before then queue.
  */
 export function loadAnalytics(): void {
-  if (!ANALYTICS.enabled || requested) return;
+  if (!analyticsOn() || requested) return;
   requested = true;
   let timer = 0;
   let started = false;

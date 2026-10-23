@@ -1,4 +1,5 @@
 import { TAGS_FLICKER } from '../constants';
+import { flashFallbackFadeMs, flashingAllowed } from './motion-policy';
 
 const GLOW = '0 0 6px currentColor';
 const NO_GLOW = 'none';
@@ -39,7 +40,7 @@ function schedule(tags: HTMLElement[], slashes: HTMLElement[]): Flicker[] {
   let start = 0;
   tags.forEach((element, index) => {
     if (index > 0) start += between(TAGS_FLICKER.staggerMinMs, TAGS_FLICKER.staggerMaxMs);
-    const duration = between(TAGS_FLICKER.durationMinMs, TAGS_FLICKER.durationMaxMs);
+    const duration = flickerDuration();
     flickers.push({ element, start, duration });
     const slash = slashes[index - 1];
     if (slash) {
@@ -60,28 +61,45 @@ function schedule(tags: HTMLElement[], slashes: HTMLElement[]): Flicker[] {
   return flickers;
 }
 
+/** One power-on flicker's length, random per run. */
+export const flickerDuration = (): number =>
+  between(TAGS_FLICKER.durationMinMs, TAGS_FLICKER.durationMaxMs);
+
 /**
- * Flicker the hero tags on like a neon sign with a bad power supply; resolves when all are lit.
- * The tags are hidden by CSS until now (only with JS and motion; see hero.astro), and are left
- * at full opacity with no animation attached.
+ * Switch one element on from dark like a neon tube with a bad power supply, after `delay` ms;
+ * resolves when it is steady, left at full opacity with no animation attached. It flashes, so
+ * under reduced motion it is a plain fade at once instead (scripts/motion-policy.ts).
+ */
+export async function powerOn(
+  element: HTMLElement,
+  delay: number,
+  duration: number,
+): Promise<void> {
+  const animation = flashingAllowed()
+    ? element.animate(flickerKeyframes(), { delay, duration, fill: 'forwards' })
+    : element.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: flashFallbackFadeMs(),
+        easing: 'ease-out',
+        fill: 'forwards',
+      });
+  await animation.finished;
+  // Settle explicitly: commitStyles() would freeze a `steps()` segment at its start value.
+  element.style.opacity = '1';
+  animation.cancel();
+}
+
+/**
+ * Power the hero tags on, one after another; resolves when all are lit. They are hidden by CSS
+ * until now (only with JS; see hero.astro).
  */
 export async function flickerTags(): Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-tags]');
   if (!root) return;
   const tags = [...root.querySelectorAll<HTMLElement>('[data-tag]')];
   const slashes = [...root.querySelectorAll<HTMLElement>('[data-slash]')];
-
   await Promise.all(
-    schedule(tags, slashes).map(async ({ element, start, duration }) => {
-      const animation = element.animate(flickerKeyframes(), {
-        delay: start,
-        duration,
-        fill: 'forwards',
-      });
-      await animation.finished;
-      // Settle explicitly: commitStyles() would freeze a `steps()` segment at its start value.
-      element.style.opacity = '1';
-      animation.cancel();
-    }),
+    schedule(tags, slashes).map(({ element, start, duration }) =>
+      powerOn(element, start, duration),
+    ),
   );
 }

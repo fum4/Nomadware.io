@@ -1,21 +1,12 @@
 import { WORDMARK_LETTER_DELAY_S, WORDMARK_LETTER_STAGGER_S } from '../constants';
-import { prefersReducedMotion } from './motion';
 
 const OPEN_CLASS = 'is-open';
 
-/** "nware" → "nomadware", now (the intro sequence picks the moment). Reduced motion: no transition. */
+/** "nware" → "nomadware", now (the intro sequence picks the moment). */
 export function expandWordmark(): void {
   const unfold = document.querySelector<HTMLElement>('[data-wordmark-unfold]');
   if (!unfold) return;
   const letters = [...unfold.querySelectorAll<HTMLElement>('i')];
-
-  if (prefersReducedMotion()) {
-    unfold.style.transition = 'none';
-    letters.forEach((letter) => (letter.style.transition = 'none'));
-    unfold.style.width = 'auto';
-    unfold.classList.add(OPEN_CLASS);
-    return;
-  }
 
   const width = letters.reduce((sum, letter) => sum + letter.offsetWidth, 0);
   unfold.style.width = `${width}px`;

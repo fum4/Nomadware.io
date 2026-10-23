@@ -13,7 +13,7 @@ export const ANALYTICS_LOAD_TRIGGERS = ['pointerdown', 'keydown', 'scroll', 'tou
 /** Events tracked before posthog-js has loaded wait here; beyond this, the oldest are dropped. */
 export const TRACK_QUEUE_LIMIT = 50;
 
-/** Share of the stats strip that must be on screen for `stats_viewed`. */
+/** Share of the stats card that must be on screen for `stats_viewed`. */
 export const STATS_VIEWED_THRESHOLD = 0.5;
 
 /**

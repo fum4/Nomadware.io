@@ -1,0 +1,199 @@
+---
+// The stats card's activity chart: agent-minutes per bucket as a seismograph line, one plot per
+// window (the current one shown), drawn left to right on reveal. Hover or touch snaps a dot and a
+// guide to a bucket and shows its numbers in a chip (scripts/stats-chart.ts reads data-series).
+import type { StatsSeries } from '@nomadware/site-stats';
+import { STAT_WINDOWS } from '@nomadware/site-stats';
+
+import { tracePaths } from '../chart/trace-geometry';
+import { DEFAULT_STAT_WINDOW, STATS_CHART } from '../constants';
+
+interface Props {
+  series: StatsSeries;
+  generatedAt: string;
+}
+const { series, generatedAt } = Astro.props;
+const { viewWidth, viewHeight } = STATS_CHART;
+const plots = STAT_WINDOWS.map((range) => {
+  const { active, quiet } = tracePaths(series[range].agentMinutes, viewWidth, viewHeight);
+  return { range, active, quiet };
+});
+---
+
+<div
+  class="chart"
+  aria-hidden="true"
+  data-stats-chart
+  data-series={JSON.stringify(series)}
+  data-generated-at={generatedAt}
+>
+  {
+    plots.map((plot) => (
+      <div
+        class="plot"
+        data-range-label={plot.range}
+        data-current={plot.range === DEFAULT_STAT_WINDOW ? '' : undefined}
+      >
+        <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} preserveAspectRatio="none">
+          <path class="quiet" d={plot.quiet} />
+          <path class="trace" d={plot.active} pathLength="1" />
+        </svg>
+        <span class="guide" />
+        <span class="mark" />
+        <span class="tip">
+          <span data-tip="when" />
+          <span data-tip="work" />
+          <span data-tip-lines>
+            <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" /> lines
+          </span>
+        </span>
+        <span class="now">now</span>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  /* Paper ruled like a seismograph: the page grid's own cell, finer. Vertical swipes still scroll
+     the page on touch; horizontal drags scrub the tooltip. */
+  .chart {
+    position: relative;
+    height: 240px;
+    border-bottom: 1px solid var(--line);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    touch-action: pan-y;
+  }
+
+  /* The top inset is the tooltip's own band: the chip sits there (at STATS_CHART.tipTopPx from
+     the top), clear of the trace, whose peaks touch the plot's top. Taller than the chip. */
+  .plot {
+    position: absolute;
+    inset: 84px 24px 16px;
+  }
+
+  .plot:not([data-current]) {
+    display: none;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Drawn left → right whenever it is shown (display: none → block restarts the animation). */
+  .trace {
+    fill: none;
+    stroke: var(--sig);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: trace-draw 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.2s forwards;
+    filter: drop-shadow(0 0 4px var(--sig-glow));
+  }
+
+  /* Idle stretches: a faint dotted baseline, revealed left → right in step with the trace. */
+  .quiet {
+    fill: none;
+    stroke: var(--sig);
+    stroke-width: 1;
+    stroke-dasharray: 2 5;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.55;
+    clip-path: inset(0 100% 0 0);
+    animation: quiet-reveal 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.2s forwards;
+  }
+
+  @keyframes quiet-reveal {
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes trace-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .tip,
+  .now {
+    position: absolute;
+    font: 400 11px/var(--leading) var(--mono);
+    white-space: nowrap;
+  }
+
+  /* Only while pointing (data-hover, set by scripts/stats-chart.ts), at the px corner it measured:
+     centred over the snapped point in the band above the trace, overhanging the card if need be
+     (the card doesn't clip; above everything around it). */
+  .tip {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    left: var(--tip-left);
+    top: var(--tip-top);
+    padding: 4px 8px;
+    border: 1px solid var(--sig-soft);
+    border-radius: 4px;
+    background: var(--ink);
+    color: var(--fg);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .plot:not([data-hover]) :is(.tip, .guide, .mark) {
+    display: none;
+  }
+
+  [data-tip='when'],
+  .deleted {
+    color: var(--dim);
+  }
+
+  .added {
+    color: var(--sig);
+  }
+
+  .guide {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--hover-x);
+    width: 1px;
+    background: var(--sig-soft);
+    pointer-events: none;
+  }
+
+  .mark {
+    position: absolute;
+    left: var(--hover-x);
+    top: var(--hover-y);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--sig);
+    box-shadow: 0 0 6px var(--sig-glow);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .now {
+    right: -4px;
+    bottom: -14px;
+    color: var(--faint);
+  }
+
+  @media (max-width: 640px) {
+    .chart {
+      height: 204px;
+    }
+
+    .plot {
+      inset: 84px 14px 16px;
+    }
+  }
+</style>

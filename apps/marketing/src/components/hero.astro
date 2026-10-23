@@ -1,23 +1,37 @@
 ---
+import { HERO_TAGS } from '../constants';
+
 const HEADLINE = 'We build software.';
-const TAGS = ['web', 'mobile', 'backend', 'infra'];
+// Each slot shows its pool's first word and reserves its longest (scripts/tags-rotate.ts).
+const SLOTS = HERO_TAGS.pools.map((pool) => ({
+  word: pool[0],
+  chars: Math.max(...pool.map((word) => word.length)),
+}));
+const STATIC_LINE = SLOTS.map((slot) => slot.word).join(' / ');
+// Two pairs, so a narrow phone can set them as two rows (slots 1–2 / 3–4).
+const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 ---
 
 <section class="hero" aria-labelledby="hero-title">
   <canvas class="dots" data-dot-field aria-hidden="true"></canvas>
-  <p class="eyebrow">Small studio · large output</p>
-  <h1 id="hero-title">
-    <span class="headline" data-scramble>{HEADLINE}</span>{' '}
-    <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
-    <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
-  </h1>
-  <p class="tags" data-tags>{TAGS.map((tag, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span data-tag>{tag}</span></>)}</p>
+  <div class="copy">
+    <p class="eyebrow">Small studio · large output</p>
+    <h1 id="hero-title">
+      <span class="headline" data-scramble>{HEADLINE}</span>{' '}
+      <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
+      <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
+    </h1>
+    <!-- The visible line rotates; readers get the server-rendered words once, never each swap. -->
+    <p class="tags">
+      <span class="sr-only">{STATIC_LINE}</span><span aria-hidden="true" data-tags>{PAIRS.map((pair, pairIndex) => <>{pairIndex > 0 && <span class="slash between" data-slash>/</span>}<span class="pair">{pair.map((slot, index) => <>{index > 0 && <span class="slash" data-slash>/</span>}<span class="slot" data-tag style={`--slot-chars: ${slot.chars}`}>{slot.word}</span></>)}</span></>)}</span>
+    </p>
+  </div>
 </section>
 
 <script>
   import { initDotField } from '../scripts/dot-field';
-  import { whenIdle } from '../scripts/motion';
-  whenIdle(initDotField);
+  // Straight away, not when idle: the field fades in from the first frame.
+  initDotField();
 </script>
 
 <style>
@@ -26,12 +40,52 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
     padding: 96px 0 60px;
   }
 
+  /* Full bleed (the frame clips the overhang sideways), reaching up behind the nav and down past
+     the hero, faded out at both ends so the field never stops at an edge. Absolutely positioned,
+     so it never affects layout. A canvas is a replaced element: insets alone don't size it (it
+     would fall back to its intrinsic size), so width and height are explicit. */
   .dots {
+    --dots-above: 96px;
+    --dots-below: 200px;
+
     position: absolute;
-    inset: 0;
+    top: calc(var(--dots-above) * -1);
+    left: calc(50% - 50vw);
     z-index: -1;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: calc(100% + var(--dots-above) + var(--dots-below));
+    mask-image: linear-gradient(
+      transparent,
+      #000 var(--dots-above),
+      #000 calc(100% - var(--dots-below)),
+      transparent
+    );
+  }
+
+  /* The text halo: an ink veil hugging the copy (fit-content: the widest line, so the text sets
+     exactly as without it), fading out over --halo-fade beyond it, so the dots drawn underneath
+     recede behind the words. Two intersected linear masks make a soft-cornered rectangle with
+     no edge anywhere; painted once, no blur, no layout. */
+  .copy {
+    --halo-fade: 140px;
+
+    position: relative;
+    width: fit-content;
+  }
+
+  .copy::before {
+    content: '';
+    position: absolute;
+    inset: calc(var(--halo-fade) * -1);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--halo-text);
+    --halo-ramp: transparent, rgba(0, 0, 0, 0.2) calc(var(--halo-fade) * 0.35),
+      rgba(0, 0, 0, 0.6) calc(var(--halo-fade) * 0.65), #000 var(--halo-fade),
+      #000 calc(100% - var(--halo-fade)), rgba(0, 0, 0, 0.6) calc(100% - var(--halo-fade) * 0.65),
+      rgba(0, 0, 0, 0.2) calc(100% - var(--halo-fade) * 0.35), transparent;
+    mask-image: linear-gradient(90deg, var(--halo-ramp)), linear-gradient(var(--halo-ramp));
+    mask-composite: intersect;
   }
 
   .eyebrow,
@@ -47,21 +101,37 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
   }
 
   .tags {
-    letter-spacing: 0.14em;
+    --tags-tracking: 0.14em;
+    --slash-gap: 2ch;
+
+    letter-spacing: var(--tags-tracking);
+    white-space: nowrap;
   }
 
+  /* Mono: every character advances 1ch plus the tracking, so this is the longest word's width.
+     Centred, so a shorter word's leftover splits evenly around it instead of piling up before
+     the next slash; a row's first slot starts flush, on the copy's left edge. */
+  .slot {
+    display: inline-block;
+    width: calc(var(--slot-chars) * (1ch + var(--tags-tracking)));
+    text-align: center;
+  }
+
+  .pair:first-child > .slot:first-child {
+    text-align: start;
+  }
+
+  /* Wide enough that the up-to-2ch leftover inside a slot reads as small beside it. */
   .slash {
-    margin: 0 8px;
+    margin: 0 var(--slash-gap);
     color: var(--sig);
   }
 
-  /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline.
-     Only with JS and motion; the failsafe lights them anyway if the intro never runs. */
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html.js) .tags > span {
-      opacity: 0;
-      animation: tags-failsafe 0s 4s forwards;
-    }
+  /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline
+     (only with JS); the failsafe lights them anyway if the intro never runs. */
+  :global(html.js) [data-tags] :is([data-tag], [data-slash]) {
+    opacity: 0;
+    animation: tags-failsafe 0s 4s forwards;
   }
 
   @keyframes tags-failsafe {
@@ -128,8 +198,29 @@ const TAGS = ['web', 'mobile', 'backend', 'infra'];
       font-size: 42px;
     }
 
-    .slash {
-      margin: 0 5px;
+    .copy {
+      --halo-fade: 72px;
+    }
+
+    /* 1.5ch on phones: the one-row line (337px) then fits a 390px screen. */
+    .tags {
+      --slash-gap: 1.5ch;
+    }
+
+  }
+
+  /* The four slots don't fit one row on a narrow phone: two rows, slots 1–2 / 3–4. */
+  @media (max-width: 380px) {
+    .pair {
+      display: block;
+    }
+
+    .between {
+      display: none;
+    }
+
+    .pair > .slot:first-child {
+      text-align: start;
     }
   }
 </style>

@@ -1,4 +1,4 @@
-import { ANALYTICS } from '../../config/analytics';
+import { analyticsOn } from '../../config/analytics';
 import { TRACK_QUEUE_LIMIT } from './constants';
 import type { AnalyticsEvent, AnalyticsEvents } from './events';
 
@@ -13,10 +13,11 @@ let capture: Capture | undefined;
 
 /**
  * Send a custom event. Safe to call before posthog-js has loaded (it is loaded lazily, after the
- * page is idle): events queue and flush once it connects. No-op outside production builds.
+ * page is idle): events queue and flush once it connects. No-op unless analytics is on (a
+ * production build on nomadware.io).
  */
 export function track<E extends AnalyticsEvent>(event: E, ...[props]: PropsArg<E>): void {
-  if (!ANALYTICS.enabled) return;
+  if (!analyticsOn()) return;
   const properties: EventProps | undefined = props ? { ...props } : undefined;
   if (capture) {
     capture(event, properties);

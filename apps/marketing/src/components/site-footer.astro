@@ -1,23 +1,14 @@
 ---
 import { BUILD_INFO } from '../config/build-info';
 import { SITE } from '../config/site';
-import RelativeTime from './relative-time.astro';
-
-interface Props {
-  renderedAt: string;
-}
-const { renderedAt } = Astro.props;
 ---
 
-<footer class="footer">
+<!-- data-commit: the deployed commit, for debugging only (not shown; "dev" off Vercel). -->
+<footer class="footer" data-commit={BUILD_INFO.sha}>
   <p class="studio">
-    <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no office · no overhead · just software</span>
+    <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no overhead · just software</span>
   </p>
-  <p>
-    last deploy <RelativeTime iso={BUILD_INFO.builtAt} renderedAt={renderedAt} /> · <span
-      class="sha">{BUILD_INFO.sha}</span
-    ><span class="privacy"> · <button type="button" data-consent-open>privacy</button></span>
-  </p>
+  <p class="privacy"><button type="button" data-consent-open>privacy</button></p>
 </footer>
 
 <style>
@@ -25,7 +16,8 @@ const { renderedAt } = Astro.props;
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    margin-top: 48px;
+    /* Whole grid cells on top of the base gap, so the contact form has room to breathe. */
+    margin-top: calc(48px + var(--grid) * 3);
     padding-top: 16px;
     border-top: 1px solid var(--line);
     font: 400 11px/var(--leading) var(--mono);
@@ -36,12 +28,12 @@ const { renderedAt } = Astro.props;
     margin: 0;
   }
 
-  .owner,
-  .sha {
+  .owner {
     color: var(--fg);
   }
 
-  /* Reopens the consent banner; looks like the footer's text, not a button. */
+  /* Reopens the consent banner (withdrawing consent must be as easy as giving it); looks like
+     the footer's text, not a button. */
   .privacy button {
     padding: 0;
     border: 0;
@@ -64,20 +56,24 @@ const { renderedAt } = Astro.props;
   }
 
   @media (max-width: 640px) {
-    /* Three rows: owner / tagline / deploy. */
-    .footer,
-    .studio {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
+    /* Two rows: owner · tagline / privacy. */
     .footer {
-      margin-top: 36px;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: calc(36px + var(--grid) * 2);
     }
 
-    .sep {
-      display: none;
+    .studio {
+      white-space: nowrap;
+    }
+  }
+
+  /* The first row is 322px at 11px, which needs a 362px screen; below 370px it steps down
+     (283px) so it stays on one line down to a 330px screen. */
+  @media (max-width: 370px) {
+    .footer {
+      font-size: 10px;
+      letter-spacing: -0.02em;
     }
   }
 </style>

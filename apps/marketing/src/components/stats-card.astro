@@ -1,0 +1,222 @@
+---
+// The live stats card: the window's agent activity as a seismograph line (stats-chart.astro), the
+// numbers as a compact legend underneath, a 7d/30d toggle and the snapshot's age on top. Behaviour:
+// scripts/stats-card.ts (toggle, count-up) and scripts/stats-chart.ts (hover tooltip).
+import { STAT_WINDOWS } from '@nomadware/site-stats';
+
+import { DEFAULT_STAT_WINDOW, STATS_STALE_AFTER_MS } from '../constants';
+import type { LoadedStats } from '../data/load-stats';
+import RelativeTime from './relative-time.astro';
+import StatValue from './stat-value.astro';
+import StatsChart from './stats-chart.astro';
+
+interface Props {
+  stats: LoadedStats;
+  renderedAt: string;
+}
+const { stats, renderedAt } = Astro.props;
+const { snapshot, source } = stats;
+// Over a day old (the publisher stopped, or this is the bundled fallback): no live dot.
+const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_STALE_AFTER_MS;
+---
+
+<section
+  class:list={['stats', { stale }]}
+  aria-labelledby="stats-title"
+  data-stats
+  data-stats-source={source}
+>
+  <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
+  <div class="head">
+    <span>agent activity · last</span>
+    <span class="seg" role="group" aria-label="Time range">
+      {
+        STAT_WINDOWS.map((range) => (
+          <button
+            type="button"
+            data-range={range}
+            aria-pressed={range === DEFAULT_STAT_WINDOW ? 'true' : 'false'}
+          >
+            {range}
+          </button>
+        ))
+      }
+    </span>
+    <span class="live"
+      ><span class="dot" aria-hidden="true"></span>updated <RelativeTime
+        iso={snapshot.generatedAt}
+        renderedAt={renderedAt}
+      /></span
+    >
+  </div>
+  {snapshot.series && <StatsChart series={snapshot.series} generatedAt={snapshot.generatedAt} />}
+  <dl class="legend">
+    <div><dt>PRs merged</dt><dd><StatValue stat="prs" snapshot={snapshot} /></dd></div>
+    <div><dt>agent runs</dt><dd><StatValue stat="runs" snapshot={snapshot} /></dd></div>
+    <div><dt>agent-hours</dt><dd><StatValue stat="agentHours" snapshot={snapshot} /></dd></div>
+    <div><dt>tool calls</dt><dd><StatValue stat="actions" snapshot={snapshot} /></dd></div>
+    <div><dt>checks</dt><dd><StatValue stat="checks" snapshot={snapshot} /></dd></div>
+    <div class="warm"><dt>issues caught</dt><dd><StatValue stat="caught" snapshot={snapshot} /></dd></div>
+  </dl>
+</section>
+
+<style>
+  .stats {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--term);
+    /* No overflow clip: the chart's tooltip may overhang the card. Nothing inside paints into the
+       rounded corners (the head and legend have no background), so none is needed. */
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+  }
+
+  /* Centred on the text's x-height, not its line box: flex centring leaves it 1px high. */
+  .dot {
+    position: relative;
+    top: 1px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sig);
+    animation: pulse 2s infinite;
+  }
+
+  /* Same box, so nothing moves: only the colour and the pulse go. */
+  .stale .dot {
+    background: var(--faint);
+    animation: none;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 var(--sig-glow);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 6px transparent;
+    }
+  }
+
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .seg button {
+    padding: 3px 8px;
+    border: 0;
+    background: none;
+    color: var(--dim);
+    font: 500 10px/var(--leading) var(--mono);
+    cursor: pointer;
+  }
+
+  .seg button[aria-pressed='true'] {
+    background: var(--chip);
+    color: var(--fg);
+  }
+
+  .seg button:focus-visible {
+    outline-offset: -2px;
+  }
+
+  :global(html:not(.js)) .seg {
+    display: none;
+  }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    margin: 0;
+  }
+
+  .legend div {
+    display: flex;
+    flex-direction: column-reverse;
+    padding: 14px 18px;
+    border-right: 1px solid var(--line);
+  }
+
+  .legend div:last-child {
+    border-right: 0;
+  }
+
+  .legend dt {
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .legend dd {
+    margin: 0;
+    font: 500 22px/var(--leading) var(--sans);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .legend .warm dd,
+  .legend .warm dt {
+    color: var(--warm);
+  }
+
+  @media (max-width: 640px) {
+    .head {
+      flex-wrap: wrap;
+      padding: 11px 14px;
+    }
+
+    /* Its own row on phones, whatever the font: a wrap that depends on glyph widths shifts the
+       card when the web font swaps in. */
+    .live {
+      flex-basis: 100%;
+      margin-left: 0;
+    }
+
+    .legend {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .legend div {
+      padding: 12px 14px;
+    }
+
+    .legend div:nth-child(3n) {
+      border-right: 0;
+    }
+
+    .legend div:nth-child(-n + 3) {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .legend dd {
+      font-size: 18px;
+    }
+
+    .legend dt {
+      font-size: 10px;
+    }
+  }
+</style>

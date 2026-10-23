@@ -1,11 +1,10 @@
 // The stats snapshot contract: what the devbox publisher writes to R2 and the site reads. The one
 // home for its shape — both sides import it from here, and both run it through parseStatsSnapshot.
 
-export const STAT_WINDOWS = ['7d', '30d'] as const;
-export type StatWindow = (typeof STAT_WINDOWS)[number];
-
-/** Window length in days, by window. */
-export const STAT_WINDOW_DAYS: Readonly<Record<StatWindow, number>> = { '7d': 7, '30d': 30 };
+import { isRecord } from './is-record.ts';
+import type { StatsSeries } from './series.ts';
+import { parseStatsSeries } from './series.ts';
+import type { StatWindow } from './windows.ts';
 
 export interface StatWindowValues {
   /** PRs authored by the owner, merged in the window, every repo (private included). */
@@ -45,18 +44,12 @@ export interface StatsSnapshot {
   /** ISO 8601 — when these numbers were computed ("updated Xm ago"). */
   generatedAt: string;
   windows: Record<StatWindow, StatWindowValues>;
+  /** The activity chart's series (series.ts); absent from older snapshots or when malformed. */
+  series?: StatsSeries;
 }
 
 export function isStatKey(value: string | undefined): value is StatKey {
   return STAT_KEYS.some((key) => key === value);
-}
-
-export function isStatWindow(value: string | undefined): value is StatWindow {
-  return STAT_WINDOWS.some((window) => window === value);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function parseWindow(value: unknown): StatWindowValues | null {
@@ -80,7 +73,10 @@ function parseWindow(value: unknown): StatWindowValues | null {
   return STAT_KEYS.every((key) => !Number.isNaN(values[key])) ? values : null;
 }
 
-/** A snapshot from untrusted JSON, or null when anything is missing or malformed. */
+/**
+ * A snapshot from untrusted JSON, or null when anything it needs is missing or malformed. The
+ * series is optional: missing or malformed, it is left out and the snapshot still stands.
+ */
 export function parseStatsSnapshot(value: unknown): StatsSnapshot | null {
   if (!isRecord(value)) return null;
   const generatedAt = value['generatedAt'];
@@ -89,5 +85,7 @@ export function parseStatsSnapshot(value: unknown): StatsSnapshot | null {
   if (typeof generatedAt !== 'string' || Number.isNaN(Date.parse(generatedAt))) return null;
   const week = parseWindow(windows['7d']);
   const month = parseWindow(windows['30d']);
-  return week && month ? { generatedAt, windows: { '7d': week, '30d': month } } : null;
+  if (!week || !month) return null;
+  const series = parseStatsSeries(value['series']);
+  return { generatedAt, windows: { '7d': week, '30d': month }, ...(series ? { series } : {}) };
 }
