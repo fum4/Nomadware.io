@@ -39,7 +39,6 @@ import PageSection from './page-section.astro';
         placeholder="you@company.com"
         autocomplete="email"
         maxlength={CONTACT.maxEmailLength}
-        error="that address doesn't look right"
       />
       <ContactField
         name="brief"
@@ -56,8 +55,9 @@ import PageSection from './page-section.astro';
     {/* Turnstile mounts here; it only takes space when Cloudflare asks for an interaction.
         ph-no-capture: blocked out of session replay and autocapture. */}
     <div class="term-challenge ph-no-capture" data-challenge></div>
-    {/* data-private: the success line repeats the visitor's email address. */}
-    <p class="term-out" role="status" data-output data-private></p>
+    {/* The one place the form talks: what's wrong (scripts/contact/form-output.ts), or a send's
+        result. data-private: the success line repeats the visitor's email address. */}
+    <p class="term-out" id="contact-output" role="status" data-output data-private></p>
     <p class="term-nojs">
       JavaScript is off: write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
     </p>

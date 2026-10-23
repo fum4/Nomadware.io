@@ -10,8 +10,8 @@ export interface ContactRequest {
 }
 
 /**
- * Why a submission ended the way it did. Internal: the response carries it for logs and tests,
- * the form never shows it (every failure reads the same to the visitor).
+ * Why a submission ended the way it did. The response carries it for logs and tests; the form
+ * never shows a code, it words the few a visitor can act on (scripts/contact/failure-message.ts).
  */
 export const CONTACT_CODES = [
   'sent',

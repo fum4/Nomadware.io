@@ -15,7 +15,6 @@ interface Props {
   multiline?: boolean;
   /** Same limit the endpoint enforces (CONTACT in constants.ts). */
   maxlength: number;
-  error?: string;
 }
 const {
   name,
@@ -24,10 +23,8 @@ const {
   inputmode = 'text',
   multiline = false,
   maxlength,
-  error,
 } = Astro.props;
 const id = `contact-${name}`;
-const errorId = `${id}-error`;
 ---
 
 <div class="term-line" data-field={name}>
@@ -57,15 +54,9 @@ const errorId = `${id}-error`;
           spellcheck={inputmode === 'email' ? 'false' : undefined}
           autocapitalize={inputmode === 'email' ? 'off' : undefined}
           required
-          aria-describedby={error ? errorId : undefined}
           data-placeholder={placeholder}
         />
       )
     }
   </div>
-  {
-    error && (
-      <p class="term-err" id={errorId} data-error={error} aria-live="polite" />
-    )
-  }
 </div>
