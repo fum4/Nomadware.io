@@ -13,60 +13,61 @@
    scripts/contact/term-frame.ts; otherwise it would play on load). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 0.9s steps(1, end) 1 forwards;
+  animation: term-frame-on 1s steps(1, end) 1 forwards;
 }
 
 .term.was-lit:not(:focus-within) {
   animation: term-frame-off 0.5s steps(1, end) 1 forwards;
 }
 
-/* The send button's rhythm (term-surge), with a longer dark beat after the first flash. */
+/* A first spark, a ~320 ms dark beat, then the send button's rhythm (term-surge); percentages
+   are ms of the 1 s run. */
 @keyframes term-frame-on {
   0% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  6% {
+  5.4% {
     border-color: var(--line);
     box-shadow: none;
   }
-  15% {
+  37.8% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  19% {
+  41.4% {
     border-color: var(--line);
     box-shadow: none;
   }
-  22% {
+  44.1% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  31% {
+  52.2% {
     border-color: var(--line);
     box-shadow: none;
   }
-  34% {
+  54.9% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  38% {
+  58.5% {
     border-color: var(--line);
     box-shadow: none;
   }
-  41% {
+  61.2% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  62% {
+  80.1% {
     border-color: var(--line);
     box-shadow: none;
   }
-  64% {
+  81.9% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  70%,
+  87.3%,
   100% {
     border-color: var(--sig-soft);
     box-shadow: none;
