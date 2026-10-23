@@ -30,9 +30,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
   <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
   <div class="head">
     <span>agent activity</span>
-    <span class="range"
-      >last
-      <span class="seg" role="group" aria-label="Time range">
+    <span class="seg" role="group" aria-label="Time range">
       {
         STAT_WINDOWS.map((range) => (
           <button
@@ -44,8 +42,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
           </button>
         ))
       }
-      </span></span
-    >
+    </span>
     <span class="live"
       ><span class="dot" aria-hidden="true"></span>updated <RelativeTime
         iso={snapshot.generatedAt}
@@ -88,19 +85,10 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     text-transform: uppercase;
   }
 
-  /* "last" travels with its toggle: they read as one control ("last 7d / 30d"). */
-  .range {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-  }
 
-  /* The header is title left, "last [7d | 30d]" right; "updated" is the card's footer row, so the
+  /* The header is title left, the 7d/30d toggle right; "updated" is the card's footer row, so the
      header keeps to one line whatever the font (a wrap that depends on glyph widths shifts the
      card when the web font swaps in). */
-  .range {
-    margin-left: auto;
-  }
 
   .live {
     position: absolute;
@@ -136,6 +124,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
      side (the ::after). Its corners are the buttons' own, so the group doesn't clip that area. */
   .seg {
     display: inline-flex;
+    margin-left: auto;
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
   }
