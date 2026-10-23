@@ -1,12 +1,13 @@
 import { CURSOR_FIELD, DOT_FIELD } from '../constants';
 import type { BlackHole } from './black-hole';
 import { createBlackHole } from './black-hole';
+import type { FlungBody } from './dot-burst';
+import { burst, isFlung } from './dot-burst';
 import { cursorPull, releaseEnvelope, ringRadius } from './dot-forces';
-import type { Body } from './dot-separation';
 import { SeparationGrid } from './dot-separation';
 import { hasFinePointer, isMobileViewport } from './motion';
 
-interface Dot extends Body {
+interface Dot extends FlungBody {
   highlight: boolean;
   /** Inside the cursor's field this frame. */
   captured: boolean;
@@ -40,8 +41,13 @@ export function initDotField(): void {
   // Where the pointer last moved more than stillPx from, and when: it is still once stillMs pass.
   const anchor = { x: OFF_SCREEN, y: OFF_SCREEN, at: 0 };
   const grid = new SeparationGrid();
-  const hole: BlackHole | null = chase ? createBlackHole(scale) : null;
   let dots: Dot[] = [];
+  // Its collapse is a blast: the dots near it fly out, then drift home (scripts/dot-burst.ts).
+  const hole: BlackHole | null = chase
+    ? createBlackHole(scale, (centre, strength) => {
+        burst(dots, centre, strength, scale, performance.now());
+      })
+    : null;
   // Where dots live and drift back to (canvas px): the content column, barely spilling past it,
   // over the hero's own height. The canvas reaches past it so a pushed dot can fly to the edge.
   const home = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -77,6 +83,7 @@ export function initDotField(): void {
         highlight: Math.random() < DOT_FIELD.highlightShare,
         captured: false,
         releasedAt: Number.NEGATIVE_INFINITY,
+        flungAt: Number.NEGATIVE_INFINITY,
         ringOffsetPx: (Math.random() * 2 - 1) * DOT_FIELD.ringScatterPx,
         ringPhase: Math.random() * 2 * Math.PI,
         appearMs:
@@ -90,8 +97,9 @@ export function initDotField(): void {
     const dx = dot.x - pointer.x;
     const dy = dot.y - pointer.y;
     const distance = Math.hypot(dx, dy);
+    const flung = isFlung(dot, now);
     const pull =
-      dot.captured && distance > 0
+      dot.captured && !flung && distance > 0
         ? cursorPull(distance / scale, ringRadius(dot.ringOffsetPx, dot.ringPhase, now))
         : 0;
     if (pull !== 0) {
@@ -111,7 +119,9 @@ export function initDotField(): void {
     const age = now - dot.releasedAt;
     const loosened = settling ? 0 : Math.min(1, age / DOT_FIELD.releaseRampMs);
     const { settleFriction } = DOT_FIELD;
-    const friction = (settleFriction + (DOT_FIELD.friction - settleFriction) * loosened) ** dt;
+    const friction = flung
+      ? DOT_FIELD.friction ** dt
+      : (settleFriction + (DOT_FIELD.friction - settleFriction) * loosened) ** dt;
     // A random walk's spread grows with the square root of time.
     const jitter = settling
       ? 0
@@ -120,7 +130,7 @@ export function initDotField(): void {
     dot.vy = dot.vy * friction + (Math.random() - 0.5) * jitter;
     // A speed limit, so a dot falling in fast can't tunnel through the core in one frame.
     const speed = Math.hypot(dot.vx, dot.vy);
-    if (speed > DOT_FIELD.maxSpeed) {
+    if (!flung && speed > DOT_FIELD.maxSpeed) {
       dot.vx *= DOT_FIELD.maxSpeed / speed;
       dot.vy *= DOT_FIELD.maxSpeed / speed;
     }

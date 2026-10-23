@@ -19,7 +19,11 @@ export interface BlackHole {
  * between it and them (the ring keeps its radius, DOT_FIELD.gatherCorePx). It fades when the
  * cursor moves fast (a slow move only shrinks it, and it follows). Drawn only: it doesn't touch the dots' motion.
  */
-export function createBlackHole(scale: number): BlackHole {
+export function createBlackHole(
+  scale: number,
+  /** Called once when a hole of at least BLACK_HOLE.burstMinStrength collapses to nothing. */
+  onCollapse: (centre: { x: number; y: number }, strength: number) => void,
+): BlackHole {
   const centre = { x: 0, y: 0 };
   const last = { x: 0, y: 0 };
   /** The cursor's speed, CSS px/s, smoothed over BLACK_HOLE.speedSmoothingMs. */
@@ -27,6 +31,8 @@ export function createBlackHole(scale: number): BlackHole {
   let hadPointer = false;
   let progress = 0;
   let strength = 0;
+  /** The strongest it got in this life: what its collapse releases. */
+  let peak = 0;
   let lastUpdate = 0;
 
   /** Horizon radius in CSS px: grows in with the hole from horizonStartShare of its size. */
@@ -58,8 +64,14 @@ export function createBlackHole(scale: number): BlackHole {
         centre.x = lerp(centre.x, pointer.x, share);
         centre.y = lerp(centre.y, pointer.y, share);
       }
+      const wasAlive = progress > 0;
       progress = advanceToward(progress, target, elapsed, BLACK_HOLE.growMs, BLACK_HOLE.shrinkMs);
       strength = easeOutCubic(progress);
+      peak = Math.max(peak, strength);
+      if (wasAlive && progress === 0) {
+        if (peak >= BLACK_HOLE.burstMinStrength) onCollapse({ ...centre }, peak);
+        peak = 0;
+      }
     },
 
     draw(context) {

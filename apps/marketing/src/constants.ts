@@ -201,16 +201,27 @@ export const BLACK_HOLE = {
   appearAfterMs: 1_000,
   /** It seeps in (and back to full) over growMs, ease-out; it shrinks at 1 per shrinkMs. */
   growMs: 4_500,
-  shrinkMs: 500,
+  shrinkMs: 150,
   /**
    * Cursor speed (CSS px/s) → size: full at or below calmSpeedPx, shrinking linearly, gone at
    * collapseSpeedPx. The speed is smoothed over speedSmoothingMs so one jerky event doesn't kill it.
    */
-  calmSpeedPx: 40,
-  collapseSpeedPx: 900,
-  speedSmoothingMs: 120,
+  calmSpeedPx: 10,
+  collapseSpeedPx: 320,
+  speedSmoothingMs: 80,
   /** While alive it drifts after the cursor with this time constant. */
   followMs: 90,
+  /**
+   * Its collapse (only from at least burstMinStrength) flings the dots within burstRadiusPx
+   * outward (scripts/dot-burst.ts): burstSpeed canvas px/frame at the centre, fading to 0 at the
+   * radius, ± burstSpread at random. For burstFreeMs they fly free (no pull, no speed limit), then
+   * drift home and diffuse like any released dot.
+   */
+  burstMinStrength: 0.25,
+  burstRadiusPx: 160,
+  burstSpeed: 30,
+  burstSpread: 0.4,
+  burstFreeMs: 1_000,
   /**
    * Horizon radius at full size, well inside the dots' ring (DOT_FIELD.gatherCorePx), so empty
    * page shows between them; it starts at horizonStartShare of it and grows with the hole.
