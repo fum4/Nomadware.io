@@ -5,7 +5,7 @@ import type { StatWindow } from '@nomadware/site-stats';
 
 /** Same breakpoint as the CSS `@media (max-width: 640px)` in styles/. */
 export const MOBILE_QUERY = '(max-width: 640px)';
-/** A device where hovering a mouse is the primary input (no auto-focus, no cursor repel otherwise). */
+/** A device where hovering a mouse is the primary input (no auto-focus, no cursor effects otherwise). */
 export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
 /** Only the flashing effects listen to it (scripts/motion-policy.ts). */
 export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
@@ -88,7 +88,7 @@ export const RELATIVE_TIME_REFRESH_MS = 60_000;
 
 /**
  * The cursor as one field (scripts/cursor-field.ts): the grid lines bend toward it
- * (scripts/grid-warp.ts) and the hero dots scatter from it (scripts/dot-field.ts), both with the
+ * (scripts/grid-warp.ts) and the hero dots gather to it (scripts/dot-field.ts), both with the
  * same radius and falloff, so they read as one force. CSS px.
  */
 export const CURSOR_FIELD = {
@@ -121,19 +121,46 @@ export const DOT_FIELD = {
   densityMobile: 9,
   /** Canvas pixels per CSS pixel; sizes and speeds below are in canvas px. */
   canvasScale: 2,
+  /**
+   * The frame every per-frame value below is tuned for (60 Hz); other refresh rates scale each
+   * step to it, capped at maxStepFrames so a hitch never becomes a leap.
+   */
+  frameMs: 1000 / 60,
+  maxStepFrames: 3,
   highlightShare: 0.15,
   /** How far past the content column the dots' home reaches, CSS px. */
   homeSpillPx: 96,
   /** Per frame, the share of its distance outside home a dot's speed gains back toward it. */
   homePull: 0.0004,
-  /** At the cursor; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's pull. */
-  repelForce: 0.6,
-  // TEMPORARY (NWARE-82): the "gather" test the owner is judging (`?dots=gravity`, dev only).
-  /** Pull toward the cursor at its strongest; tapers like repelForce. */
+  /** Pull toward the cursor at its strongest; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's. */
   gatherForce: 0.25,
-  /** Inside this many CSS px of the cursor a dot is pushed back out, so they swarm, not collapse. */
-  gatherCorePx: 28,
+  /** Inside this many CSS px of the cursor a dot is pushed back out, so the cursor stays clear. */
+  gatherCorePx: 16,
   gatherCorePush: 0.5,
+  /**
+   * Dots closer than this (CSS px) push each other apart (scripts/dot-separation.ts): what packs
+   * the gathered dots into an even disc instead of a heap on the side they came from.
+   */
+  separationPx: 12,
+  /** Per frame, the push at zero distance; falls off linearly to 0 at the separation radius. */
+  separationForce: 0.4,
+  /** The pointer counts as still once it has stayed within stillPx (CSS px) for stillMs. */
+  stillPx: 4,
+  stillMs: 150,
+  /**
+   * Friction of captured dots round a still pointer (vs `friction`): they stop orbiting. A
+   * released dot starts from it and eases to `friction` over releaseRampMs.
+   */
+  settleFriction: 0.86,
+  /**
+   * Once a dot leaves the field it diffuses back over releaseMs: its separation radius widens
+   * to releaseSpacingPx (≈ the drift's own spacing at densityDesktop) over releaseRampMs, its
+   * jitter gains up to releaseJitter × itself, and both ease back by releaseMs.
+   */
+  releaseSpacingPx: 40,
+  releaseRampMs: 4_000,
+  releaseMs: 8_000,
+  releaseJitter: 3,
   friction: 0.96,
   jitter: 0.05,
   initialSpeed: 0.4,
