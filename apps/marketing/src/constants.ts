@@ -304,11 +304,12 @@ export const STATS_CHART = {
   tipGapPx: 10,
   tipViewportMarginPx: 8,
   /**
-   * A caught-issue marker's area: a single issue's, plus this share of it per further issue in the
-   * bucket, capped at markerMaxArea times it (chart/catch-markers.ts).
+   * A caught-issue marker's area: a single issue's (6 px across), plus this share of it per further
+   * issue in the bucket, capped at markerMaxArea times it (≈ 9.5 px from 5 issues on;
+   * chart/catch-markers.ts).
    */
-  markerAreaPerIssue: 0.25,
-  markerMaxArea: 2,
+  markerAreaPerIssue: 0.38,
+  markerMaxArea: 2.53,
 } as const;
 
 /**

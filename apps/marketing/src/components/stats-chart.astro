@@ -110,7 +110,7 @@ const plots = STAT_WINDOWS.map((range) => {
     clip-path: inset(0 100% 0 0);
   }
 
-  /* A bucket's caught issues: a warm dot on the trace, its area growing with the count
+  /* A bucket's caught issues: a warm dot on the trace (6 px for one issue), its area growing with the count
      (--scale, chart/catch-markers.ts). HTML over the plot, not SVG: the SVG stretches
      (preserveAspectRatio none). It pops in as the pen reaches it (data-reached), with the issues
      counter's step. */
@@ -118,11 +118,13 @@ const plots = STAT_WINDOWS.map((range) => {
     position: absolute;
     left: calc(var(--x) * 100%);
     top: calc(var(--y) * 100%);
-    width: calc(5px * var(--scale));
-    height: calc(5px * var(--scale));
+    --dot: calc(6px * var(--scale));
+    width: var(--dot);
+    height: var(--dot);
     border-radius: 50%;
     background: var(--warm);
-    box-shadow: 0 0 5px var(--warm-glow);
+    /* A solid ring of the plot's own colour punches the dot out of the line under it. */
+    box-shadow: 0 0 0 2px var(--plot-bg);
     transform: translate(-50%, -50%);
     transition:
       opacity 0.2s ease-out,
@@ -130,34 +132,25 @@ const plots = STAT_WINDOWS.map((range) => {
     pointer-events: none;
   }
 
-  /* TEMPORARY: caught-marker treatments to compare (?markers=1..5, scripts/marker-variants.ts
-     sets data-markers on the card). Delete the losers once one is picked. */
-  /* 1 cut-out: a solid ring of the plot's colour punches the dot out of the line. */
-  :global([data-markers='1']) .catch {
-    box-shadow: 0 0 0 2px var(--plot-bg);
-  }
-
-  /* 2 hollow: a warm ring, the plot's colour inside. */
-  :global([data-markers='2']) .catch {
-    border: 1.5px solid var(--warm);
-    background: var(--plot-bg);
+  /* TEMPORARY: the two caught-marker treatments left to compare: 1 cut-out (the default, above)
+     and 5 fade (?markers=5, scripts/marker-variants.ts sets data-markers on the card). */
+  /* 5 fade: no cut-out ring; a dark halo under the dot, over the line, from ~90% of the plot's
+     colour at the dot's edge to nothing at 4× its radius, so the green dims around it. The
+     element grows to the halo's size; the dot is its centre quarter. */
+  :global([data-markers='5']) .catch {
+    width: calc(var(--dot) * 4);
+    height: calc(var(--dot) * 4);
+    background: radial-gradient(
+      circle closest-side,
+      var(--warm) 23%,
+      var(--plot-veil) 26%,
+      transparent 100%
+    );
     box-shadow: none;
   }
 
-  /* 3 rail: off the trace, on a rail just above the plot's baseline, at the bucket's x. */
-  :global([data-markers='3']) .catch {
-    top: calc(100% - 3px);
-  }
-
-  /* 4 red-pink: the whole issues colour (markers, counter, tooltip row) goes red-pink. */
-  :global([data-markers='4']) {
-    --warm: var(--hot);
-    --warm-glow: var(--hot-glow);
-  }
-
-  /* 5 fade: a soft dark halo under the dot, over the line, fading out to ~3× its radius. */
-  :global([data-markers='5']) .catch {
-    box-shadow: 0 0 7px 3px var(--plot-veil);
+  :global([data-markers='5']) .catch::after {
+    inset: 37.5%;
   }
 
   /* One warm ring (global.css ring-pulse) as the marker appears and whenever its range shows

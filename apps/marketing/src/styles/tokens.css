@@ -23,12 +23,10 @@
   --sig-soft: rgba(198, 255, 74, 0.22);
   --warm: #ff8a4c;
   --warm-glow: rgba(255, 138, 76, 0.55);
-  /* TEMPORARY (marker comparison, stats-chart.astro [data-markers]): the plot's own colour, a dark
-     veil of it, and a red-pink candidate for the caught markers. */
+  /* The plot's own colour (the card over the ink), solid, and as a dark veil: the caught markers'
+     cut-out ring and (TEMPORARY variant 5) fade, stats-chart.astro. */
   --plot-bg: #09080e;
-  --plot-veil: rgba(9, 8, 14, 0.75);
-  --hot: #ff4f7e;
-  --hot-glow: rgba(255, 79, 126, 0.55);
+  --plot-veil: rgba(9, 8, 14, 0.9);
   --glow: rgba(120, 90, 255, 0.18);
 
   --panel: rgba(19, 18, 28, 0.72);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { STATS_CHART } from '../constants';
 import { catchMarkers } from './catch-markers';
 
 const TRACE = [0, 10, 20, 10, 0];
@@ -13,11 +14,12 @@ describe('catchMarkers', () => {
     ]);
   });
 
-  it('grows its area with the count, from a single issue up to twice it', () => {
+  it('grows its area with the count, capped at markerMaxArea times a single issue', () => {
+    const { markerMaxArea } = STATS_CHART;
     const [one, two, many] = catchMarkers(TRACE, [1, 2, 40, 0, 0]);
     expect(one?.scale).toBe(1);
     expect(two?.scale).toBeGreaterThan(1);
-    expect(two?.scale).toBeLessThan(Math.SQRT2);
-    expect(many?.scale).toBe(Math.SQRT2);
+    expect(two?.scale).toBeLessThan(Math.sqrt(markerMaxArea));
+    expect(many?.scale).toBe(Math.sqrt(markerMaxArea));
   });
 });
