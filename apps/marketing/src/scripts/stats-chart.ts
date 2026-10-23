@@ -8,7 +8,6 @@ import {
   formatBucketRange,
   formatCaughtKinds,
   formatCount,
-  formatFixedIn,
   formatIssuesCaught,
   formatPrsMerged,
 } from '../format/format-activity';
@@ -80,10 +79,10 @@ function describe(
   const kinds = formatCaughtKinds(series.caughtCategories[index] ?? null);
   setTip(plot, 'caught', formatIssuesCaught(caught, series.caughtByGate[index] ?? null));
   setTip(plot, 'kinds', kinds);
-  setTip(plot, 'fixed', fixMinutes === null ? '' : formatFixedIn(fixMinutes));
+  setTip(plot, 'fixed', fixMinutes === null ? '' : formatAgentTime(fixMinutes));
   plot.querySelector('[data-tip-issues]')?.toggleAttribute('hidden', caught === 0);
   plot.querySelector('[data-tip="kinds"]')?.toggleAttribute('hidden', kinds === '');
-  plot.querySelector('[data-tip="fixed"]')?.toggleAttribute('hidden', fixMinutes === null);
+  plot.querySelector('[data-tip-fixed]')?.toggleAttribute('hidden', fixMinutes === null);
 }
 
 /** Snap to the bucket nearest the pointer: guide, dot, and the tooltip centred over the guide. */

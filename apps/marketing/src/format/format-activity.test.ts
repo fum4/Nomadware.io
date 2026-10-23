@@ -4,7 +4,6 @@ import {
   formatAgentTime,
   formatBucketRange,
   formatCaughtKinds,
-  formatFixedIn,
   formatIssuesCaught,
   formatPrsMerged,
 } from './format-activity';
@@ -60,12 +59,5 @@ describe('formatCaughtKinds', () => {
     expect(formatCaughtKinds([0, 0, 2, 3, 0, 0])).toBe('3 tests, 2 types');
     expect(formatCaughtKinds([1, 1, 0, 0, 0, 0])).toBe('1 format, 1 lint');
     expect(formatCaughtKinds(null)).toBe('');
-  });
-});
-
-describe('formatFixedIn', () => {
-  it("reads in the tooltip's own hours and minutes", () => {
-    expect(formatFixedIn(14)).toBe('fixed in 14m');
-    expect(formatFixedIn(118)).toBe('fixed in 1h 58m');
   });
 });

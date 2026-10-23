@@ -67,6 +67,3 @@ export function formatIssuesCaught(count: number, byGate: readonly number[] | nu
 /** "3 tests, 2 types": what they were (CAUGHT_CATEGORIES counts), most first; "" when unknown. */
 export const formatCaughtKinds = (categories: readonly number[] | null): string =>
   namedCounts(CAUGHT_CATEGORIES, categories).join(', ');
-
-/** "fixed in 1h 58m": in the chip's own durations (formatAgentTime). */
-export const formatFixedIn = (minutes: number): string => `fixed in ${formatAgentTime(minutes)}`;
