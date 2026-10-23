@@ -73,4 +73,8 @@ import PageSection from './page-section.astro';
 <script>
   import { initContactForm } from '../scripts/contact/contact-form';
   initContactForm();
+  // TEMPORARY (NWARE-82): `?beat=25` compares the frame flicker's 0.25 s beat (contact-terminal.css).
+  if (new URLSearchParams(location.search).get('beat') === '25') {
+    document.documentElement.dataset.beat = '25';
+  }
 </script>

@@ -77,6 +77,71 @@
   }
 }
 
+/* TEMPORARY (NWARE-82): `?beat=25` swaps in the 0.25 s beat for the owner to compare; one of the
+   two goes before the PR merges. */
+html[data-beat='25'] .term:focus-within {
+  animation: term-frame-on-25 0.886s steps(1, end) 1 forwards;
+}
+
+@keyframes term-frame-on-25 {
+  0% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  6.09% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  11.74% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  15.8% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  44.02% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  48.08% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  51.13% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  60.27% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  63.32% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  67.38% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  70.43% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  91.76% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  93.79% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  100% {
+    border-color: var(--sig-soft);
+    box-shadow: none;
+  }
+}
+
 .term-bar {
   display: flex;
   align-items: center;
