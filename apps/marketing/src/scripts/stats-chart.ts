@@ -89,6 +89,20 @@ function describe(
 }
 
 /** Snap to the bucket nearest the pointer: guide, dot, and the tooltip centred over the guide. */
+/**
+ * The hovered bucket's caught marker, if it has one, takes the green dot's place: it stays warm,
+ * on top, pulsing (stats-chart.astro). Only a change of bucket touches the DOM, so the pulse
+ * keeps its rhythm while the pointer moves within one.
+ */
+function hoverMarker(plot: HTMLElement, index: number): void {
+  const marker = plot.querySelector<HTMLElement>(`[data-catch="${index}"]`);
+  const current = plot.querySelector<HTMLElement>('[data-hovered]');
+  if (current === marker) return;
+  current?.removeAttribute('data-hovered');
+  marker?.setAttribute('data-hovered', '');
+  plot.toggleAttribute('data-hover-catch', marker !== null);
+}
+
 function snap(plot: HTMLElement, series: StatSeries, generatedAtMs: number, clientX: number): void {
   const plotBox = plot.getBoundingClientRect();
   const values = series.agentMinutes;
@@ -98,6 +112,7 @@ function snap(plot: HTMLElement, series: StatSeries, generatedAtMs: number, clie
   plot.style.setProperty('--hover-x', `${point.x * 100}%`);
   plot.style.setProperty('--hover-y', `${point.y * 100}%`);
   plot.toggleAttribute('data-hover', true);
+  hoverMarker(plot, index);
 
   // Measured once data-hover shows it: its size depends on the text. Centred on the guide, above
   // the plot, free to overhang the card, never the screen.
@@ -126,10 +141,15 @@ export function initStatsChart(root: HTMLElement): StatsChart {
   }
   const { series, generatedAtMs } = data;
 
-  const reset = (): void =>
+  const reset = (): void => {
+    chart.querySelectorAll('.plot[data-hover]').forEach((plot) => {
+      plot.removeAttribute('data-hover');
+      plot.removeAttribute('data-hover-catch');
+    });
     chart
-      .querySelectorAll('.plot[data-hover]')
-      .forEach((plot) => plot.removeAttribute('data-hover'));
+      .querySelectorAll('[data-hovered]')
+      .forEach((marker) => marker.removeAttribute('data-hovered'));
+  };
 
   const follow = (event: PointerEvent): void => {
     const plot = currentPlot(chart);
