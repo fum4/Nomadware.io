@@ -112,12 +112,16 @@ export const GRID_WARP = {
 } as const;
 
 export const DOT_FIELD = {
-  /** Dots per 10,000 CSS px² of canvas: the field keeps its density at any size. */
+  /** Dots per 10,000 CSS px² of their home (the content column over the hero). */
   densityDesktop: 5.6,
   densityMobile: 9,
   /** Canvas pixels per CSS pixel; sizes and speeds below are in canvas px. */
   canvasScale: 2,
   highlightShare: 0.15,
+  /** How far past the content column the dots' home reaches, CSS px. */
+  homeSpillPx: 32,
+  /** Per frame, the share of its distance outside home a dot's speed gains back toward it. */
+  homePull: 0.0004,
   /** At the cursor; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's pull. */
   repelForce: 0.6,
   friction: 0.96,

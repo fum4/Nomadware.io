@@ -26,6 +26,9 @@ export function initDotField(): void {
   const scale = DOT_FIELD.canvasScale;
   const pointer = { x: OFF_SCREEN, y: OFF_SCREEN };
   let dots: Dot[] = [];
+  // Where dots live and drift back to (canvas px): the content column, barely spilling past it,
+  // over the hero's own height. The canvas reaches past it so a pushed dot can fly to the edge.
+  const home = { left: 0, right: 0, top: 0, bottom: 0 };
   let onScreen = true;
   let frame = 0;
 
@@ -35,12 +38,20 @@ export function initDotField(): void {
     if (width === canvas.width && height === canvas.height) return;
     canvas.width = width;
     canvas.height = height;
+    const box = canvas.getBoundingClientRect();
+    const column = host.getBoundingClientRect();
+    const spill = DOT_FIELD.homeSpillPx;
+    home.left = Math.max(0, (column.left - box.left - spill) * scale);
+    home.right = Math.min(width, (column.right - box.left + spill) * scale);
+    home.top = (column.top - box.top) * scale;
+    home.bottom = (column.bottom - box.top) * scale;
     if (dots.length === 0) {
       const density = isMobileViewport() ? DOT_FIELD.densityMobile : DOT_FIELD.densityDesktop;
-      const count = Math.round(((width / scale) * (height / scale) * density) / 10_000);
+      const area = ((home.right - home.left) / scale) * ((home.bottom - home.top) / scale);
+      const count = Math.round((area * density) / 10_000);
       dots = Array.from({ length: count }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
+        x: home.left + Math.random() * (home.right - home.left),
+        y: home.top + Math.random() * (home.bottom - home.top),
         vx: (Math.random() - 0.5) * DOT_FIELD.initialSpeed,
         vy: (Math.random() - 0.5) * DOT_FIELD.initialSpeed,
         highlight: Math.random() < DOT_FIELD.highlightShare,
@@ -57,10 +68,16 @@ export function initDotField(): void {
       dot.vx += (dx / distance) * push;
       dot.vy += (dy / distance) * push;
     }
+    // Outside home, a soft spring toward its nearest edge: a pushed dot drifts back, never snaps.
+    const clampX = Math.min(home.right, Math.max(home.left, dot.x));
+    const clampY = Math.min(home.bottom, Math.max(home.top, dot.y));
+    dot.vx += (clampX - dot.x) * DOT_FIELD.homePull;
+    dot.vy += (clampY - dot.y) * DOT_FIELD.homePull;
     dot.vx = dot.vx * DOT_FIELD.friction + (Math.random() - 0.5) * DOT_FIELD.jitter;
     dot.vy = dot.vy * DOT_FIELD.friction + (Math.random() - 0.5) * DOT_FIELD.jitter;
-    dot.x = (dot.x + dot.vx + canvas.width) % canvas.width;
-    dot.y = (dot.y + dot.vy + canvas.height) % canvas.height;
+    // The canvas edge stops a dot; home pulls it back from there.
+    dot.x = Math.min(canvas.width, Math.max(0, dot.x + dot.vx));
+    dot.y = Math.min(canvas.height, Math.max(0, dot.y + dot.vy));
   };
 
   const draw = (): void => {
