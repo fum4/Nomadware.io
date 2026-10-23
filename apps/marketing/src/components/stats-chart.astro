@@ -36,7 +36,7 @@ const plots = STAT_WINDOWS.map((range) => {
       >
         <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} preserveAspectRatio="none">
           <path class="quiet" d={plot.quiet} />
-          <path class="trace" d={plot.active} pathLength="1" />
+          <path class="trace" d={plot.active} />
         </svg>
         <span class="guide" />
         <span class="mark" />
@@ -78,25 +78,32 @@ const plots = STAT_WINDOWS.map((range) => {
     display: none;
   }
 
+  /* Drawn left → right as one pen stroke, active and idle stretches alike: a wipe over the whole
+     plot (a dash animation would draw every separate stretch at once). The inset's -12px keeps
+     the glow; display: none → block restarts it on a toggle. */
   svg {
     width: 100%;
     height: 100%;
     overflow: visible;
+    clip-path: inset(-12px 100% -12px -12px);
+    animation: trace-draw 3s cubic-bezier(0.45, 0, 0.55, 1) 0.2s forwards;
   }
 
-  /* Drawn left → right whenever it is shown (display: none → block restarts the animation). */
+  @keyframes trace-draw {
+    to {
+      clip-path: inset(-12px -12px -12px -12px);
+    }
+  }
+
   .trace {
     fill: none;
     stroke: var(--sig);
     stroke-width: 1.5;
     vector-effect: non-scaling-stroke;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: trace-draw 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.2s forwards;
     filter: drop-shadow(0 0 4px var(--sig-glow));
   }
 
-  /* Idle stretches: a faint dotted baseline, revealed left → right in step with the trace. */
+  /* Idle stretches: a faint dotted baseline. */
   .quiet {
     fill: none;
     stroke: var(--sig);
@@ -104,20 +111,6 @@ const plots = STAT_WINDOWS.map((range) => {
     stroke-dasharray: 2 5;
     vector-effect: non-scaling-stroke;
     opacity: 0.55;
-    clip-path: inset(0 100% 0 0);
-    animation: quiet-reveal 1.6s cubic-bezier(0.3, 0, 0.2, 1) 0.2s forwards;
-  }
-
-  @keyframes quiet-reveal {
-    to {
-      clip-path: inset(0 0 0 0);
-    }
-  }
-
-  @keyframes trace-draw {
-    to {
-      stroke-dashoffset: 0;
-    }
   }
 
   .tip,

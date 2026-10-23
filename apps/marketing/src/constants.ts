@@ -14,8 +14,6 @@ export const SHA_LENGTH = 7;
  * Intro (scripts/intro-sequence.ts): each step at a fixed time from navigation start
  * (performance.now()), so they land the same however long the scripts took to load.
  */
-/** The stats count up then, or once the card scrolls into view if that is later. */
-export const INTRO_STATS_AT_MS = 1_000;
 export const INTRO_TAGS_AT_MS = 2_000;
 /** The headline shows as plain text until then, and the scramble runs over it. */
 export const INTRO_HEADLINE_AT_MS = 2_500;

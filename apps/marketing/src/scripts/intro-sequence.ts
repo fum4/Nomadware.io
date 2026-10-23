@@ -1,9 +1,4 @@
-import {
-  INTRO_STATS_AT_MS,
-  INTRO_HEADLINE_AT_MS,
-  INTRO_TAGS_AT_MS,
-  INTRO_WORDMARK_AT_MS,
-} from '../constants';
+import { INTRO_HEADLINE_AT_MS, INTRO_TAGS_AT_MS, INTRO_WORDMARK_AT_MS } from '../constants';
 import { scrambleHeadline } from './headline-scramble';
 import { initStats } from './stats-card';
 import { flickerTags } from './tags-flicker';
@@ -21,14 +16,12 @@ const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
  * The page-load choreography, on a clock from navigation start: the tags power on at
  * INTRO_TAGS_AT_MS, the headline scramble runs over the readable headline at INTRO_HEADLINE_AT_MS,
  * and the nav wordmark expands at INTRO_WORDMARK_AT_MS (after which the tags rotate). The stats
- * count up at INTRO_STATS_AT_MS, or once the card is in view if that is later. Plays whatever
+ * count up straight away, as soon as the card is in view. Plays whatever
  * `prefers-reduced-motion` says (README § Motion).
  */
 export async function playIntro(): Promise<void> {
   const countUp = initStats();
-  void waitUntil(INTRO_STATS_AT_MS)
-    .then(countUp)
-    .then(() => mark('stats-end'));
+  void countUp().then(() => mark('stats-end'));
   void waitUntil(INTRO_WORDMARK_AT_MS).then(() => {
     mark('wordmark-start');
     expandWordmark();
