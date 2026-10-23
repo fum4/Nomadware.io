@@ -17,12 +17,8 @@ export const SHA_LENGTH = 7;
  * the hero tags power on from INTRO_TAGS_AT_SCRAMBLE_SHARE of the way through the scramble.
  */
 export const INTRO_GAP_MS = 500;
-/**
- * The headline waits this long before its scramble, blank (hero.astro hides it until it has been
- * decoded, and shows it anyway after INTRO_HEADLINE_FALLBACK_MS should the script never run).
- */
+/** The headline shows as plain text for this long, then the scramble runs over it. */
 export const INTRO_HEADLINE_DELAY_MS = 800;
-export const INTRO_HEADLINE_FALLBACK_MS = 4_000;
 /** Share of the headline revealed when the tags start powering on (overlapping the scramble). */
 export const INTRO_TAGS_AT_SCRAMBLE_SHARE = 0.25;
 /**

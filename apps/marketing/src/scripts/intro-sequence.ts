@@ -17,7 +17,7 @@ const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
 
 /**
  * The page-load choreography, each step started by the previous one finishing: a beat
- * (INTRO_HEADLINE_DELAY_MS, the headline blank) → headline scramble
+ * (INTRO_HEADLINE_DELAY_MS, the headline already readable) → headline scramble over it
  * → gap → stats count-up (once the card is in view) → gap → nav wordmark, and from then on the
  * tags rotate. The tags power on alongside, from INTRO_TAGS_AT_SCRAMBLE_SHARE of the scramble
  * (or when it ends, if it never reports), never lengthening anything. The wordmark never waits
