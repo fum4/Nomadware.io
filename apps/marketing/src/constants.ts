@@ -78,7 +78,9 @@ export const WORDMARK_LETTER_STAGGER_S = 0.08;
 export const SCRAMBLE_STEP_MS = 40;
 export const SCRAMBLE_GLYPHS = '▚▞▙▟01<>/{}#';
 
-export const COUNT_UP_DURATION_MS = 1600;
+/** The stats' count-up on load (it crawls in and out, so it needs the room) and on a 7d/30d toggle. */
+export const COUNT_UP_INTRO_MS = 2_500;
+export const COUNT_UP_TOGGLE_MS = 1_600;
 export const COUNT_UP_VISIBLE_THRESHOLD = 0.3;
 
 export const RELATIVE_TIME_REFRESH_MS = 60_000;

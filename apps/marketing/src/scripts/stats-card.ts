@@ -2,7 +2,8 @@ import type { StatKey, StatWindow } from '@nomadware/site-stats';
 import { isStatKey, isStatWindow } from '@nomadware/site-stats';
 
 import {
-  COUNT_UP_DURATION_MS,
+  COUNT_UP_INTRO_MS,
+  COUNT_UP_TOGGLE_MS,
   COUNT_UP_VISIBLE_THRESHOLD,
   DEFAULT_STAT_WINDOW,
 } from '../constants';
@@ -12,6 +13,16 @@ import { track } from './analytics/track';
 import { onceVisible } from './motion';
 import { initStatsChart } from './stats-chart';
 import { easeInOutExpo, easeOutExpo } from './easing';
+
+/** How a count runs: its curve and its length. */
+interface CountMotion {
+  ease: (t: number) => number;
+  durationMs: number;
+}
+
+/** The intro builds up and lands softly; a toggle answers at once. */
+const INTRO_COUNT: CountMotion = { ease: easeInOutExpo, durationMs: COUNT_UP_INTRO_MS };
+const TOGGLE_COUNT: CountMotion = { ease: easeOutExpo, durationMs: COUNT_UP_TOGGLE_MS };
 
 interface StatElement {
   element: HTMLElement;
@@ -90,14 +101,9 @@ let latestShow = 0;
 /**
  * Show one range; resolves when its numbers have settled (or a newer `show` took over). Every
  * number counts from what it shows now (0 in the intro, the other range's value on a toggle, the
- * in-flight value on a toggle mid-count) to its target along `ease`, inside its locked width.
- * The intro builds up and lands softly (ease-in-out, expo); a toggle answers at once (ease-out).
+ * in-flight value on a toggle mid-count) to its target as `motion` says, inside its locked width.
  */
-function show(
-  stats: StatElement[],
-  range: StatWindow,
-  ease: (t: number) => number = easeOutExpo,
-): Promise<void> {
+function show(stats: StatElement[], range: StatWindow, motion: CountMotion): Promise<void> {
   const run = ++latestShow;
   const targets = targetsOf(stats, range);
   const counts = stats.map((stat, index) => ({ from: stat.shown, to: targets[index] ?? 0 }));
@@ -106,8 +112,8 @@ function show(
     const start = performance.now();
     const step = (now: number): void => {
       if (run !== latestShow) return resolve();
-      const progress = Math.min(1, (now - start) / COUNT_UP_DURATION_MS);
-      paint(stats, counts, progress, ease);
+      const progress = Math.min(1, (now - start) / motion.durationMs);
+      paint(stats, counts, progress, motion.ease);
       if (progress < 1) requestAnimationFrame(step);
       else resolve();
     };
@@ -140,7 +146,7 @@ export function initStats(): () => Promise<void> {
     stats,
     finals.map((to) => ({ from: 0, to })),
     0,
-    easeInOutExpo,
+    INTRO_COUNT.ease,
   );
 
   buttons.forEach((button) =>
@@ -155,7 +161,7 @@ export function initStats(): () => Promise<void> {
       current = range;
       chart.reset();
       track('stats_window_toggled', { window: range });
-      void show(stats, range);
+      void show(stats, range, TOGGLE_COUNT);
     }),
   );
 
@@ -166,7 +172,7 @@ export function initStats(): () => Promise<void> {
           onceVisible(root, COUNT_UP_VISIBLE_THRESHOLD, () => {
             if (picked) return resolve();
             performance.mark('intro:stats-start');
-            resolve(show(stats, DEFAULT_STAT_WINDOW, easeInOutExpo));
+            resolve(show(stats, DEFAULT_STAT_WINDOW, INTRO_COUNT));
           }),
         );
 }
