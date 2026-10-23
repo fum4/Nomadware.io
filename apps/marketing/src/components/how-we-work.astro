@@ -14,7 +14,7 @@ const PRINCIPLES = [
   },
   {
     title: 'Always in motion',
-    subtitle: 'We work while you sleep, so every morning starts with progress.',
+    subtitle: 'Agents work around the clock. Every morning starts with progress.',
     detail: [
       "Most projects don't fail, they stall, so our agents keep the work moving around the clock. We build the pipelines, workflows and guardrails that keep them in check: every change is rigorously tested, reviewed and gated before it gets out of our lab.",
     ],
@@ -23,7 +23,7 @@ const PRINCIPLES = [
     title: 'Zero friction',
     subtitle: 'No calls, no tickets to babysit. New builds show up on your phone as they land.',
     detail: [
-      'Meetings describe progress; a working build shows it. So we focus on builds you can tap, not meetings you have to sit through. Your time is better spent running your business than managing us.',
+      "Meetings describe progress; a working build shows it. So we focus on builds we can all tap, not meetings we'd have to sit through. Time is better spent building than managing.",
     ],
   },
 ];
@@ -63,11 +63,13 @@ const PRINCIPLES = [
     letter-spacing: -0.02em;
   }
 
+  /* pretty: the browser avoids a lone word on the last line (no-op where unsupported). */
   p {
     max-width: 60ch;
     margin: 0;
     font-size: 14px;
     line-height: 1.55;
+    text-wrap: pretty;
   }
 
   .subtitle {
