@@ -1,12 +1,13 @@
 import type { StatSeries, StatsSeries, StatWindow } from '@nomadware/site-stats';
 import { bucketStartMs, isStatWindow, parseStatsSeries } from '@nomadware/site-stats';
 
-import { centreChip, nearestIndex, pointAt } from '../chart/trace-geometry';
+import { centreChip, chipTop, nearestIndex, pointAt } from '../chart/trace-geometry';
 import { STATS_CHART } from '../constants';
 import {
   formatAgentTime,
   formatBucketRange,
   formatCount,
+  formatFixedIn,
   formatIssuesCaught,
   formatPrsMerged,
 } from '../format/format-activity';
@@ -44,8 +45,8 @@ const setTip = (plot: HTMLElement, name: string, text: string): void => {
 };
 
 /**
- * Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines and the
- * issues caught with their time to fix (each row only if any).
+ * Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines, and the
+ * issues caught with their kinds and time to fix (each only if known).
  */
 function describe(
   plot: HTMLElement,
@@ -70,20 +71,16 @@ function describe(
     .querySelector<HTMLElement>('[data-tip-lines]')
     ?.toggleAttribute('hidden', added + deleted === 0);
   const caught = series.caught[index] ?? 0;
-  setTip(plot, 'caught', formatIssuesCaught(caught, series.caughtFixMinutes[index] ?? null));
-  plot.querySelector<HTMLElement>('[data-tip="caught"]')?.toggleAttribute('hidden', caught === 0);
+  const fixMinutes = series.caughtFixMinutes[index] ?? null;
+  setTip(plot, 'caught', formatIssuesCaught(caught, series.caughtCategories[index] ?? null));
+  setTip(plot, 'fixed', fixMinutes === null ? '' : formatFixedIn(fixMinutes));
+  plot.querySelector('[data-tip-issues]')?.toggleAttribute('hidden', caught === 0);
+  plot.querySelector('[data-tip="fixed"]')?.toggleAttribute('hidden', fixMinutes === null);
 }
 
 /** Snap to the bucket nearest the pointer: guide, dot, and the tooltip centred over the guide. */
-function snap(
-  chart: HTMLElement,
-  plot: HTMLElement,
-  series: StatSeries,
-  generatedAtMs: number,
-  clientX: number,
-): void {
+function snap(plot: HTMLElement, series: StatSeries, generatedAtMs: number, clientX: number): void {
   const plotBox = plot.getBoundingClientRect();
-  const chartBox = chart.getBoundingClientRect();
   const values = series.agentMinutes;
   const index = nearestIndex((clientX - plotBox.left) / plotBox.width, values.length);
   const point = pointAt(values, index);
@@ -92,17 +89,18 @@ function snap(
   plot.style.setProperty('--hover-y', `${point.y * 100}%`);
   plot.toggleAttribute('data-hover', true);
 
-  // Measured once data-hover shows it: its width depends on the text. Centred on the guide,
-  // free to overhang the card, never the screen.
+  // Measured once data-hover shows it: its size depends on the text. Centred on the guide, above
+  // the plot, free to overhang the card, never the screen.
   const tip = plot.querySelector<HTMLElement>('.tip');
   if (!tip) return;
-  const { tipTopPx, tipViewportMarginPx } = STATS_CHART;
+  const { tipGapPx, tipViewportMarginPx } = STATS_CHART;
   const left = centreChip(point.x * plotBox.width, tip.offsetWidth, {
     left: tipViewportMarginPx - plotBox.left,
     right: document.documentElement.clientWidth - tipViewportMarginPx - plotBox.left,
   });
   plot.style.setProperty('--tip-left', `${left}px`);
-  plot.style.setProperty('--tip-top', `${chartBox.top - plotBox.top + tipTopPx}px`);
+  const top = chipTop(tip.offsetHeight, plotBox, tipGapPx, tipViewportMarginPx);
+  plot.style.setProperty('--tip-top', `${top}px`);
 }
 
 /**
@@ -125,7 +123,7 @@ export function initStatsChart(root: HTMLElement): StatsChart {
   const follow = (event: PointerEvent): void => {
     const plot = currentPlot(chart);
     const range = plot?.dataset.rangeLabel;
-    if (plot && isStatWindow(range)) snap(chart, plot, series[range], generatedAtMs, event.clientX);
+    if (plot && isStatWindow(range)) snap(plot, series[range], generatedAtMs, event.clientX);
   };
 
   const draw = (range: StatWindow, onReach: (reach: number) => void): TraceDraw => {

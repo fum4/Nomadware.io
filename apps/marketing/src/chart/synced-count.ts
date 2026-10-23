@@ -28,11 +28,12 @@ export function pointsReached(reach: number, count: number): number {
 }
 
 /**
- * Stat `key`'s value with the pen at `reach`, landing on `total` at the end. Each bucket steps in
- * as the pen reaches its point, so a flat stretch holds and a spike climbs fast. Whatever the
- * window counts beyond the series (the window starts before its first bucket; hours round on
- * their own) is there from the start: so a count steps exactly as its buckets do (one caught
- * issue per marker). No series for the stat: the count follows the pen.
+ * Stat `key`'s value with the pen at `reach`: 0 at the start, `total` at the end. From the second
+ * point on, each bucket steps in as the pen reaches its point, so a flat stretch holds and a spike
+ * climbs fast. What comes before that — the first bucket, plus whatever the window counts beyond
+ * the series (it starts before the first bucket; hours round on their own) — ramps in as the pen
+ * draws the first segment, so no number starts ahead of the line. A count then steps exactly as
+ * its buckets do (one caught issue per marker). No series for the stat: the count follows the pen.
  */
 export function countAlong(
   key: StatKey,
@@ -49,8 +50,12 @@ export function countAlong(
     reached.push(sum);
   }
   const before = total - sum;
+  const atFirstPoint = before + (reached[1] ?? 0);
   return (reach) => {
     const passed = pointsReached(reach, values.length);
-    return passed === values.length ? total : Math.max(0, before + (reached[passed] ?? 0));
+    if (passed === values.length) return total;
+    if (passed > 1) return Math.max(0, before + (reached[passed] ?? 0));
+    const firstSegment = Math.min(1, Math.max(0, reach * (values.length - 1)));
+    return Math.max(0, atFirstPoint * firstSegment);
   };
 }

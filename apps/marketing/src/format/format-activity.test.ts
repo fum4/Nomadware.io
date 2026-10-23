@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatAgentTime,
   formatBucketRange,
+  formatFixedIn,
   formatIssuesCaught,
   formatPrsMerged,
 } from './format-activity';
@@ -46,8 +47,16 @@ describe('formatIssuesCaught', () => {
     expect(formatIssuesCaught(3, null)).toBe('3 issues caught');
   });
 
-  it("adds the time to fix, in the tooltip's own hours and minutes", () => {
-    expect(formatIssuesCaught(3, 14)).toBe('3 issues caught · fixed in 14m');
-    expect(formatIssuesCaught(1, 80)).toBe('1 issue caught · fixed in 1h 20m');
+  it('adds the known categories, most first, ties in category order', () => {
+    expect(formatIssuesCaught(5, [0, 0, 2, 3, 0, 0])).toBe('5 issues caught · 3 tests, 2 types');
+    expect(formatIssuesCaught(4, [1, 1, 0, 0, 0, 0])).toBe('4 issues caught · 1 format, 1 lint');
+    expect(formatIssuesCaught(2, [0, 0, 0, 0, 0, 0])).toBe('2 issues caught');
+  });
+});
+
+describe('formatFixedIn', () => {
+  it("reads in the tooltip's own hours and minutes", () => {
+    expect(formatFixedIn(14)).toBe('fixed in 14m');
+    expect(formatFixedIn(118)).toBe('fixed in 1h 58m');
   });
 });

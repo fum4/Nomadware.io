@@ -43,14 +43,19 @@ describe('countAlong', () => {
     expect([0, 0.25, 0.49, 0.5, 0.74, 0.99, 1].map(at)).toEqual([0, 0, 0, 6, 6, 6, 10]);
   });
 
-  it('steps one caught issue per issue on the trace, the rest of the window there at once', () => {
+  it('steps one caught issue per issue on the trace, the rest of the window ramped in first', () => {
     const at = countAlong('caught', 5, series({ caught: [0, 1, 0, 2, 0] }));
-    expect([0, 0.25, 0.75, 1].map(at)).toEqual([2, 3, 5, 5]);
+    expect([0, 0.125, 0.25, 0.5, 0.75, 1].map(at)).toEqual([0, 1, 3, 3, 5, 5]);
+  });
+
+  it('starts every number at 0, the first bucket ramping in over the first segment', () => {
+    const at = countAlong('runs', 12, series({ runs: [4, 2, 0, 0, 0] }));
+    expect([0, 0.125, 0.24, 0.25].map(at)).toEqual([0, 5, 9.6, 12]);
   });
 
   it('counts agent-hours along agent-minutes', () => {
     const at = countAlong('agentHours', 3, series({ agentMinutes: [60, 0, 60, 0, 60] }));
-    expect([0, 0.5, 1].map(at)).toEqual([1, 2, 3]);
+    expect([0, 0.25, 0.5, 1].map(at)).toEqual([0, 1, 2, 3]);
   });
 
   it('never goes below zero when the series sums past the total', () => {

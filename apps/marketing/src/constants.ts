@@ -300,14 +300,15 @@ export const STATS_CHART = {
   /** The trace's SVG viewBox; stretched to the plot (preserveAspectRatio none). */
   viewWidth: 1000,
   viewHeight: 140,
-  /** The hover tooltip: px below the chart's top edge, and kept from the viewport's sides. */
-  tipTopPx: 6,
+  /** The hover tooltip: px clear of the plot (above it, or below if above won't fit on screen), and kept from the viewport's edges. */
+  tipGapPx: 10,
   tipViewportMarginPx: 8,
   /**
-   * Caught-issue counts closer than this share of the plot's width crowd each other: below 640px
-   * the smaller hides (≈11 px on a phone's ≈320 px plot; a desktop plot has room for all).
+   * A caught-issue marker's area: a single issue's, plus this share of it per further issue in the
+   * bucket, capped at markerMaxArea times it (chart/catch-markers.ts).
    */
-  markerLabelGapShare: 0.035,
+  markerAreaPerIssue: 0.25,
+  markerMaxArea: 2,
 } as const;
 
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */

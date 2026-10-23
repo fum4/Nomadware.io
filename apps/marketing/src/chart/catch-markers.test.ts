@@ -6,24 +6,18 @@ const TRACE = [0, 10, 20, 10, 0];
 
 describe('catchMarkers', () => {
   it('puts one marker on the trace per bucket that caught issues', () => {
-    expect(catchMarkers(TRACE, [0, 0, 3, 0, 1], 0)).toEqual([
-      { index: 2, x: 0.5, y: 0, count: 3, crowded: false },
-      { index: 4, x: 1, y: 1, count: 1, crowded: false },
+    const markers = catchMarkers(TRACE, [0, 0, 1, 0, 1]);
+    expect(markers.map(({ index, x, y }) => ({ index, x, y }))).toEqual([
+      { index: 2, x: 0.5, y: 0 },
+      { index: 4, x: 1, y: 1 },
     ]);
   });
 
-  it('crowds out a smaller count next to a larger one, never a single issue', () => {
-    const markers = catchMarkers(TRACE, [2, 4, 1, 0, 2], 0.3);
-    expect(markers.map((marker) => [marker.index, marker.crowded])).toEqual([
-      [0, true],
-      [1, false],
-      [2, false],
-      [4, false],
-    ]);
-  });
-
-  it('keeps the earlier of two equal counts', () => {
-    const markers = catchMarkers(TRACE, [0, 3, 3, 0, 0], 0.3);
-    expect(markers.map((marker) => marker.crowded)).toEqual([false, true]);
+  it('grows its area with the count, from a single issue up to twice it', () => {
+    const [one, two, many] = catchMarkers(TRACE, [1, 2, 40, 0, 0]);
+    expect(one?.scale).toBe(1);
+    expect(two?.scale).toBeGreaterThan(1);
+    expect(two?.scale).toBeLessThan(Math.SQRT2);
+    expect(many?.scale).toBe(Math.SQRT2);
   });
 });

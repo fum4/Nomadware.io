@@ -1,5 +1,6 @@
 // The activity chart's words: what the hover tooltip prints. Times are the visitor's own zone
 // unless `timeZone` says (tests pin one).
+import { CAUGHT_CATEGORIES } from '@nomadware/site-stats';
 
 const LOCALE = 'en-GB';
 const MINUTES_PER_HOUR = 60;
@@ -36,8 +37,18 @@ export const formatCount = (value: number): string => Math.round(value).toLocale
 export const formatPrsMerged = (count: number): string =>
   `${formatCount(count)} ${count === 1 ? 'PR' : 'PRs'} merged`;
 
-/** "1 issue caught", "3 issues caught · fixed in 1h 20m" (when every one of them is fixed). */
-export function formatIssuesCaught(count: number, fixMinutes: number | null): string {
+/**
+ * "1 issue caught", "5 issues caught · 3 tests, 2 types": the categories known (CAUGHT_CATEGORIES
+ * counts), most first.
+ */
+export function formatIssuesCaught(count: number, categories: readonly number[] | null): string {
   const issues = `${formatCount(count)} ${count === 1 ? 'issue' : 'issues'} caught`;
-  return fixMinutes === null ? issues : `${issues} · fixed in ${formatAgentTime(fixMinutes)}`;
+  const kinds = CAUGHT_CATEGORIES.map((name, index) => ({ name, count: categories?.[index] ?? 0 }))
+    .filter((kind) => kind.count > 0)
+    .toSorted((a, b) => b.count - a.count)
+    .map((kind) => `${formatCount(kind.count)} ${kind.name}`);
+  return kinds.length === 0 ? issues : `${issues} · ${kinds.join(', ')}`;
 }
+
+/** "fixed in 1h 58m": in the chip's own durations (formatAgentTime). */
+export const formatFixedIn = (minutes: number): string => `fixed in ${formatAgentTime(minutes)}`;

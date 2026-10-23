@@ -15,11 +15,11 @@ interface Props {
   generatedAt: string;
 }
 const { series, generatedAt } = Astro.props;
-const { viewWidth, viewHeight, markerLabelGapShare } = STATS_CHART;
+const { viewWidth, viewHeight } = STATS_CHART;
 const plots = STAT_WINDOWS.map((range) => {
   const { agentMinutes, caught } = series[range];
   const { active, quiet } = tracePaths(agentMinutes, viewWidth, viewHeight);
-  const markers = catchMarkers(agentMinutes, caught, markerLabelGapShare);
+  const markers = catchMarkers(agentMinutes, caught);
   return { range, active, quiet, markers, points: agentMinutes.length };
 });
 ---
@@ -45,22 +45,23 @@ const plots = STAT_WINDOWS.map((range) => {
         </svg>
         {plot.markers.map((marker) => (
           <span
-            class:list={['catch', { many: marker.count > 1, crowded: marker.crowded }]}
+            class="catch"
             data-catch={marker.index}
-            style={`--x: ${marker.x}; --y: ${marker.y}`}
-          >
-            {marker.count > 1 && <span class="count">{marker.count}</span>}
-          </span>
+            style={`--x: ${marker.x}; --y: ${marker.y}; --scale: ${marker.scale.toFixed(3)}`}
+          />
         ))}
         <span class="guide" />
         <span class="mark" />
         <span class="tip">
-          <span data-tip="when" />
+          <span class="when" data-tip="when" />
           <span data-tip="work" />
           <span data-tip-lines>
             <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" /> lines
           </span>
-          <span class="caught" data-tip="caught" hidden />
+          <span class="issues" data-tip-issues hidden>
+            <span data-tip="caught" />
+            <span class="fixed" data-tip="fixed" />
+          </span>
         </span>
         <span class="now">now</span>
       </div>
@@ -73,7 +74,7 @@ const plots = STAT_WINDOWS.map((range) => {
      the page on touch; horizontal drags scrub the tooltip. */
   .chart {
     position: relative;
-    height: 240px;
+    height: 180px;
     border-bottom: 1px solid var(--line);
     background-image:
       linear-gradient(var(--line) 1px, transparent 1px),
@@ -82,11 +83,10 @@ const plots = STAT_WINDOWS.map((range) => {
     touch-action: pan-y;
   }
 
-  /* The top inset is the tooltip's own band: the chip sits there (at STATS_CHART.tipTopPx from
-     the top), clear of the trace, whose peaks touch the plot's top. Taller than the chip. */
+  /* The trace's peaks touch the plot's top; the inset keeps them off the card's header. */
   .plot {
     position: absolute;
-    inset: 84px 24px 16px;
+    inset: 24px 24px 16px;
   }
 
   .plot:not([data-current]) {
@@ -107,15 +107,16 @@ const plots = STAT_WINDOWS.map((range) => {
     clip-path: inset(0 100% 0 0);
   }
 
-  /* A caught issue: a warm dot on the trace, a little larger with its count above when the bucket
-     caught several. HTML over the plot, not SVG: the SVG stretches (preserveAspectRatio none). It
-     pops in as the pen reaches it (data-reached), with the issues counter's step. */
+  /* A bucket's caught issues: a warm dot on the trace, its area growing with the count
+     (--scale, chart/catch-markers.ts). HTML over the plot, not SVG: the SVG stretches
+     (preserveAspectRatio none). It pops in as the pen reaches it (data-reached), with the issues
+     counter's step. */
   .catch {
     position: absolute;
     left: calc(var(--x) * 100%);
     top: calc(var(--y) * 100%);
-    width: 5px;
-    height: 5px;
+    width: calc(5px * var(--scale));
+    height: calc(5px * var(--scale));
     border-radius: 50%;
     background: var(--warm);
     box-shadow: 0 0 5px var(--warm-glow);
@@ -124,20 +125,6 @@ const plots = STAT_WINDOWS.map((range) => {
       opacity 0.2s ease-out,
       transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     pointer-events: none;
-  }
-
-  .catch.many {
-    width: 7px;
-    height: 7px;
-  }
-
-  .count {
-    position: absolute;
-    bottom: calc(100% + 2px);
-    left: 50%;
-    transform: translateX(-50%);
-    font: 500 9px/1 var(--mono);
-    color: var(--warm);
   }
 
   :global(html.js) .plot:not([data-drawn]) .catch:not([data-reached]) {
@@ -171,38 +158,63 @@ const plots = STAT_WINDOWS.map((range) => {
   }
 
   /* Only while pointing (data-hover, set by scripts/stats-chart.ts), at the px corner it measured:
-     centred over the snapped point in the band above the trace, overhanging the card if need be
-     (the card doesn't clip; above everything around it). */
+     centred over the snapped point, growing upward from just above the plot (never over the
+     trace) across the header and past the card if need be (the card doesn't clip); below the plot
+     when the screen has no room above. Above everything around it. */
   .tip {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     left: var(--tip-left);
     top: var(--tip-top);
-    padding: 4px 8px;
+    padding: 8px 11px;
     border: 1px solid var(--sig-soft);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: var(--ink);
+    box-shadow: var(--overlay-shadow);
     color: var(--fg);
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
+  }
+
+  .when {
+    margin-bottom: 2px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* The issues block: its own section under a hairline, warm like the issues counter. */
+  .issues {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 3px;
+    padding-top: 7px;
+    border-top: 1px solid var(--line);
+    color: var(--warm);
+  }
+
+  .issues[hidden],
+  .fixed[hidden] {
+    display: none;
+  }
+
+  .fixed {
+    color: var(--dim);
   }
 
   .plot:not([data-hover]) :is(.tip, .guide, .mark) {
     display: none;
   }
 
-  [data-tip='when'],
+  .when,
   .deleted {
     color: var(--dim);
   }
 
   .added {
     color: var(--sig);
-  }
-
-  .caught {
-    color: var(--warm);
   }
 
   .guide {
@@ -236,15 +248,11 @@ const plots = STAT_WINDOWS.map((range) => {
 
   @media (max-width: 640px) {
     .chart {
-      height: 204px;
-    }
-
-    .crowded .count {
-      display: none;
+      height: 144px;
     }
 
     .plot {
-      inset: 84px 14px 16px;
+      inset: 24px 14px 16px;
     }
   }
 </style>
