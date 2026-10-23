@@ -2,7 +2,8 @@ import type { StatKey, StatWindow } from '@nomadware/site-stats';
 import { isStatKey, isStatWindow } from '@nomadware/site-stats';
 
 import {
-  COUNT_UP_DURATION_MS,
+  COUNT_UP_INTRO_MS,
+  COUNT_UP_TOGGLE_MS,
   COUNT_UP_VISIBLE_THRESHOLD,
   DEFAULT_STAT_WINDOW,
 } from '../constants';
@@ -11,6 +12,17 @@ import { STATS_VIEWED_THRESHOLD } from './analytics/constants';
 import { track } from './analytics/track';
 import { onceVisible } from './motion';
 import { initStatsChart } from './stats-chart';
+import { easeInOutExpo, easeOutExpo } from './easing';
+
+/** How a count runs: its curve and its length. */
+interface CountMotion {
+  ease: (t: number) => number;
+  durationMs: number;
+}
+
+/** The intro builds up and lands softly; a toggle answers at once. */
+const INTRO_COUNT: CountMotion = { ease: easeInOutExpo, durationMs: COUNT_UP_INTRO_MS };
+const TOGGLE_COUNT: CountMotion = { ease: easeOutExpo, durationMs: COUNT_UP_TOGGLE_MS };
 
 interface StatElement {
   element: HTMLElement;
@@ -19,9 +31,6 @@ interface StatElement {
   /** The value on screen right now (mid-count too), where the next count starts from. */
   shown: number;
 }
-
-const easeOutExpo = (progress: number): number =>
-  progress >= 1 ? 1 : 1 - Math.pow(2, -10 * progress);
 
 function parseValues(raw: string | undefined): Partial<Record<StatWindow, number>> {
   const parsed: unknown = JSON.parse(raw ?? '{}');
@@ -69,8 +78,13 @@ function lockWidths(stats: StatElement[], targets: number[]): void {
   });
 }
 
-function paint(stats: StatElement[], counts: Count[], progress: number): void {
-  const eased = easeOutExpo(progress);
+function paint(
+  stats: StatElement[],
+  counts: Count[],
+  progress: number,
+  ease: (t: number) => number,
+): void {
+  const eased = ease(progress);
   stats.forEach((stat, index) => {
     const { from, to } = counts[index] ?? { from: 0, to: 0 };
     stat.shown = progress >= 1 ? to : from + (to - from) * eased;
@@ -87,9 +101,9 @@ let latestShow = 0;
 /**
  * Show one range; resolves when its numbers have settled (or a newer `show` took over). Every
  * number counts from what it shows now (0 in the intro, the other range's value on a toggle, the
- * in-flight value on a toggle mid-count) to its target, ease-out-expo, inside its locked width.
+ * in-flight value on a toggle mid-count) to its target as `motion` says, inside its locked width.
  */
-function show(stats: StatElement[], range: StatWindow): Promise<void> {
+function show(stats: StatElement[], range: StatWindow, motion: CountMotion): Promise<void> {
   const run = ++latestShow;
   const targets = targetsOf(stats, range);
   const counts = stats.map((stat, index) => ({ from: stat.shown, to: targets[index] ?? 0 }));
@@ -98,8 +112,8 @@ function show(stats: StatElement[], range: StatWindow): Promise<void> {
     const start = performance.now();
     const step = (now: number): void => {
       if (run !== latestShow) return resolve();
-      const progress = Math.min(1, (now - start) / COUNT_UP_DURATION_MS);
-      paint(stats, counts, progress);
+      const progress = Math.min(1, (now - start) / motion.durationMs);
+      paint(stats, counts, progress, motion.ease);
       if (progress < 1) requestAnimationFrame(step);
       else resolve();
     };
@@ -132,6 +146,7 @@ export function initStats(): () => Promise<void> {
     stats,
     finals.map((to) => ({ from: 0, to })),
     0,
+    INTRO_COUNT.ease,
   );
 
   buttons.forEach((button) =>
@@ -146,7 +161,7 @@ export function initStats(): () => Promise<void> {
       current = range;
       chart.reset();
       track('stats_window_toggled', { window: range });
-      void show(stats, range);
+      void show(stats, range, TOGGLE_COUNT);
     }),
   );
 
@@ -157,7 +172,7 @@ export function initStats(): () => Promise<void> {
           onceVisible(root, COUNT_UP_VISIBLE_THRESHOLD, () => {
             if (picked) return resolve();
             performance.mark('intro:stats-start');
-            resolve(show(stats, DEFAULT_STAT_WINDOW));
+            resolve(show(stats, DEFAULT_STAT_WINDOW, INTRO_COUNT));
           }),
         );
 }

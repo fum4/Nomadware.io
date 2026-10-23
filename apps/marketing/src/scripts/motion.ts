@@ -1,7 +1,7 @@
 import { FINE_POINTER_QUERY, MOBILE_QUERY } from '../constants';
 
-// Environment questions every client script asks, answered in one place (reduced motion: the
-// motion policy, motion-policy.ts).
+// Environment questions every client script asks, answered in one place (reduced motion:
+// README § Motion).
 
 export const isMobileViewport = (): boolean => matchMedia(MOBILE_QUERY).matches;
 

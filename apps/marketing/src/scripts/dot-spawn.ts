@@ -47,7 +47,8 @@ export function spawnDots(home: Home, density: number, scale: number): Dot[] {
 
 /** A dot's opacity `sinceFirstMs` after the field's first frame, or null once every dot is in. */
 export function appearAlpha(dot: Dot, sinceFirstMs: number): number | null {
-  if (sinceFirstMs >= DOT_FIELD.appearMaxMs) return null;
+  const fading = sinceFirstMs - DOT_FIELD.appearDelayMs;
+  if (fading >= DOT_FIELD.appearMaxMs) return null;
   // Eased out: most of its brightness in the first moments, so the field shows up at once.
-  return easeOutCubic(Math.min(1, sinceFirstMs / dot.appearMs));
+  return easeOutCubic(Math.min(1, Math.max(0, fading) / dot.appearMs));
 }

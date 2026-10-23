@@ -243,25 +243,6 @@ html:not(.js) .term-send {
   }
 }
 
-/* The surge flashes: under reduced motion the hover glow fades in plainly instead. The one CSS
-   copy of the motion policy's query (scripts/motion-policy.ts); the dev server opts out
-   (.full-motion, FULL_MOTION_CLASS). */
-@media (prefers-reduced-motion: reduce) {
-  html:not(.full-motion) .term-send:hover {
-    animation: term-glow-in var(--flash-fallback-fade) ease-out 1 forwards;
-  }
-}
-
-/* The surge's final frame, reached without the flicker. */
-@keyframes term-glow-in {
-  from {
-    text-shadow: none;
-  }
-  to {
-    text-shadow: 0 0 6px rgba(198, 255, 74, 0.45);
-  }
-}
-
 @media (max-width: 640px) {
   .term-body {
     padding: 18px 14px 12px;

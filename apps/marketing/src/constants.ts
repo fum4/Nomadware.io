@@ -7,31 +7,21 @@ import type { StatWindow } from '@nomadware/site-stats';
 export const MOBILE_QUERY = '(max-width: 640px)';
 /** A device where hovering a mouse is the primary input (no auto-focus, no cursor effects otherwise). */
 export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
-/** Only the flashing effects listen to it (scripts/motion-policy.ts). */
-export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-/** On <html> in dev only: the motion policy ignores reduced motion (base-layout.astro). */
-export const FULL_MOTION_CLASS = 'full-motion';
 
 export const SHA_LENGTH = 7;
 
 /**
- * Intro (scripts/intro-sequence.ts): headline scramble → gap → stats count-up → gap → wordmark;
- * the hero tags power on INTRO_TAGS_LEAD_MS before the scramble starts.
+ * Intro (scripts/intro-sequence.ts): each step at a fixed time from navigation start
+ * (performance.now()), so they land the same however long the scripts took to load.
  */
-export const INTRO_GAP_MS = 500;
-/** The headline shows as plain text for this long, then the scramble runs over it. */
-export const INTRO_HEADLINE_DELAY_MS = 800;
-/** The tags start powering on this long before the headline scramble (≤ INTRO_HEADLINE_DELAY_MS). */
-export const INTRO_TAGS_LEAD_MS = 500;
-/**
- * Latest the wordmark starts, counted from the headline settling, when the stats card is below
- * the fold and never scrolled into view. The in-view path takes 500 + 1600 + 500 = 2.6 s, so 4 s
- * still lets a visitor who scrolls straight down see the full order before the nav gives up.
- */
-export const INTRO_WORDMARK_MAX_WAIT_MS = 4_000;
+export const INTRO_TAGS_AT_MS = 2_000;
+/** The headline shows as plain text until then, and the scramble runs over it. */
+export const INTRO_HEADLINE_AT_MS = 2_500;
+/** The nav wordmark expands then, whatever the stats card is doing. */
+export const INTRO_WORDMARK_AT_MS = 3_900;
 
 /**
- * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started INTRO_TAGS_LEAD_MS
+ * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started at INTRO_TAGS_AT_MS,
  * before the headline scramble and over well before the stats start, so the sequence timing never
  * moves.
  * Each tag starts a random stagger after the last and flickers on over a random duration; a slash
@@ -50,7 +40,8 @@ export const TAGS_FLICKER = {
   /** Irregular on/off steps per element before it settles at full brightness. */
   stepsMin: 4,
   stepsMax: 6,
-  budgetMs: INTRO_GAP_MS - 20,
+  /** The whole run is scaled to end within this, whatever the random draws. */
+  budgetMs: 480,
 } as const;
 
 /**
@@ -85,7 +76,9 @@ export const WORDMARK_LETTER_STAGGER_S = 0.08;
 export const SCRAMBLE_STEP_MS = 40;
 export const SCRAMBLE_GLYPHS = '▚▞▙▟01<>/{}#';
 
-export const COUNT_UP_DURATION_MS = 1600;
+/** The stats' count-up on load (it crawls in and out, so it needs the room) and on a 7d/30d toggle. */
+export const COUNT_UP_INTRO_MS = 2_500;
+export const COUNT_UP_TOGGLE_MS = 1_600;
 export const COUNT_UP_VISIBLE_THRESHOLD = 0.3;
 
 export const RELATIVE_TIME_REFRESH_MS = 60_000;
@@ -138,10 +131,12 @@ export const DOT_FIELD = {
    * On load every dot starts fading in (0 → its colour) on the field's first frame, each over its
    * own random span between appearMinMs and appearMaxMs, eased out (bright early): the field
    * condenses rather than pops in.
-   * A fade, not a flash, so it plays whatever prefers-reduced-motion says (scripts/motion-policy.ts).
+   * Plays whatever prefers-reduced-motion says (README § Motion).
    */
-  appearMinMs: 400,
-  appearMaxMs: 1_600,
+  /** The fade-in waits this long after the field's first frame. */
+  appearDelayMs: 500,
+  appearMinMs: 800,
+  appearMaxMs: 3_200,
   /** How far past the content column the dots' home reaches, CSS px. */
   homeSpillPx: 96,
   /** Per frame, the share of its distance outside home a dot's speed gains back toward it. */
@@ -300,8 +295,12 @@ export const STATS_CHART = {
 } as const;
 
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */
-export const STATS_FETCH_TIMEOUT_MS = 1500;
+export const STATS_FETCH_TIMEOUT_MS = 800;
 /** Older than this, the snapshot reads as stale: the live dot goes grey and stops pulsing. */
 export const STATS_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
-/** The page renders on demand with live stats; Vercel's CDN serves it for a minute, then revalidates in the background. */
-export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=300';
+/**
+ * The page renders on demand with live stats; Vercel's CDN serves it fresh for a minute, then for
+ * up to a day it still answers at once from the cached copy while revalidating in the background:
+ * a visitor never waits on a render (stats only move every 5 minutes anyway).
+ */
+export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
