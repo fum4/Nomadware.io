@@ -11,7 +11,7 @@ import { STATS_VIEWED_THRESHOLD } from './analytics/constants';
 import { track } from './analytics/track';
 import { onceVisible } from './motion';
 import { initStatsChart } from './stats-chart';
-import { easeInOutQuint, easeOutExpo } from './easing';
+import { easeInOutExpo, easeOutExpo } from './easing';
 
 interface StatElement {
   element: HTMLElement;
@@ -91,7 +91,7 @@ let latestShow = 0;
  * Show one range; resolves when its numbers have settled (or a newer `show` took over). Every
  * number counts from what it shows now (0 in the intro, the other range's value on a toggle, the
  * in-flight value on a toggle mid-count) to its target along `ease`, inside its locked width.
- * The intro builds up and lands softly (ease-in-out); a toggle answers at once (ease-out).
+ * The intro builds up and lands softly (ease-in-out, expo); a toggle answers at once (ease-out).
  */
 function show(
   stats: StatElement[],
@@ -140,7 +140,7 @@ export function initStats(): () => Promise<void> {
     stats,
     finals.map((to) => ({ from: 0, to })),
     0,
-    easeInOutQuint,
+    easeInOutExpo,
   );
 
   buttons.forEach((button) =>
@@ -166,7 +166,7 @@ export function initStats(): () => Promise<void> {
           onceVisible(root, COUNT_UP_VISIBLE_THRESHOLD, () => {
             if (picked) return resolve();
             performance.mark('intro:stats-start');
-            resolve(show(stats, DEFAULT_STAT_WINDOW, easeInOutQuint));
+            resolve(show(stats, DEFAULT_STAT_WINDOW, easeInOutExpo));
           }),
         );
 }
