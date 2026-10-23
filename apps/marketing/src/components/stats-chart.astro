@@ -133,28 +133,6 @@ const plots = STAT_WINDOWS.map((range) => {
     pointer-events: none;
   }
 
-  /* TEMPORARY: the two caught-marker treatments left to compare: 1 cut-out (the default, above)
-     and 5 fade (?markers=5, scripts/marker-variants.ts sets data-markers on the card). */
-  /* 5 fade: no cut-out ring; a dark halo under the dot, over the line, from ~90% of the plot's
-     colour at the dot's edge to nothing at 4× its radius, so the green dims around it. The
-     element grows to the halo's size; the dot is its centre quarter. */
-  :global([data-markers='5']) .catch {
-    width: calc(var(--dot) * 4);
-    height: calc(var(--dot) * 4);
-    background: radial-gradient(
-      circle closest-side,
-      var(--warm) 23%,
-      var(--plot-veil) 26%,
-      transparent 100%
-    );
-    box-shadow: none;
-  }
-
-  :global([data-markers='5']) .catch::after,
-  :global([data-markers='5']) .catch::before {
-    inset: 37.5%;
-  }
-
   /* One warm ring (global.css ring-pulse) as the marker appears and whenever its range shows
      again (data-pulse, restarted by scripts/marker-pulse.ts). On a ring of its own, so the
      marker's glow stays. */
@@ -171,7 +149,7 @@ const plots = STAT_WINDOWS.map((range) => {
   }
 
   /* The hovered bucket's marker (data-hovered, scripts/stats-chart.ts) stands in for the green
-     hover dot: raised above its neighbours (and their halos), it pulses the same ring every 1.2 s
+     hover dot: raised above its neighbours (and their cut-out rings), it pulses the same ring every 1.2 s
      on a ring of its own (::before), so the one-per-show pulse on ::after is never touched. */
   .catch[data-hovered] {
     z-index: 1;

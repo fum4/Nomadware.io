@@ -10,7 +10,6 @@ import { onceVisible } from './motion';
 import type { StatElement } from './stat-elements';
 import { lockWidths, paintValues, readStats, targetsOf } from './stat-elements';
 import type { StatsChart } from './stats-chart';
-import { applyMarkerVariant } from './marker-variants';
 import { initStatsChart } from './stats-chart';
 import type { TraceDraw } from './trace-draw';
 
@@ -83,7 +82,6 @@ function recount(stats: StatElement[], range: StatWindow): void {
 export function initStats(): () => Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-stats]');
   if (!root) return () => Promise.resolve();
-  applyMarkerVariant(root); // TEMPORARY: marker comparison (marker-variants.ts)
   const stats = readStats(root);
   const labels = [...root.querySelectorAll<HTMLElement>('[data-range-label]')];
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-range]')];

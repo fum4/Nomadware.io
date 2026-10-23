@@ -23,9 +23,8 @@
   --sig-soft: rgba(198, 255, 74, 0.22);
   --warm: #ff8a4c;
   --warm-glow: rgba(255, 138, 76, 0.55);
-  /* The plot's own colour (the card over the ink, #09080e) at 90% / 70%: the caught markers'
-     (TEMPORARY variant 5) fade and their cut-out ring, stats-chart.astro. */
-  --plot-veil: rgba(9, 8, 14, 0.9);
+  /* The plot's own colour (the card over the ink, #09080e) at 70%: the caught markers' cut-out
+     ring (stats-chart.astro). */
   --plot-ring: rgba(9, 8, 14, 0.7);
   --glow: rgba(120, 90, 255, 0.18);
 
