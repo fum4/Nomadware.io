@@ -2,7 +2,7 @@ import {
   INTRO_GAP_MS,
   INTRO_HEADLINE_AT_MS,
   INTRO_TAGS_AT_MS,
-  INTRO_WORDMARK_MAX_WAIT_MS,
+  INTRO_WORDMARK_AT_MS,
 } from '../constants';
 import { scrambleHeadline } from './headline-scramble';
 import { initStats } from './stats-card';
@@ -18,15 +18,19 @@ const waitUntil = (ms: number): Promise<void> => wait(Math.max(0, ms - performan
 const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
 
 /**
- * The page-load choreography: the tags power on at INTRO_TAGS_AT_MS and the headline scramble
- * runs over the readable headline at INTRO_HEADLINE_AT_MS (both from navigation start); from there
- * each step starts when the previous one finishes → gap → stats count-up (once the card is in
- * view) → gap → nav wordmark, and from then on the tags rotate. The wordmark never waits
- * on a card nobody scrolls to: it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at the
- * latest. Plays whatever `prefers-reduced-motion` says (README § Motion).
+ * The page-load choreography, on a clock from navigation start: the tags power on at
+ * INTRO_TAGS_AT_MS, the headline scramble runs over the readable headline at INTRO_HEADLINE_AT_MS,
+ * and the nav wordmark expands at INTRO_WORDMARK_AT_MS (after which the tags rotate). The stats
+ * count up a gap after the headline settles, once the card is in view. Plays whatever
+ * `prefers-reduced-motion` says (README § Motion).
  */
 export async function playIntro(): Promise<void> {
   const countUp = initStats();
+  void waitUntil(INTRO_WORDMARK_AT_MS).then(() => {
+    mark('wordmark-start');
+    expandWordmark();
+    rotateTags();
+  });
 
   await waitUntil(INTRO_TAGS_AT_MS);
   mark('tags-start');
@@ -35,15 +39,7 @@ export async function playIntro(): Promise<void> {
   mark('headline-start');
   await scrambleHeadline();
   mark('headline-end');
-  const wordmarkDeadline = wait(INTRO_WORDMARK_MAX_WAIT_MS);
   await wait(INTRO_GAP_MS);
-
-  const stats = countUp().then(() => {
-    mark('stats-end');
-    return wait(INTRO_GAP_MS);
-  });
-  await Promise.race([stats, wordmarkDeadline]);
-  mark('wordmark-start');
-  expandWordmark();
-  rotateTags();
+  await countUp();
+  mark('stats-end');
 }

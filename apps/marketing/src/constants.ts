@@ -11,20 +11,16 @@ export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
 export const SHA_LENGTH = 7;
 
 /**
- * Intro (scripts/intro-sequence.ts): tags power on → headline scramble → gap → stats count-up →
- * gap → wordmark. The first two at fixed times from navigation start (performance.now()), so
- * they land the same however long the scripts took to load.
+ * Intro (scripts/intro-sequence.ts): tags power on → headline scramble → gap → stats count-up,
+ * and the nav wordmark on its own clock. Tags, headline and wordmark at fixed times from
+ * navigation start (performance.now()), so they land the same however long the scripts took.
  */
 export const INTRO_GAP_MS = 500;
 export const INTRO_TAGS_AT_MS = 2_000;
 /** The headline shows as plain text until then, and the scramble runs over it. */
 export const INTRO_HEADLINE_AT_MS = 2_500;
-/**
- * Latest the wordmark starts, counted from the headline settling, when the stats card is below
- * the fold and never scrolled into view. The in-view path takes 500 + 1600 + 500 = 2.6 s, so 4 s
- * still lets a visitor who scrolls straight down see the full order before the nav gives up.
- */
-export const INTRO_WORDMARK_MAX_WAIT_MS = 4_000;
+/** The nav wordmark expands then (mid stats count-up on a desktop), whatever the card is doing. */
+export const INTRO_WORDMARK_AT_MS = 3_900;
 
 /**
  * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started at INTRO_TAGS_AT_MS,
@@ -136,6 +132,8 @@ export const DOT_FIELD = {
    * condenses rather than pops in.
    * Plays whatever prefers-reduced-motion says (README § Motion).
    */
+  /** The fade-in waits this long after the field's first frame. */
+  appearDelayMs: 500,
   appearMinMs: 800,
   appearMaxMs: 3_200,
   /** How far past the content column the dots' home reaches, CSS px. */
