@@ -12,6 +12,8 @@ interface Dot extends Body {
   captured: boolean;
   /** When it last left the field (performance.now()), -Infinity if never. */
   releasedAt: number;
+  /** Its fade-in on load starts this long after the field's first frame. */
+  appearDelayMs: number;
 }
 
 const OFF_SCREEN = -9_999;
@@ -43,6 +45,9 @@ export function initDotField(): void {
   let onScreen = true;
   let frame = 0;
   let lastStep = 0;
+  // The first frame: on load the dots fade in from it, each after its own delay, so the field
+  // condenses instead of popping in at once.
+  let firstFrame = 0;
 
   const resize = (): void => {
     const width = Math.round(canvas.offsetWidth * scale);
@@ -69,6 +74,7 @@ export function initDotField(): void {
         highlight: Math.random() < DOT_FIELD.highlightShare,
         captured: false,
         releasedAt: Number.NEGATIVE_INFINITY,
+        appearDelayMs: Math.random() * DOT_FIELD.appearSpreadMs,
       }));
     }
   };
@@ -141,14 +147,21 @@ export function initDotField(): void {
     for (const dot of dots) move(dot, now, still, dt);
   };
 
-  const draw = (): void => {
+  const draw = (now: number): void => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     hole?.draw(context);
+    const sinceFirst = now - firstFrame;
+    const appearing = sinceFirst < DOT_FIELD.appearSpreadMs + DOT_FIELD.appearFadeMs;
     for (const dot of dots) {
       const size = dot.highlight ? DOT_FIELD.highlightSize : DOT_FIELD.size;
+      if (appearing) {
+        const shown = (sinceFirst - dot.appearDelayMs) / DOT_FIELD.appearFadeMs;
+        context.globalAlpha = Math.min(1, Math.max(0, shown));
+      }
       context.fillStyle = dot.highlight ? DOT_FIELD.highlightColor : DOT_FIELD.color;
       context.fillRect(dot.x, dot.y, size, size);
     }
+    context.globalAlpha = 1;
   };
 
   const tick = (now: number): void => {
@@ -156,8 +169,9 @@ export function initDotField(): void {
     const dt =
       lastStep === 0 ? 1 : Math.min(DOT_FIELD.maxStepFrames, (now - lastStep) / DOT_FIELD.frameMs);
     lastStep = now;
+    if (firstFrame === 0) firstFrame = now;
     step(now, dt);
-    draw();
+    draw(now);
     frame = onScreen && !document.hidden ? requestAnimationFrame(tick) : 0;
     if (frame === 0) lastStep = 0;
   };
