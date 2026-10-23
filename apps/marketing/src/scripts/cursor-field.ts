@@ -1,0 +1,13 @@
+import { CURSOR_FIELD } from '../constants';
+
+/**
+ * The cursor's field strength at `distance` CSS px: 1 at the cursor, easing smoothly to 0 at
+ * CURSOR_FIELD.radiusPx and beyond. One curve for every effect that reacts to the cursor (grid
+ * bend, dot scatter), so they move as one field.
+ */
+export function fieldStrength(distance: number): number {
+  const t = distance / CURSOR_FIELD.radiusPx;
+  if (t >= 1) return 0;
+  const falloff = 1 - t * t;
+  return falloff * falloff;
+}

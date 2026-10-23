@@ -1,4 +1,5 @@
 import { DOT_FIELD } from '../constants';
+import { fieldStrength } from './cursor-field';
 import { hasFinePointer, isMobileViewport } from './motion';
 
 interface Dot {
@@ -50,9 +51,10 @@ export function initDotField(): void {
     const dx = dot.x - pointer.x;
     const dy = dot.y - pointer.y;
     const distance = Math.hypot(dx, dy);
-    if (distance > 0 && distance < DOT_FIELD.repelRadius) {
-      dot.vx += (dx / distance) * DOT_FIELD.repelForce;
-      dot.vy += (dy / distance) * DOT_FIELD.repelForce;
+    const push = distance > 0 ? DOT_FIELD.repelForce * fieldStrength(distance / scale) : 0;
+    if (push > 0) {
+      dot.vx += (dx / distance) * push;
+      dot.vy += (dy / distance) * push;
     }
     dot.vx = dot.vx * DOT_FIELD.friction + (Math.random() - 0.5) * DOT_FIELD.jitter;
     dot.vy = dot.vy * DOT_FIELD.friction + (Math.random() - 0.5) * DOT_FIELD.jitter;

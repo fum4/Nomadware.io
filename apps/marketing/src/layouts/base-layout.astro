@@ -24,10 +24,16 @@ import '../styles/global.css';
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="frame" data-grid-paper>
+      <canvas class="grid-canvas" data-grid-canvas aria-hidden="true" hidden></canvas>
       <div class="wrap">
         <slot />
       </div>
     </div>
     <ConsentBanner />
+    <script>
+      import { initGridWarp } from '../scripts/grid-warp';
+      import { whenIdle } from '../scripts/motion';
+      whenIdle(initGridWarp);
+    </script>
   </body>
 </html>

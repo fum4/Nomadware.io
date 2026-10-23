@@ -73,13 +73,38 @@ export const COUNT_UP_VISIBLE_THRESHOLD = 0.3;
 
 export const RELATIVE_TIME_REFRESH_MS = 60_000;
 
+/**
+ * The cursor as one field (scripts/cursor-field.ts): the grid lines bend toward it
+ * (scripts/grid-warp.ts) and the hero dots scatter from it (scripts/dot-field.ts), both with the
+ * same radius and falloff, so they read as one force. CSS px.
+ */
+export const CURSOR_FIELD = {
+  radiusPx: 220,
+} as const;
+
+/** The grid's bend toward the cursor (scripts/grid-warp.ts). Lengths in CSS px. */
+export const GRID_WARP = {
+  /** Largest pull on a line, reached about 0.45 × radius from the cursor. */
+  maxPullPx: 8,
+  /** Distance between the points a bent line is drawn through. */
+  sampleStepPx: 10,
+  /** Per frame, how far the well's centre closes on the pointer (0–1). */
+  follow: 0.22,
+  /** Per frame, how far the well's depth eases to its target (0–1). */
+  ease: 0.1,
+  /** The well fills while the pointer moves and drains this long after it stops. */
+  idleMs: 700,
+  /** Below this depth the well counts as gone: the loop stops on a straight grid. */
+  restDepth: 0.002,
+} as const;
+
 export const DOT_FIELD = {
   countDesktop: 253,
   countMobile: 120,
-  /** Canvas pixels per CSS pixel; sizes, speeds and the repel radius below are in canvas px. */
+  /** Canvas pixels per CSS pixel; sizes and speeds below are in canvas px. */
   canvasScale: 2,
   highlightShare: 0.15,
-  repelRadius: 200,
+  /** At the cursor; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's pull. */
   repelForce: 0.6,
   friction: 0.96,
   jitter: 0.05,

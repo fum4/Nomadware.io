@@ -63,17 +63,46 @@ a {
   transform: none;
 }
 
-/* Grid paper + violet glow behind the page, film grain on top. Between the glow and the paper,
-   the column halo: an ink veil down the content column (full height, soft sides) that quiets the
-   grid lines behind the text; the hero's dot field and every band paint above it (.wrap). */
+/* Layers, bottom to top: grid paper → column halo + violet glow (::before) → film grain (::after)
+   → the page (.wrap: hero dot field, bands, text halo, content). The column halo is an ink veil
+   down the content column (full height, soft sides) that quiets the grid lines behind the text.
+   The grid is drawn twice, identically: here as CSS (first paint, no JS, touch devices), and by
+   scripts/grid-warp.ts on a fixed canvas that bends it round the cursor; `is-grid-live` drops the
+   CSS copy the frame the canvas has painted. */
 .frame {
   --column-core: calc(var(--content-width) / 2);
   --column-fade: 200px;
 
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   /* Halos and bands reach past the column; the page never scrolls sideways for them. */
   overflow-x: clip;
+  background-image:
+    linear-gradient(var(--grid-color) var(--grid-line), transparent var(--grid-line)),
+    linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
+  background-size: var(--grid) var(--grid);
+}
+
+.frame.is-grid-live {
+  background-image: none;
+}
+
+.grid-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background-image:
     radial-gradient(1200px 400px at 85% -10%, var(--glow), transparent 60%),
     linear-gradient(
@@ -82,20 +111,14 @@ a {
       var(--halo-column) calc(50% - var(--column-core)),
       var(--halo-column) calc(50% + var(--column-core)),
       transparent calc(50% + var(--column-core) + var(--column-fade))
-    ),
-    linear-gradient(var(--grid-color) var(--grid-line), transparent var(--grid-line)),
-    linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
-  background-size:
-    auto,
-    auto,
-    var(--grid) var(--grid),
-    var(--grid) var(--grid);
+    );
 }
 
 .frame::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
   opacity: 0.08;
   mix-blend-mode: overlay;
@@ -104,7 +127,7 @@ a {
 
 .wrap {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 26px 44px 32px;
