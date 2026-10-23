@@ -123,8 +123,9 @@ const plots = STAT_WINDOWS.map((range) => {
     height: var(--dot);
     border-radius: 50%;
     background: var(--warm);
-    /* A solid ring of the plot's own colour punches the dot out of the line under it. */
-    box-shadow: 0 0 0 2px var(--plot-bg);
+    /* A ring of the plot's own colour cuts the dot out of the line under it (70%: the line still
+       shows through a little). */
+    box-shadow: 0 0 0 2px var(--plot-ring);
     transform: translate(-50%, -50%);
     transition:
       opacity 0.2s ease-out,
