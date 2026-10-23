@@ -73,8 +73,25 @@ import PageSection from './page-section.astro';
 <script>
   import { initContactForm } from '../scripts/contact/contact-form';
   initContactForm();
-  // TEMPORARY (NWARE-82): `?beat=25` compares the frame flicker's 0.25 s beat (contact-terminal.css).
-  if (new URLSearchParams(location.search).get('beat') === '25') {
-    document.documentElement.dataset.beat = '25';
+  // TEMPORARY (NWARE-82): a floating switch to compare the frame flicker's 0.2 / 0.25 s beat
+  // (contact-terminal.css) and replay it in place. Deleted with the losing beat before the merge.
+  {
+    const panel = document.createElement('div');
+    panel.style.cssText =
+      'position:fixed;left:12px;bottom:12px;z-index:99;display:flex;gap:6px;font:500 12px monospace';
+    for (const beat of ['20', '25']) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = `beat 0.${beat} s`;
+      button.style.cssText =
+        'padding:6px 10px;border:1px solid #444;border-radius:6px;background:#111;color:#eee;cursor:pointer';
+      button.addEventListener('click', () => {
+        document.documentElement.dataset.beat = beat;
+        // The click took focus out of the form; focusing it again replays the flicker.
+        document.querySelector<HTMLElement>('[data-contact] input')?.focus({ preventScroll: true });
+      });
+      panel.append(button);
+    }
+    document.body.append(panel);
   }
 </script>
