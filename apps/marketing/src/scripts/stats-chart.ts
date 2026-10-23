@@ -71,7 +71,7 @@ function describe(
   const deleted = series.linesDeleted[index] ?? 0;
   setTip(plot, 'added', `+${formatCount(added)}`);
   setTip(plot, 'deleted', `−${formatCount(deleted)}`);
-  // A bucket with no merged lines gets no "+0 −0 lines" row.
+  // A bucket with no merged lines gets no "+0 −0" row.
   plot
     .querySelector<HTMLElement>('[data-tip-lines]')
     ?.toggleAttribute('hidden', added + deleted === 0);
