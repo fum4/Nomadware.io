@@ -2,20 +2,12 @@
 // A small line icon for the chart tooltip's rows (stats-chart.astro): hand-drawn on a 12 px grid,
 // stroked in currentColor (the row's own colour), decorative (the chart is aria-hidden anyway).
 interface Props {
-  name: 'calendar' | 'robot' | 'merge';
+  name: 'robot' | 'merge';
 }
 const { name } = Astro.props;
 ---
 
 <svg class={`icon icon-${name}`} viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-  {
-    name === 'calendar' && (
-      <>
-        <rect x="1.5" y="2.5" width="9" height="8" rx="1.5" />
-        <path d="M1.5 5.25h9M4 1.25v2.5M8 1.25v2.5" />
-      </>
-    )
-  }
   {
     name === 'robot' && (
       <>

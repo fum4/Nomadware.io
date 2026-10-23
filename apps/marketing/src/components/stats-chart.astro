@@ -54,7 +54,7 @@ const plots = STAT_WINDOWS.map((range) => {
         <span class="guide" />
         <span class="mark" />
         <span class="tip">
-          <span class="when"><TipIcon name="calendar" /><span data-tip="when" /></span>
+          <span class="when" data-tip="when" />
           <span class="activity">
             <TipIcon name="robot" /><span data-tip="work" /><span class="sep">·</span><TipIcon
               name="merge"
@@ -224,8 +224,8 @@ const plots = STAT_WINDOWS.map((range) => {
     z-index: 2;
   }
 
-  /* Icon rows: each icon centred on the text's x-height, not its line box (see the live dot). */
-  .when,
+  /* The activity row's icons, each centred on the text's x-height, not its line box (see the live
+     dot). */
   .activity {
     display: flex;
     align-items: center;
@@ -242,11 +242,12 @@ const plots = STAT_WINDOWS.map((range) => {
     margin: 0 2px;
   }
 
-  /* Measured against each row's x-height: flex centring leaves the 11px row's icons 1px high;
-     the header's smaller type gets a smaller icon. The icons are bright, their rows' text dim. */
+  /* Measured against the row's x-height: flex centring leaves the 11px icons 1px high. The icons
+     are bright, the row's text dim. */
   .activity :global(.icon) {
     position: relative;
     top: 1px;
+    color: var(--fg);
   }
 
   /* Optical, not geometric: its body sits low in the box under the antenna, so centred it reads
@@ -255,14 +256,6 @@ const plots = STAT_WINDOWS.map((range) => {
     top: 0;
   }
 
-  :is(.when, .activity) :global(.icon) {
-    color: var(--fg);
-  }
-
-  .when :global(.icon) {
-    width: 11px;
-    height: 11px;
-  }
 
   /* The issues block: its own section under a hairline, warm like the issues counter. */
   .issues {
