@@ -10,6 +10,8 @@ import type { LoadedStats } from '../data/load-stats';
 import RelativeTime from './relative-time.astro';
 import StatValue from './stat-value.astro';
 import StatsChart from './stats-chart.astro';
+// TEMPORARY (NWARE-82): the phone layouts under comparison, `?card=1..5`.
+import '../styles/stats-card-variants.css';
 
 interface Props {
   stats: LoadedStats;
@@ -60,6 +62,11 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     <div class="warm"><dt>issues caught</dt><dd><StatValue stat="caught" snapshot={snapshot} /></dd></div>
   </dl>
 </section>
+
+<script>
+  // TEMPORARY (NWARE-82): the phone layout picked with `?card=N`.
+  import '../scripts/stats-card-variant';
+</script>
 
 <style>
   .stats {
