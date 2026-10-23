@@ -13,61 +13,53 @@
    focus, it just fades back (the frame's transition). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 0.836s steps(1, end) 1 forwards;
+  animation: term-frame-on 0.629s steps(1, end) 1 forwards;
 }
 
-/* A double spark, a 0.2 s dark beat, then the send button's rhythm (term-surge); percentages are
-   of the ~0.85 s run. */
+/* A double spark, a 0.2 s dark beat, then the send button's rhythm (term-surge) minus its last
+   blink. */
 @keyframes term-frame-on {
   0% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  6.46% {
+  8.59% {
     border-color: var(--line);
     box-shadow: none;
   }
-  12.44% {
+  16.53% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  16.75% {
+  22.26% {
     border-color: var(--line);
     box-shadow: none;
   }
-  40.67% {
+  54.05% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  44.98% {
+  59.78% {
     border-color: var(--line);
     box-shadow: none;
   }
-  48.21% {
+  64.07% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  57.89% {
+  76.95% {
     border-color: var(--line);
     box-shadow: none;
   }
-  61.12% {
+  81.24% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  65.43% {
+  86.96% {
     border-color: var(--line);
     box-shadow: none;
   }
-  68.66% {
-    border-color: var(--sig-soft);
-    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
-  }
-  91.27% {
-    border-color: var(--line);
-    box-shadow: none;
-  }
-  93.42% {
+  91.26% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
@@ -80,7 +72,7 @@
 /* TEMPORARY (NWARE-82): `?beat=25` swaps in the 0.25 s beat for the owner to compare; one of the
    two goes before the PR merges. */
 html[data-beat='25'] .term:focus-within {
-  animation: term-frame-on-25 0.886s steps(1, end) 1 forwards;
+  animation: term-frame-on-25 0.679s steps(1, end) 1 forwards;
 }
 
 @keyframes term-frame-on-25 {
@@ -88,51 +80,43 @@ html[data-beat='25'] .term:focus-within {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  6.09% {
+  7.95% {
     border-color: var(--line);
     box-shadow: none;
   }
-  11.74% {
+  15.32% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  15.8% {
+  20.62% {
     border-color: var(--line);
     box-shadow: none;
   }
-  44.02% {
+  57.44% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  48.08% {
+  62.74% {
     border-color: var(--line);
     box-shadow: none;
   }
-  51.13% {
+  66.72% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  60.27% {
+  78.65% {
     border-color: var(--line);
     box-shadow: none;
   }
-  63.32% {
+  82.62% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  67.38% {
+  87.92% {
     border-color: var(--line);
     box-shadow: none;
   }
-  70.43% {
-    border-color: var(--sig-soft);
-    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
-  }
-  91.76% {
-    border-color: var(--line);
-    box-shadow: none;
-  }
-  93.79% {
+  91.9% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
