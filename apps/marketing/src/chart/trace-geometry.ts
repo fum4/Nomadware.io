@@ -1,5 +1,5 @@
-// The activity chart's geometry, shared by the server render (the trace, the peak) and the hover
-// tooltip (snapping, the chip's place). Pure: no DOM, so it is unit-tested.
+// The activity chart's geometry, shared by the server render (the trace) and the hover tooltip
+// (snapping, the dot, the chip's place). Pure: no DOM, so it is unit-tested.
 
 /** An SVG path through `values`, scaled into a width × height box (y grows down; the largest touches the top). */
 export function linePath(values: readonly number[], width: number, height: number): string {
@@ -12,14 +12,6 @@ export function linePath(values: readonly number[], width: number, height: numbe
       return `${index === 0 ? 'M' : 'L'}${x} ${y}`;
     })
     .join(' ');
-}
-
-/** Index and value of the largest point (the first one on a tie). */
-export function peakOf(values: readonly number[]): { index: number; value: number } {
-  return values.reduce((peak, value, index) => (value > peak.value ? { index, value } : peak), {
-    index: 0,
-    value: values[0] ?? 0,
-  });
 }
 
 /** Where point `index` sits in the plot, as shares of its width and height (0,0 = top left). */
@@ -37,28 +29,16 @@ export function nearestIndex(share: number, count: number): number {
   return Math.round(Math.min(1, Math.max(0, share)) * (count - 1));
 }
 
-export interface Box {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
-
 /**
- * The chip's top-left corner for a point at (`x`, `y`): beside it, `gap` to the right, or to the
- * left when it would leave `bounds` there; vertically centred on it, pushed back inside `bounds`.
- * All lengths in the same px space.
+ * The chip's left edge for a point at `x`: `gap` to its right, or to its left when it would
+ * pass `bounds.right` there, never past `bounds.left`. All lengths in the same px space.
  */
 export function placeChip(
-  point: { x: number; y: number },
-  chip: { width: number; height: number },
-  bounds: Box,
+  x: number,
+  chipWidth: number,
+  bounds: { left: number; right: number },
   gap: number,
-): { left: number; top: number } {
-  const right = point.x + gap;
-  const left =
-    right + chip.width <= bounds.right ? right : Math.max(bounds.left, point.x - gap - chip.width);
-  const centred = point.y - chip.height / 2;
-  const top = Math.min(Math.max(bounds.top, centred), bounds.bottom - chip.height);
-  return { left, top };
+): number {
+  const right = x + gap;
+  return right + chipWidth <= bounds.right ? right : Math.max(bounds.left, x - gap - chipWidth);
 }

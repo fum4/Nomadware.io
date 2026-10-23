@@ -193,9 +193,7 @@ export const STATS_CHART = {
   /** The trace's SVG viewBox; stretched to the plot (preserveAspectRatio none). */
   viewWidth: 1000,
   viewHeight: 140,
-  /** The resting peak callout's centre stays this far (% of the plot) from either side. */
-  peakEdgePercent: 15,
-  /** The hover tooltip: px between it and the snapped point, and kept clear of the chart's edges. */
+  /** The hover tooltip: px between it and the snapped point's guide, and from the chart's edges. */
   tipGapPx: 10,
   tipEdgePx: 6,
 } as const;

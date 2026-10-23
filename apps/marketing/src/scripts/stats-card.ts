@@ -108,7 +108,7 @@ function show(stats: StatElement[], range: StatWindow): Promise<void> {
 }
 
 /**
- * Wire the 7d/30d toggle (numbers and chart; the chart's tooltip goes back to the peak) and hold
+ * Wire the 7d/30d toggle (numbers and chart; the chart's tooltip hides) and hold
  * the numbers at 0 for the intro. Returns the intro's count-up: it waits until the card is in
  * view, then resolves when the count settles (at once if the visitor already picked a range).
  */

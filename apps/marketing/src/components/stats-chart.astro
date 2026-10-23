@@ -1,34 +1,23 @@
 ---
 // The stats card's activity chart: agent-minutes per bucket as a seismograph line, one plot per
-// window (the current one shown), drawn left to right on reveal. The callout names the peak; on
-// hover or touch it follows the pointer instead (scripts/stats-chart.ts reads data-series).
+// window (the current one shown), drawn left to right on reveal. Hover or touch snaps a dot and a
+// guide to a bucket and shows its numbers in a chip (scripts/stats-chart.ts reads data-series).
 import type { StatsSeries } from '@nomadware/site-stats';
 import { STAT_WINDOWS } from '@nomadware/site-stats';
 
-import { linePath, peakOf, pointAt } from '../chart/trace-geometry';
+import { linePath } from '../chart/trace-geometry';
 import { DEFAULT_STAT_WINDOW, STATS_CHART } from '../constants';
-import { formatAgentTime } from '../format/format-activity';
 
 interface Props {
   series: StatsSeries;
   generatedAt: string;
 }
 const { series, generatedAt } = Astro.props;
-const { viewWidth, viewHeight, peakEdgePercent } = STATS_CHART;
-const plots = STAT_WINDOWS.map((range) => {
-  const { agentMinutes, bucketHours } = series[range];
-  const peak = peakOf(agentMinutes);
-  const point = pointAt(agentMinutes, peak.index);
-  return {
-    range,
-    path: linePath(agentMinutes, viewWidth, viewHeight),
-    // In % of the plot, so it follows the SVG's stretch; kept off the edges so the label never
-    // hangs outside the card.
-    peakX: Math.min(100 - peakEdgePercent, Math.max(peakEdgePercent, point.x * 100)),
-    peakY: point.y * 100,
-    peakText: `peak · ${formatAgentTime(peak.value)} of agent work in ${bucketHours}h`,
-  };
-});
+const { viewWidth, viewHeight } = STATS_CHART;
+const plots = STAT_WINDOWS.map((range) => ({
+  range,
+  path: linePath(series[range].agentMinutes, viewWidth, viewHeight),
+}));
 ---
 
 <div
@@ -50,15 +39,11 @@ const plots = STAT_WINDOWS.map((range) => {
         </svg>
         <span class="guide" />
         <span class="mark" />
-        <span class="callout" style={`--peak-x: ${plot.peakX}%; --peak-y: ${plot.peakY}%`}>
-          <span class="peak">{plot.peakText}</span>
-          <span class="detail">
-            <span data-tip="when" />
-            <span data-tip="work" />
-            <span>
-              day: <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" />{' '}
-              lines
-            </span>
+        <span class="tip">
+          <span data-tip="when" />
+          <span data-tip="work" />
+          <span>
+            <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" /> lines
           </span>
         </span>
         <span class="now">now</span>
@@ -72,7 +57,7 @@ const plots = STAT_WINDOWS.map((range) => {
      the page on touch; horizontal drags scrub the tooltip. */
   .chart {
     position: relative;
-    height: 180px;
+    height: 228px;
     border-bottom: 1px solid var(--line);
     background-image:
       linear-gradient(var(--line) 1px, transparent 1px),
@@ -81,9 +66,11 @@ const plots = STAT_WINDOWS.map((range) => {
     touch-action: pan-y;
   }
 
+  /* The top inset is the tooltip's own band: the chip sits there (at STATS_CHART.tipEdgePx from
+     the top), clear of the trace, whose peaks touch the plot's top. Taller than the chip. */
   .plot {
     position: absolute;
-    inset: 24px 24px 16px;
+    inset: 72px 24px 16px;
   }
 
   .plot:not([data-current]) {
@@ -114,20 +101,22 @@ const plots = STAT_WINDOWS.map((range) => {
     }
   }
 
-  .callout,
+  .tip,
   .now {
     position: absolute;
     font: 400 11px/var(--leading) var(--mono);
     white-space: nowrap;
   }
 
-  /* At rest: the peak, centred above it. Hovering (data-hover, set by scripts/stats-chart.ts):
-     the snapped point's details beside it, at the px corner the script measured. */
-  .callout {
-    left: var(--peak-x);
-    top: var(--peak-y);
-    transform: translate(-50%, -150%);
-    padding: 2px 6px;
+  /* Only while pointing (data-hover, set by scripts/stats-chart.ts), at the px corner it measured:
+     beside the snapped point, in the band above the trace. */
+  .tip {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    left: var(--tip-left);
+    top: var(--tip-top);
+    padding: 4px 8px;
     border: 1px solid var(--sig-soft);
     border-radius: 4px;
     background: var(--ink);
@@ -135,20 +124,7 @@ const plots = STAT_WINDOWS.map((range) => {
     pointer-events: none;
   }
 
-  [data-hover] .callout {
-    left: var(--tip-left);
-    top: var(--tip-top);
-    transform: none;
-    padding: 4px 8px;
-  }
-
-  .detail {
-    display: flex;
-    flex-direction: column;
-  }
-
-  [data-hover] .peak,
-  .plot:not([data-hover]) :is(.detail, .guide, .mark) {
+  .plot:not([data-hover]) :is(.tip, .guide, .mark) {
     display: none;
   }
 
@@ -192,11 +168,11 @@ const plots = STAT_WINDOWS.map((range) => {
 
   @media (max-width: 640px) {
     .chart {
-      height: 150px;
+      height: 192px;
     }
 
     .plot {
-      inset: 30px 14px 16px;
+      inset: 72px 14px 16px;
     }
   }
 </style>

@@ -11,9 +11,8 @@ import {
 } from '../format/format-activity';
 
 const HOUR_MS = 3_600_000;
-const UTC_DATE_LENGTH = 10;
 
-/** The chart's hover tooltip, as stats-card.ts sees it: put it back on the peak. */
+/** The chart's hover tooltip, as stats-card.ts sees it: hide it (on a range toggle). */
 export interface StatsChart {
   reset: () => void;
 }
@@ -32,7 +31,7 @@ const setTip = (plot: HTMLElement, name: string, text: string): void => {
   if (slot) slot.textContent = text;
 };
 
-/** Fill the tooltip with bucket `index`: when, how much agent work, that UTC day's lines. */
+/** Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines. */
 function describe(
   plot: HTMLElement,
   series: StatSeries,
@@ -41,19 +40,17 @@ function describe(
 ): void {
   const count = series.agentMinutes.length;
   const startMs = bucketStartMs(generatedAtMs, series.bucketHours, index, count);
-  const date = new Date(startMs).toISOString().slice(0, UTC_DATE_LENGTH);
-  const day = series.days.find((entry) => entry.date === date);
   setTip(plot, 'when', formatBucketRange(startMs, startMs + series.bucketHours * HOUR_MS));
   setTip(
     plot,
     'work',
     `${formatAgentTime(series.agentMinutes[index] ?? 0)} agent work · ${formatPrsMerged(series.prsMerged[index] ?? 0)}`,
   );
-  setTip(plot, 'added', `+${formatCount(day?.linesAdded ?? 0)}`);
-  setTip(plot, 'deleted', `−${formatCount(day?.linesDeleted ?? 0)}`);
+  setTip(plot, 'added', `+${formatCount(series.linesAdded[index] ?? 0)}`);
+  setTip(plot, 'deleted', `−${formatCount(series.linesDeleted[index] ?? 0)}`);
 }
 
-/** Snap to the bucket nearest the pointer: guide, dot, and the tooltip beside them. */
+/** Snap to the bucket nearest the pointer: guide, dot, and the tooltip beside the guide, on top. */
 function snap(
   chart: HTMLElement,
   plot: HTMLElement,
@@ -71,29 +68,27 @@ function snap(
   plot.style.setProperty('--hover-y', `${point.y * 100}%`);
   plot.toggleAttribute('data-hover', true);
 
-  // Measured after data-hover shows the details: the chip's size depends on them.
-  const callout = plot.querySelector<HTMLElement>('.callout');
-  if (!callout) return;
+  // Measured once data-hover shows it: its width depends on the text.
+  const tip = plot.querySelector<HTMLElement>('.tip');
+  if (!tip) return;
   const { tipGapPx, tipEdgePx } = STATS_CHART;
-  const { left, top } = placeChip(
-    { x: point.x * plotBox.width, y: point.y * plotBox.height },
-    { width: callout.offsetWidth, height: callout.offsetHeight },
+  const left = placeChip(
+    point.x * plotBox.width,
+    tip.offsetWidth,
     {
       left: chartBox.left - plotBox.left + tipEdgePx,
-      top: chartBox.top - plotBox.top + tipEdgePx,
       right: chartBox.right - plotBox.left - tipEdgePx,
-      bottom: chartBox.bottom - plotBox.top - tipEdgePx,
     },
     tipGapPx,
   );
   plot.style.setProperty('--tip-left', `${left}px`);
-  plot.style.setProperty('--tip-top', `${top}px`);
+  plot.style.setProperty('--tip-top', `${chartBox.top - plotBox.top + tipEdgePx}px`);
 }
 
 /**
- * Wire the chart's tooltip: a mouse snaps it to the nearest bucket and leaving puts it back on the
- * peak; a touch (tap or horizontal drag) does the same and keeps it until a tap elsewhere or a
- * scroll takes over. No animation, so nothing for the motion policy to decide.
+ * Wire the chart's tooltip: a mouse snaps it to the nearest bucket and leaving hides it; a touch
+ * (tap or horizontal drag) does the same and keeps it until a tap elsewhere or a scroll takes
+ * over. No animation, so nothing for the motion policy to decide.
  */
 export function initStatsChart(root: HTMLElement): StatsChart {
   const chart = root.querySelector<HTMLElement>('[data-stats-chart]');

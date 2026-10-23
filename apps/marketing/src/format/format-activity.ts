@@ -1,5 +1,5 @@
-// The activity chart's words: the peak callout (server) and the hover tooltip (browser) print
-// through these, so both read the same. Times are the visitor's own zone unless `timeZone` says.
+// The activity chart's words: what the hover tooltip prints. Times are the visitor's own zone
+// unless `timeZone` says (tests pin one).
 
 const LOCALE = 'en-GB';
 const MINUTES_PER_HOUR = 60;
