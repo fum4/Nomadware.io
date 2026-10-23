@@ -13,57 +13,65 @@
    scripts/contact/term-frame.ts; otherwise it would play on load). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 1.55s steps(1, end) 1 forwards;
+  animation: term-frame-on 1.613s steps(1, end) 1 forwards;
 }
 
 .term.was-lit:not(:focus-within) {
   animation: term-frame-off 0.5s steps(1, end) 1 forwards;
 }
 
-/* A first spark, a 1 s dark beat, then the send button's rhythm (term-surge); percentages are of
-   the 1.55 s run. */
+/* A double spark, a 1 s dark beat, then the send button's rhythm (term-surge); percentages are
+   of the 1.6 s run. */
 @keyframes term-frame-on {
   0% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  3.48% {
+  3.35% {
     border-color: var(--line);
     box-shadow: none;
   }
-  68% {
+  5.02% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  70.32% {
+  7.25% {
     border-color: var(--line);
     box-shadow: none;
   }
-  72.06% {
+  69.25% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  77.29% {
+  71.48% {
     border-color: var(--line);
     box-shadow: none;
   }
-  79.03% {
+  73.16% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  81.35% {
+  78.18% {
     border-color: var(--line);
     box-shadow: none;
   }
-  83.1% {
+  79.85% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  95.29% {
+  82.08% {
     border-color: var(--line);
     box-shadow: none;
   }
-  96.45% {
+  83.76% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  95.47% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  96.59% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
