@@ -2,7 +2,8 @@
 // A titled band: small mono label in the left column, content on the right (stacked on phones).
 // `band`: a full-bleed darker background whose edges sit on the page's grid lines
 // (scripts/grid-band.ts snaps them; without JS the band is drawn unsnapped).
-// `extraCells`: whole grid cells of extra space above the section, on top of the usual gap.
+// `extraCells`: whole grid cells of extra space above the section, on top of the usual gap
+// (desktop only: phones keep the plain gap).
 interface Props {
   id: string;
   title: string;
@@ -94,6 +95,15 @@ const { id, title, band = false, extraCells = 0 } = Astro.props;
     .section.is-band,
     .section.is-band + .section {
       --section-gap: calc(var(--grid) * 3);
+    }
+
+    /* No extra cells on phones: the plain gap is room enough. */
+    .section {
+      margin-top: var(--section-gap);
+    }
+
+    .section.is-band {
+      margin-top: calc(var(--section-gap) - var(--band-pad));
     }
   }
 </style>
