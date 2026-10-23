@@ -65,7 +65,10 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 </section>
 
 <style>
+  /* Room at the bottom for the "updated" footer (.live), under the legend. */
   .stats {
+    position: relative;
+    padding-bottom: 40px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--term);
@@ -92,11 +95,20 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     gap: 10px;
   }
 
+  /* The header is title left, "last [7d | 30d]" right; "updated" is the card's footer row, so the
+     header keeps to one line whatever the font (a wrap that depends on glyph widths shifts the
+     card when the web font swaps in). */
+  .range {
+    margin-left: auto;
+  }
+
   .live {
+    position: absolute;
+    left: 18px;
+    bottom: 13px;
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: auto;
     letter-spacing: 0;
     text-transform: none;
     white-space: nowrap;
@@ -153,6 +165,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     margin: 0;
+    border-bottom: 1px solid var(--line);
   }
 
   .legend div {
@@ -185,27 +198,12 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
   }
 
   @media (max-width: 640px) {
-    .range {
-      margin-left: auto;
-    }
-
-    /* Room for the "updated" footer (.live) under the legend. */
-    .stats {
-      position: relative;
-      padding-bottom: 40px;
-    }
-
     .head {
       padding: 11px 14px;
     }
 
-    /* A footer row on phones, so the header keeps to one line whatever the font (a wrap that
-       depends on glyph widths shifts the card when the web font swaps in). */
     .live {
-      position: absolute;
       left: 14px;
-      bottom: 13px;
-      margin-left: 0;
     }
 
     /* A thumb-sized toggle: a bigger chip, and a hit area 6px taller than it on each side (the
@@ -236,7 +234,6 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 
     .legend {
       grid-template-columns: repeat(3, 1fr);
-      border-bottom: 1px solid var(--line);
     }
 
     .legend div {
