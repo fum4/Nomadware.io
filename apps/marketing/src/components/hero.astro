@@ -134,15 +134,16 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
   }
 
   /* Dark until scripts/tags-flicker.ts lights them, inside the intro's gap after the headline
-     (only with JS); the failsafe lights them anyway if the intro never runs. */
+     (only with JS): the hold's `from` fills its 4 s delay, then it ends and they show in their own
+     colour, a failsafe if the intro never runs. Colour, not opacity: an opacity change gives the
+     word a compositing layer (tags-flicker.ts says why that hurts). */
   :global(html.js) [data-tags] :is([data-tag], [data-slash]) {
-    opacity: 0;
-    animation: tags-failsafe 0s 4s forwards;
+    animation: tags-dark 0s 4s backwards;
   }
 
-  @keyframes tags-failsafe {
-    to {
-      opacity: 1;
+  @keyframes tags-dark {
+    from {
+      color: transparent;
     }
   }
 
