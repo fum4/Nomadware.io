@@ -20,54 +20,53 @@
   animation: term-frame-off 0.5s steps(1, end) 1 forwards;
 }
 
-/* A first spark, a ~200 ms dark beat, then the send button's rhythm (term-surge); percentages
-   are ms of the 1 s run (settled from 750 ms). */
+/* A first spark, a dark beat, then the send button's rhythm (term-surge), stretched so the
+   whole run lasts 1 s; percentages are ms of it. */
 @keyframes term-frame-on {
   0% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  5.4% {
+  7.2% {
     border-color: var(--line);
     box-shadow: none;
   }
-  25.4% {
+  33.9% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  29% {
+  38.7% {
     border-color: var(--line);
     box-shadow: none;
   }
-  31.7% {
+  42.3% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  39.8% {
+  53.1% {
     border-color: var(--line);
     box-shadow: none;
   }
-  42.5% {
+  56.7% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  46.1% {
+  61.5% {
     border-color: var(--line);
     box-shadow: none;
   }
-  48.8% {
+  65.1% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  67.7% {
+  90.3% {
     border-color: var(--line);
     box-shadow: none;
   }
-  69.5% {
+  92.7% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  75%,
   100% {
     border-color: var(--sig-soft);
     box-shadow: none;
