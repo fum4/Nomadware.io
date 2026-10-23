@@ -20,7 +20,7 @@
   animation: term-frame-off 0.5s steps(1, end) 1 forwards;
 }
 
-/* The send button's own rhythm (term-surge): the same steps at the same moments. */
+/* The send button's rhythm (term-surge), with a longer dark beat after the first flash. */
 @keyframes term-frame-on {
   0% {
     border-color: var(--sig-soft);
@@ -30,15 +30,15 @@
     border-color: var(--line);
     box-shadow: none;
   }
-  9% {
+  15% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  14% {
+  19% {
     border-color: var(--line);
     box-shadow: none;
   }
-  17% {
+  22% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
