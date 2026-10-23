@@ -1,4 +1,4 @@
-import { REDUCED_MOTION_QUERY } from '../constants';
+import { FULL_MOTION_CLASS, REDUCED_MOTION_QUERY } from '../constants';
 
 const FADE_TOKEN = '--flash-fallback-fade';
 
@@ -15,8 +15,11 @@ const FADE_TOKEN = '--flash-fallback-fade';
  * - the send button's neon surge on hover: CSS can't call this, so styles/contact-terminal.css
  *   repeats the same media query, next to a pointer back here
  * A new flashing effect joins this list and asks the same question; nothing else checks the query.
+ * The dev server opts out of the query entirely (FULL_MOTION_CLASS), so the flashes can be judged.
  */
-export const flashingAllowed = (): boolean => !matchMedia(REDUCED_MOTION_QUERY).matches;
+export const flashingAllowed = (): boolean =>
+  document.documentElement.classList.contains(FULL_MOTION_CLASS) ||
+  !matchMedia(REDUCED_MOTION_QUERY).matches;
 
 /** `--flash-fallback-fade` in ms, read from tokens.css so CSS and scripts share one value. */
 export function flashFallbackFadeMs(): number {

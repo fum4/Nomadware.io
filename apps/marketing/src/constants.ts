@@ -9,6 +9,8 @@ export const MOBILE_QUERY = '(max-width: 640px)';
 export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
 /** Only the flashing effects listen to it (scripts/motion-policy.ts). */
 export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+/** On <html> in dev only: the motion policy ignores reduced motion (base-layout.astro). */
+export const FULL_MOTION_CLASS = 'full-motion';
 
 export const SHA_LENGTH = 7;
 
