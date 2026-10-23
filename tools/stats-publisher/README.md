@@ -1,6 +1,6 @@
 # `tools/stats-publisher` — the site's live stats, computed on the devbox
 
-**What:** computes the stats strip on nomadware.io (NWARE-82) from the devbox's own activity and uploads it to R2 as `v1/stats.json` (`@nomadware/site-stats` § `STATS_OBJECT`). Runs every 5 minutes from the devbox timer `nomadware-site-stats.timer` (devbox `chezmoi/`), which calls `mise run stats:publish` in the main checkout. Package `@nomadware/stats-publisher`.
+**What:** computes the live stats card on nomadware.io (its numbers and activity chart) (NWARE-82) from the devbox's own activity and uploads it to R2 as `v1/stats.json` (`@nomadware/site-stats` § `STATS_OBJECT`). Runs every 5 minutes from the devbox timer `nomadware-site-stats.timer` (devbox `chezmoi/`), which calls `mise run stats:publish` in the main checkout. Package `@nomadware/stats-publisher`.
 
 **Depends on:** `@nomadware/site-stats` (the snapshot contract + R2 signing) and, on the box: `~/.claude/projects` (Claude Code transcripts), the user journal (`journalctl --user`), `gh` (its own auth). Node runs `src/main.ts` directly (type stripping) — no build, no runtime dependencies.
 
@@ -24,6 +24,11 @@ Each run logs one logfmt line per source and a `run done` line with `duration_ms
 | `agentHours` | transcripts | per file, the gaps between consecutive user/assistant entries shorter than 5 min, summed, rounded |
 | `actions` (the page's "agent tool calls") | transcripts | `tool_use` blocks in assistant entries. Claude Code writes one line per content block, all repeating the message id, so counting is per line — deduping by message id would drop tool calls |
 | `checks`, `caught` | user journal | systemd's `pc-*.pre-push/pre-merge.service: Consumed …` (a gate run finished) / `… Failed with result …` (it failed) |
+| `series.agentMinutes` | transcripts | the same per-minute active time as `agentHours`, summed per chart bucket (UTC-aligned, `@nomadware/site-stats` § Series), rounded to whole minutes |
+| `series.prsMerged` | GitHub | the same merged PRs as `prs`, per bucket of their merge time |
+| `series.days` | per-PR file stats | each PR's `linesAdded` / `linesDeleted` on its merge day (UTC); a day with no merge is 0 |
+
+The series (`src/series.ts`) is aligned to buckets and UTC days, not to the rolling window, so its totals can differ slightly from the window's numbers at the edges.
 
 **Incremental store:** `~/.local/state/nomadware-site-stats/state.json` (`src/state.ts`; local only — it holds file paths and repo names, never published). Per transcript a byte offset and per-minute totals; the journal cursor and gate timestamps; every merged PR's line counts (merged PRs are immutable, so each is fetched once). Anything older than 31 days is dropped. A run reads only appended bytes, journal entries after the cursor and PRs merged since the last sync (minus a 1 h overlap for search-index lag). Delete the file to force a backfill; a `STATE_VERSION` bump does the same. A lock (`run.lock`, pid-checked) keeps a manual run and the timer's apart.
 
@@ -31,4 +36,4 @@ Each run logs one logfmt line per source and a `run done` line with `duration_ms
 
 **Failure:** a failing source keeps its previous data, the snapshot still goes out, and the run exits 1 (the unit turns red, `devbox-doctor` sees it). A failed upload exits 1; the site keeps serving the last object.
 
-**Extend:** a new source is a module under `src/sources/` that folds new data into `State` (bump `STATE_VERSION`) and a few lines in `src/aggregate.ts`; the stat itself is added to the contract first (`packages/site-stats` README § Extend). Tests: `src/**/*.test.ts` (`node --test`, hermetic — temp files, no network).
+**Extend:** a new source is a module under `src/sources/` that folds new data into `State` (bump `STATE_VERSION`) and a few lines in `src/aggregate.ts` (a series: `src/series.ts`); the stat itself is added to the contract first (`packages/site-stats` README § Extend). Tests: `src/**/*.test.ts` (`node --test`, hermetic — temp files, no network).

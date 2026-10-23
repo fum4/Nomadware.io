@@ -57,7 +57,8 @@ async function run(command: Command, dryRun: boolean): Promise<boolean> {
     const state = loadState(PATHS.stateDir);
     const complete = updateAll(state, nowMs);
     const snapshot = parseStatsSnapshot(buildSnapshot(state, nowMs));
-    if (!snapshot) throw new Error('built snapshot fails its own contract');
+    // The contract drops a malformed series rather than the snapshot; ours must never be one.
+    if (!snapshot?.series) throw new Error('built snapshot fails its own contract');
     const json = JSON.stringify(snapshot);
     const storeBytes = dryRun ? 0 : saveState(PATHS.stateDir, state);
 
