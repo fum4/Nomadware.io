@@ -13,35 +13,48 @@
    scripts/contact/term-frame.ts; otherwise it would play on load). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 0.6s steps(1, end) 1 forwards;
+  animation: term-frame-on 0.9s steps(1, end) 1 forwards;
 }
 
 .term.was-lit:not(:focus-within) {
   animation: term-frame-off 0.5s steps(1, end) 1 forwards;
 }
 
+/* The send button's own rhythm (term-surge): the same steps at the same moments. */
 @keyframes term-frame-on {
   0% {
-    border-color: var(--line);
-    box-shadow: none;
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
   6% {
-    border-color: var(--sig-soft);
-    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
-  }
-  18% {
     border-color: var(--line);
     box-shadow: none;
   }
-  28% {
+  9% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  40% {
+  14% {
     border-color: var(--line);
     box-shadow: none;
   }
-  50% {
+  17% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  31% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  34% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  38% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  41% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
@@ -49,11 +62,11 @@
     border-color: var(--line);
     box-shadow: none;
   }
-  72% {
+  64% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  86%,
+  70%,
   100% {
     border-color: var(--sig-soft);
     box-shadow: none;
