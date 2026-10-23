@@ -11,15 +11,15 @@ export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
 export const SHA_LENGTH = 7;
 
 /**
- * Intro (scripts/intro-sequence.ts): tags power on → headline scramble → gap → stats count-up,
- * and the nav wordmark on its own clock. Tags, headline and wordmark at fixed times from
- * navigation start (performance.now()), so they land the same however long the scripts took.
+ * Intro (scripts/intro-sequence.ts): each step at a fixed time from navigation start
+ * (performance.now()), so they land the same however long the scripts took to load.
  */
-export const INTRO_GAP_MS = 500;
+/** The stats count up then, or once the card scrolls into view if that is later. */
+export const INTRO_STATS_AT_MS = 1_000;
 export const INTRO_TAGS_AT_MS = 2_000;
 /** The headline shows as plain text until then, and the scramble runs over it. */
 export const INTRO_HEADLINE_AT_MS = 2_500;
-/** The nav wordmark expands then (mid stats count-up on a desktop), whatever the card is doing. */
+/** The nav wordmark expands then, whatever the stats card is doing. */
 export const INTRO_WORDMARK_AT_MS = 3_900;
 
 /**
@@ -42,7 +42,8 @@ export const TAGS_FLICKER = {
   /** Irregular on/off steps per element before it settles at full brightness. */
   stepsMin: 4,
   stepsMax: 6,
-  budgetMs: INTRO_GAP_MS - 20,
+  /** The whole run is scaled to end within this, whatever the random draws. */
+  budgetMs: 480,
 } as const;
 
 /**
