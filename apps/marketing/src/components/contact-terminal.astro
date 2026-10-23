@@ -21,7 +21,7 @@ import PageSection from './page-section.astro';
       <span class="term-title">
         {/* Decorative macOS window buttons. */}
         <span class="term-lights" aria-hidden="true"><span /><span /><span /></span>
-        <span class="term-path">~/nomadware</span>
+        <span class="term-path">~/nware</span>
       </span>
       <a class="term-mail" href={`mailto:${SITE.email}`}>{SITE.email}</a>
     </div>
@@ -44,6 +44,7 @@ import PageSection from './page-section.astro';
         name="brief"
         multiline
         placeholder="what you're building, where it hurts"
+        placeholderShort="what you're building"
         maxlength={CONTACT.maxBriefLength}
       />
       {/* Honeypot: off-screen and out of the tab order, so only bots fill it in. */}

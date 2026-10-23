@@ -9,6 +9,8 @@ import { CONTACT } from '../constants';
 interface Props {
   name: 'name' | 'email' | 'brief';
   placeholder: string;
+  /** A shorter placeholder for phones, where the long one would wrap (CSS picks one). */
+  placeholderShort?: string;
   autocomplete?: 'name' | 'email' | 'off';
   /** Keyboard hint. Always type="text": email inputs have no selection API, and the caret needs it. */
   inputmode?: 'text' | 'email';
@@ -19,6 +21,7 @@ interface Props {
 const {
   name,
   placeholder,
+  placeholderShort,
   autocomplete = 'off',
   inputmode = 'text',
   multiline = false,
@@ -31,7 +34,13 @@ const id = `contact-${name}`;
   <span class="term-prompt" aria-hidden="true">›</span>
   <label class="term-key" for={id}>{name}</label>
   <div class="term-field">
-    <div class="term-vis" aria-hidden="true" data-private><span class="term-ph">{placeholder}</span></div>
+    <div class="term-vis" aria-hidden="true" data-private>
+      <span class="term-ph"
+        ><span class="term-ph-long">{placeholder}</span>{
+          placeholderShort && <span class="term-ph-short">{placeholderShort}</span>
+        }</span
+      >
+    </div>
     {
       multiline ? (
         <textarea
@@ -42,6 +51,7 @@ const id = `contact-${name}`;
           minlength={CONTACT.minBriefLength}
           maxlength={maxlength}
           data-placeholder={placeholder}
+          data-placeholder-short={placeholderShort}
         />
       ) : (
         <input
@@ -55,6 +65,7 @@ const id = `contact-${name}`;
           autocapitalize={inputmode === 'email' ? 'off' : undefined}
           required
           data-placeholder={placeholder}
+          data-placeholder-short={placeholderShort}
         />
       )
     }

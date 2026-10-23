@@ -141,3 +141,18 @@ html:not(.js) .term-field textarea {
     grid-template-columns: 14px 54px 1fr;
   }
 }
+
+/* A field with a short placeholder shows it on phones, where the long one would wrap. */
+.term-ph-short {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .term-ph:has(.term-ph-short) .term-ph-long {
+    display: none;
+  }
+
+  .term-ph-short {
+    display: inline;
+  }
+}
