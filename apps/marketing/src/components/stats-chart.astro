@@ -245,12 +245,14 @@ const plots = STAT_WINDOWS.map((range) => {
   }
 
   /* Measured against each row's x-height: flex centring leaves the 11px row's icons 1px high;
-     the header's smaller type gets a smaller icon. The activity icons are dim, like the header,
-     and the numbers keep their colour. */
+     the header's smaller type gets a smaller icon. The icons are bright, their rows' text dim. */
   .activity :global(.icon) {
     position: relative;
     top: 1px;
-    color: var(--dim);
+  }
+
+  :is(.when, .activity) :global(.icon) {
+    color: var(--fg);
   }
 
   .when :global(.icon) {
@@ -292,6 +294,7 @@ const plots = STAT_WINDOWS.map((range) => {
   }
 
   .when,
+  .activity,
   .deleted {
     color: var(--dim);
   }
