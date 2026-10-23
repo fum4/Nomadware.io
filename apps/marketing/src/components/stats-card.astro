@@ -175,9 +175,17 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
   }
 
   @media (max-width: 640px) {
+    /* Edge to edge on phones: out of the column's padding, no side borders or corners. */
+    .stats {
+      margin-inline: calc(var(--wrap-inline) * -1);
+      border-inline: 0;
+      border-radius: 0;
+    }
+
+    /* Its content lines up with the page column's text (--wrap-inline), not the screen edge. */
     .head {
       flex-wrap: wrap;
-      padding: 11px 14px;
+      padding: 11px var(--wrap-inline);
     }
 
     /* Its own row on phones, whatever the font: a wrap that depends on glyph widths shifts the
@@ -193,6 +201,10 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 
     .legend div {
       padding: 12px 14px;
+    }
+
+    .legend div:nth-child(3n + 1) {
+      padding-left: var(--wrap-inline);
     }
 
     .legend div:nth-child(3n) {
