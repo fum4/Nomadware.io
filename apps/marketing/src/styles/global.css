@@ -139,21 +139,16 @@ a {
 }
 
 .wrap {
-  /* The column's side padding, a token so a full-bleed block can step out of it exactly. */
-  --wrap-inline: 44px;
-
   position: relative;
   z-index: 2;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 26px var(--wrap-inline) 32px;
+  padding: 26px 44px 32px;
 }
 
 @media (max-width: 640px) {
   .wrap {
-    --wrap-inline: 20px;
-
-    padding: 18px var(--wrap-inline) 24px;
+    padding: 18px 20px 24px;
   }
 }
 
