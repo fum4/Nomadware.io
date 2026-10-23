@@ -2,12 +2,14 @@
 // A titled band: small mono label in the left column, content on the right (stacked on phones).
 // `band`: a full-bleed darker background whose edges sit on the page's grid lines
 // (scripts/grid-band.ts snaps them; without JS the band is drawn unsnapped).
+// `extraCells`: whole grid cells of extra space above the section, on top of the usual gap.
 interface Props {
   id: string;
   title: string;
   band?: boolean;
+  extraCells?: number;
 }
-const { id, title, band = false } = Astro.props;
+const { id, title, band = false, extraCells = 0 } = Astro.props;
 ---
 
 <section
@@ -15,6 +17,7 @@ const { id, title, band = false } = Astro.props;
   id={id}
   aria-labelledby={`${id}-title`}
   data-grid-band={band ? '' : undefined}
+  style={extraCells > 0 ? `--extra-cells: ${extraCells}` : undefined}
 >
   <h2 class="title" id={`${id}-title`}>{title}</h2>
   <div><slot /></div>
@@ -35,7 +38,7 @@ const { id, title, band = false } = Astro.props;
     display: grid;
     grid-template-columns: 160px 1fr;
     gap: 24px;
-    margin-top: var(--section-gap);
+    margin-top: calc(var(--section-gap) + var(--grid) * var(--extra-cells, 0));
     padding-bottom: 8px;
     scroll-margin-top: 24px;
   }
@@ -47,7 +50,7 @@ const { id, title, band = false } = Astro.props;
      can land up to a cell outside the box; the section gaps leave room for that. */
   .section.is-band {
     position: relative;
-    margin-top: calc(var(--section-gap) - var(--band-pad));
+    margin-top: calc(var(--section-gap) + var(--grid) * var(--extra-cells, 0) - var(--band-pad));
     padding-block: var(--band-pad);
   }
 

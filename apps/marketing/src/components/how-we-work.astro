@@ -29,7 +29,8 @@ const PRINCIPLES = [
 ];
 ---
 
-<PageSection id="how-we-work" title="How we work" band>
+<!-- One extra cell above: more air under the stats card. -->
+<PageSection id="how-we-work" title="How we work" band extraCells={1}>
   <ul class="rows">
     {
       PRINCIPLES.map(({ title, subtitle, detail }) => (
