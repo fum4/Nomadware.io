@@ -1,4 +1,8 @@
-import { INTRO_GAP_MS, INTRO_WORDMARK_MAX_WAIT_MS } from '../constants';
+import {
+  INTRO_GAP_MS,
+  INTRO_TAGS_AT_SCRAMBLE_SHARE,
+  INTRO_WORDMARK_MAX_WAIT_MS,
+} from '../constants';
 import { scrambleHeadline } from './headline-scramble';
 import { initStats } from './stats-strip';
 import { flickerTags } from './tags-flicker';
@@ -12,20 +16,31 @@ const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
 
 /**
  * The page-load choreography, each step started by the previous one finishing: headline scramble
- * → gap (the hero tags flicker on inside it, never lengthening it) → stats count-up (once the
- * strip is in view) → gap → nav wordmark, and from then on the tags rotate. The wordmark never waits on a strip nobody scrolls to:
- * it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at the latest. Plays whatever
+ * → gap → stats count-up (once the strip is in view) → gap → nav wordmark, and from then on the
+ * tags rotate. The tags power on alongside, from INTRO_TAGS_AT_SCRAMBLE_SHARE of the scramble
+ * (or when it ends, if it never reports), never lengthening anything. The wordmark never waits
+ * on a strip nobody scrolls to: it starts INTRO_WORDMARK_MAX_WAIT_MS after the headline at the
+ * latest. Plays whatever
  * `prefers-reduced-motion` says; only the tags' flicker swaps for a fade (scripts/motion-policy.ts).
  */
 export async function playIntro(): Promise<void> {
   const countUp = initStats();
 
+  let tagsStarted = false;
+  const startTags = (): void => {
+    if (tagsStarted) return;
+    tagsStarted = true;
+    mark('tags-start');
+    void flickerTags().then(() => mark('tags-end'));
+  };
+
   mark('headline-start');
-  await scrambleHeadline();
+  await scrambleHeadline((share) => {
+    if (share >= INTRO_TAGS_AT_SCRAMBLE_SHARE) startTags();
+  });
   mark('headline-end');
+  startTags();
   const wordmarkDeadline = wait(INTRO_WORDMARK_MAX_WAIT_MS);
-  mark('tags-start');
-  void flickerTags().then(() => mark('tags-end'));
   await wait(INTRO_GAP_MS);
 
   const stats = countUp().then(() => {

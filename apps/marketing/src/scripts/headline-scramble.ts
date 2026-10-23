@@ -11,9 +11,10 @@ const randomGlyph = (): string =>
  * is never touched, so its glyphs sit exactly where they will stay: it is painted only up to the
  * reveal point (a background clipped to the text), and the pending letters are covered by glyphs
  * in an aria-hidden overlay, positioned from the text's own character boxes. Readers, crawlers and
- * `textContent` only ever see the real text.
+ * `textContent` only ever see the real text. `onProgress` hears the revealed share (0–1) at
+ * every step.
  */
-export function scrambleHeadline(): Promise<void> {
+export function scrambleHeadline(onProgress?: (share: number) => void): Promise<void> {
   const target = document.querySelector<HTMLElement>('[data-scramble]');
   const text = target?.firstChild;
   if (!target || !(text instanceof Text)) return Promise.resolve();
@@ -71,6 +72,7 @@ export function scrambleHeadline(): Promise<void> {
         return;
       }
       paint(revealed);
+      onProgress?.(revealed / text.length);
       revealed += 1;
     };
     const timer = setInterval(step, SCRAMBLE_STEP_MS);
