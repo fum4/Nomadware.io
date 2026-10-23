@@ -7,6 +7,22 @@
 
 import { bandEdges } from './grid-band-edges';
 
+/** A snapped band, in px from the grid paper's top left (what band-warp.ts bends). */
+export interface SnappedBand {
+  section: HTMLElement;
+  /** The section box's left edge. */
+  left: number;
+  /** The painted edges (on grid lines), and the ::before's vertical scale that put them there. */
+  top: number;
+  bottom: number;
+  scale: number;
+}
+
+let snapped: readonly SnappedBand[] = [];
+
+/** Every band where the last snap put it: the one record of the painted edges. */
+export const snappedBands = (): readonly SnappedBand[] => snapped;
+
 export function snapGridBands(): void {
   const bands = [...document.querySelectorAll<HTMLElement>('[data-grid-band]')];
   const paper = document.querySelector<HTMLElement>('[data-grid-paper]');
@@ -18,7 +34,8 @@ export function snapGridBands(): void {
     const grid = Number.parseFloat(style.getPropertyValue('--grid'));
     const line = Number.parseFloat(style.getPropertyValue('--grid-line'));
     if (!(grid > 0) || !(line >= 0)) return;
-    const origin = paper.getBoundingClientRect().top;
+    const paperBox = paper.getBoundingClientRect();
+    const origin = paperBox.top;
     const snaps = bands.map((band) => {
       const box = band.getBoundingClientRect();
       const padding = getComputedStyle(band);
@@ -30,13 +47,19 @@ export function snapGridBands(): void {
         line,
       );
       const scale = box.height > 0 ? (edges.bottom - edges.top) / box.height : 1;
-      return { shift: edges.top - top, scale };
+      return { shift: edges.top - top, scale, left: box.left - paperBox.left, edges };
     });
     bands.forEach((band, index) => {
       const snap = snaps[index];
       if (!snap) return;
       band.style.setProperty('--band-shift', `${snap.shift}px`);
       band.style.setProperty('--band-scale', String(snap.scale));
+    });
+    snapped = bands.flatMap((section, index) => {
+      const snap = snaps[index];
+      if (!snap) return [];
+      const { left, scale, edges } = snap;
+      return [{ section, left, top: edges.top, bottom: edges.bottom, scale }];
     });
   };
 

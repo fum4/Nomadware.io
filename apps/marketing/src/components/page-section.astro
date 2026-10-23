@@ -61,7 +61,9 @@ const { id, title, band = false, extraCells = 0 } = Astro.props;
     z-index: -1;
     background: var(--band);
     box-shadow: 0 0 0 100vmax var(--band);
-    clip-path: inset(0 -100vmax);
+    /* Near the cursor scripts/band-warp.ts swaps in a polygon whose edges bend with the grid
+       lines they sit on (the spread shadow paints past the box for it to reveal). */
+    clip-path: var(--band-clip, inset(0 -100vmax));
     transform-origin: top;
     transform: translateY(var(--band-shift, 0px)) scaleY(var(--band-scale, 1));
   }

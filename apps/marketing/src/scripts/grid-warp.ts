@@ -1,18 +1,12 @@
 import { CURSOR_FIELD, GRID_WARP } from '../constants';
-import { fieldStrength } from './cursor-field';
+import { warpBands } from './band-warp';
+import { bendPoint, wellIsBending } from './grid-bend';
 import type { Rgba } from './grid-glow';
 import { glowGradient, parseColor } from './grid-glow';
 import { hasFinePointer, isMobileViewport } from './motion';
 
 /** global.css: the frame stops painting its CSS grid once the canvas has painted the same one. */
 const LIVE_CLASS = 'is-grid-live';
-
-/**
- * Pull at `distance` from the well as a share of that distance: a point moves toward the cursor
- * by distance × this. The peak (GRID_WARP.maxPullPx) sits at radius/√5, where d·(1−t²)² peaks at
- * 0.286·radius; never ≥ 1, so no point crosses the cursor.
- */
-const PULL_SCALE = GRID_WARP.maxPullPx / (0.286 * CURSOR_FIELD.radiusPx);
 
 /**
  * The page's grid paper on a fixed, viewport-sized canvas, bent toward the cursor like a
@@ -57,14 +51,6 @@ export function initGridWarp(): void {
     readStyle();
   };
 
-  /** Where (x, y) lands, pulled toward the well. */
-  const bend = (x: number, y: number): [number, number] => {
-    const dx = well.x - x;
-    const dy = well.y - y;
-    const pull = PULL_SCALE * fieldStrength(Math.hypot(dx, dy)) * well.depth;
-    return [x + dx * pull, y + dy * pull];
-  };
-
   /**
    * One grid line at `fixed` (an x for a vertical line, a y for a horizontal one) of `length`:
    * straight outside the well's reach, drawn through bent samples inside it. Stroked on the
@@ -75,7 +61,7 @@ export function initGridWarp(): void {
       vertical ? [across, along] : [along, across];
     const centre = line / 2;
     const bentAt = (along: number): [number, number] => {
-      const [x, y] = bend(...toXY(fixed, along));
+      const [x, y] = bendPoint(...toXY(fixed, along), well);
       return vertical ? [x + centre, y] : [x, y + centre];
     };
     const reachFrom = Math.max(0, (vertical ? well.y : well.x) - CURSOR_FIELD.radiusPx);
@@ -101,7 +87,7 @@ export function initGridWarp(): void {
     context.fillStyle = color;
     context.strokeStyle = color;
     context.lineWidth = line;
-    const bent = well.depth > GRID_WARP.restDepth;
+    const bent = wellIsBending(well);
     const reach = CURSOR_FIELD.radiusPx;
     bentPath = new Path2D();
     context.beginPath();
@@ -120,6 +106,8 @@ export function initGridWarp(): void {
       context.strokeStyle = glowGradient(context, well, glowCore, glow);
       context.stroke(bentPath);
     }
+    // The bands' edges sit on grid lines: they bend with them.
+    warpBands(well, origin, width);
   };
 
   let lastTick = 0;
