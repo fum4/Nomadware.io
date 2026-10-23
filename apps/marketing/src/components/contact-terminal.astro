@@ -63,7 +63,7 @@ import PageSection from './page-section.astro';
     </p>
     <div class="term-run">
       <span class="term-hints" aria-hidden="true"
-        ><kbd>↑↓</kbd> move · <kbd>⌘ ⏎</kbd> send</span
+        ><kbd>↑↓</kbd> move · <kbd data-send-keys>{CONTACT.sendKeys.apple}</kbd> send</span
       >
       <button class="term-send" type="submit">send</button>
     </div>
@@ -72,5 +72,7 @@ import PageSection from './page-section.astro';
 
 <script>
   import { initContactForm } from '../scripts/contact/contact-form';
+  import { initSendHint } from '../scripts/contact/send-hint';
   initContactForm();
+  initSendHint();
 </script>
