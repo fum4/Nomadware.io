@@ -48,17 +48,27 @@ export const TAGS_FLICKER = {
 } as const;
 
 /**
- * The hero's rotating tags (scripts/tags-rotate.ts): one pool per slot, shown in order, the first
- * word of each is the server-rendered line. Once the intro is done, every `intervalMs` one slot
- * (random, never the same twice running) powers on its next word. Each slot is as wide as its
- * longest word, so nothing moves.
+ * The hero's rotating tags (scripts/tags-rotate.ts): one roster split into four length bands, one
+ * band per slot (so a slot is only as wide as its band's longest word), shown in order; the first
+ * word of each is the server-rendered line. The bands share no word, so no two slots ever show the
+ * same one. Once the intro is done, every `intervalMs` one slot (random, never the same twice
+ * running) powers on its band's next word, cycling through the band before repeating.
  */
 export const HERO_TAGS = {
   pools: [
-    ['web app', 'mobile', 'desktop', 'native', 'browser'],
-    ['backend', 'realtime', 'payments', 'identity', 'webhooks'],
-    ['agents', 'llm apps', 'copilots', 'chatbots', 'insights', 'ml ops'],
-    ['infra', 'cloud', 'devops', 'ci/cd', 'uptime', 'scale'],
+    [
+      'web apps',
+      'realtime',
+      'payments',
+      'llm apps',
+      'copilots',
+      'ai tools',
+      'insights',
+      'devtools',
+    ],
+    ['backend', 'mobile', 'desktop', 'agents', 'devops'],
+    ['automation', 'analytics', 'dashboards', 'prototypes', 'ai search'],
+    ['infra', 'cloud', 'ci/cd', 'saas', 'mvps', 'apis'],
   ],
   intervalMs: 2_500,
 } as const;
