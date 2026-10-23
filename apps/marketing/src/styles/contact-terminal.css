@@ -13,7 +13,7 @@
    scripts/contact/term-frame.ts; otherwise it would play on load). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 1.2s steps(1, end) 1 forwards;
+  animation: term-frame-on 0.8s steps(1, end) 1 forwards;
 }
 
 .term.was-lit:not(:focus-within) {
@@ -25,51 +25,27 @@
     border-color: var(--line);
     box-shadow: none;
   }
-  5% {
-    border-color: var(--sig-soft);
-    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
-  }
   8% {
-    border-color: var(--line);
-    box-shadow: none;
-  }
-  12% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  15% {
+  14% {
     border-color: var(--line);
     box-shadow: none;
   }
-  26% {
+  30% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  31% {
+  38% {
     border-color: var(--line);
     box-shadow: none;
   }
-  35% {
+  56% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  47% {
-    border-color: var(--line);
-    box-shadow: none;
-  }
-  50% {
-    border-color: var(--sig-soft);
-    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
-  }
-  63% {
-    border-color: var(--line);
-    box-shadow: none;
-  }
-  66% {
-    border-color: var(--sig-soft);
-    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
-  }
-  80%,
+  75%,
   100% {
     border-color: var(--sig-soft);
     box-shadow: none;
