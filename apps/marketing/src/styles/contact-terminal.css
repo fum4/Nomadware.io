@@ -7,8 +7,66 @@
   transition: border-color 0.3s;
 }
 
+/* Taking focus, the frame powers on like the send button's neon: a one-shot flicker of the same
+   1px border, in its lit colour with a faint glow while it flickers, settling lit without the
+   glow. Each time focus enters the form; moving between its fields doesn't replay it. Losing
+   focus, it just fades back (the frame's transition). */
 .term:focus-within {
   border-color: var(--sig-soft);
+  animation: term-frame-on 0.629s steps(1, end) 1 forwards;
+}
+
+/* A double spark, a 0.2 s dark beat, then the send button's rhythm (term-surge) minus its last
+   blink. */
+@keyframes term-frame-on {
+  0% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  8.59% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  16.53% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  22.26% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  54.05% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  59.78% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  64.07% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  76.95% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  81.24% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  86.96% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  91.26% {
+    border-color: var(--sig-soft);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
+  }
+  100% {
+    border-color: var(--sig-soft);
+    box-shadow: none;
+  }
 }
 
 .term-bar {

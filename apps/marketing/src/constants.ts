@@ -76,8 +76,19 @@ export const WORDMARK_LETTER_STAGGER_S = 0.08;
 export const SCRAMBLE_STEP_MS = 40;
 export const SCRAMBLE_GLYPHS = '▚▞▙▟01<>/{}#';
 
-/** The stats' count-up on load (it crawls in and out, so it needs the room) and on a 7d/30d toggle. */
-export const COUNT_UP_INTRO_MS = 2_500;
+/**
+ * The stats card's first showing of a range (scripts/trace-draw.ts): the trace drawn left → right
+ * as one pen stroke, a wipe on the plot's SVG, with the legend counting in step with it. Starts
+ * once COUNT_UP_VISIBLE_THRESHOLD of the card is in view.
+ */
+export const TRACE_DRAW = {
+  durationMs: 3_000,
+  delayMs: 200,
+  easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+  /** The wipe reaches this far past the plot on every side, so the trace's glow isn't cut. */
+  glowPx: 12,
+} as const;
+/** The stats' recount on a 7d/30d toggle to a range already drawn once. */
 export const COUNT_UP_TOGGLE_MS = 1_600;
 export const COUNT_UP_VISIBLE_THRESHOLD = 0.3;
 
@@ -241,7 +252,7 @@ export const BLACK_HOLE = {
 
 export const CONTACT = {
   /** Form auto-focuses "name" once this share of it is on screen (desktop only). */
-  autoFocusThreshold: 0.6,
+  autoFocusThreshold: 0.9,
   typingIdleMs: 500,
   /** Field limits, enforced by the client (maxlength, readiness) and the endpoint alike. */
   maxNameLength: 120,
@@ -289,9 +300,25 @@ export const STATS_CHART = {
   /** The trace's SVG viewBox; stretched to the plot (preserveAspectRatio none). */
   viewWidth: 1000,
   viewHeight: 140,
-  /** The hover tooltip: px below the chart's top edge, and kept from the viewport's sides. */
-  tipTopPx: 6,
+  /** The hover tooltip: px clear of the plot (above it, or below if above won't fit on screen), and kept from the viewport's edges. */
+  tipGapPx: 10,
   tipViewportMarginPx: 8,
+  /**
+   * A caught-issue marker's area: a single issue's (6 px across), plus this share of it per further
+   * issue in the bucket, capped at markerMaxArea times it (≈ 9.5 px from 5 issues on;
+   * chart/catch-markers.ts).
+   */
+  markerAreaPerIssue: 0.38,
+  markerMaxArea: 2.53,
+} as const;
+
+/**
+ * The caught markers' pulses (scripts/marker-pulse.ts): one after another, each at least
+ * spacingMs after the last, the spacing tightened so a queue drains within maxRippleMs.
+ */
+export const MARKER_PULSE = {
+  spacingMs: 120,
+  maxRippleMs: 1_500,
 } as const;
 
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */

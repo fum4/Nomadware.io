@@ -52,3 +52,18 @@ export function centreChip(
 ): number {
   return Math.max(bounds.left, Math.min(x - chipWidth / 2, bounds.right - chipWidth));
 }
+
+/**
+ * The chip's top edge, relative to the plot's: `gap` above the plot, so it never covers the trace
+ * (whose peaks touch the plot's top), growing upward over whatever is there. If that would leave
+ * the viewport (the plot's top is `plotTop` px into it), it goes `gap` below the plot instead.
+ */
+export function chipTop(
+  chipHeight: number,
+  plot: { top: number; height: number },
+  gap: number,
+  viewportMargin: number,
+): number {
+  const above = -gap - chipHeight;
+  return plot.top + above >= viewportMargin ? above : plot.height + gap;
+}

@@ -71,7 +71,7 @@ a {
    CSS copy the frame the canvas has painted. */
 .frame {
   --column-core: calc(var(--content-width) / 2);
-  --column-fade: 200px;
+  --column-fade: 320px;
 
   position: relative;
   isolation: isolate;
@@ -105,11 +105,24 @@ a {
   pointer-events: none;
   background-image:
     radial-gradient(1200px 400px at 85% -10%, var(--glow), transparent 60%),
+    /* Eased (smoothstep) sides: a linear ramp shows its two kinks as faint vertical edges. */
     linear-gradient(
       90deg,
       transparent calc(50% - var(--column-core) - var(--column-fade)),
+      color-mix(in srgb, var(--halo-column) 15.6%, transparent)
+        calc(50% - var(--column-core) - var(--column-fade) * 0.75),
+      color-mix(in srgb, var(--halo-column) 50%, transparent)
+        calc(50% - var(--column-core) - var(--column-fade) * 0.5),
+      color-mix(in srgb, var(--halo-column) 84.4%, transparent)
+        calc(50% - var(--column-core) - var(--column-fade) * 0.25),
       var(--halo-column) calc(50% - var(--column-core)),
       var(--halo-column) calc(50% + var(--column-core)),
+      color-mix(in srgb, var(--halo-column) 84.4%, transparent)
+        calc(50% + var(--column-core) + var(--column-fade) * 0.25),
+      color-mix(in srgb, var(--halo-column) 50%, transparent)
+        calc(50% + var(--column-core) + var(--column-fade) * 0.5),
+      color-mix(in srgb, var(--halo-column) 15.6%, transparent)
+        calc(50% + var(--column-core) + var(--column-fade) * 0.75),
       transparent calc(50% + var(--column-core) + var(--column-fade))
     );
 }
@@ -136,5 +149,17 @@ a {
 @media (max-width: 640px) {
   .wrap {
     padding: 18px 20px 24px;
+  }
+}
+
+/* A dot's pulse: one ring of --pulse-color expanding off it and fading. The stats card's live dot
+   (looping) and the chart's caught markers (once, as each appears or its range shows) share it. */
+@keyframes ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--pulse-color);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px transparent;
   }
 }

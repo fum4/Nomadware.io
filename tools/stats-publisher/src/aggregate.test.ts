@@ -21,7 +21,7 @@ test('windows count only what falls inside them', () => {
     minutes: { [minute(20 * DAY_MS)]: [HOUR_MS, 5] },
   };
   state.journal.checksMs = [NOW - DAY_MS, NOW - 10 * DAY_MS];
-  state.journal.caughtMs = [NOW - 10 * DAY_MS];
+  state.journal.failed = [{ atMs: NOW - 10 * DAY_MS, unit: 'pc-r.pre-push.service' }];
   state.github.prs = {
     'o/a#1': { mergedAtMs: NOW - DAY_MS, repo: 'o/a', linesAdded: 10, linesDeleted: 2 },
     'o/a#2': { mergedAtMs: NOW - 2 * DAY_MS, repo: 'o/a', linesAdded: 5, linesDeleted: 1 },

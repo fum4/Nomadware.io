@@ -41,7 +41,7 @@ function windowValues(state: State, cutoffMs: number): StatWindowValues {
     runs,
     agentHours: Math.round(activeMs / HOUR_MS),
     checks: state.journal.checksMs.filter((atMs) => atMs >= cutoffMs).length,
-    caught: state.journal.caughtMs.filter((atMs) => atMs >= cutoffMs).length,
+    caught: state.journal.failed.filter((run) => run.atMs >= cutoffMs).length,
     actions,
     linesAdded,
     linesDeleted,

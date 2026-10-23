@@ -16,12 +16,12 @@ const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
  * The page-load choreography, on a clock from navigation start: the tags power on at
  * INTRO_TAGS_AT_MS, the headline scramble runs over the readable headline at INTRO_HEADLINE_AT_MS,
  * and the nav wordmark expands at INTRO_WORDMARK_AT_MS (after which the tags rotate). The stats
- * count up straight away, as soon as the card is in view. Plays whatever
- * `prefers-reduced-motion` says (README § Motion).
+ * card draws its trace, its numbers counting in step, straight away, as soon as it is in view.
+ * Plays whatever `prefers-reduced-motion` says (README § Motion).
  */
 export async function playIntro(): Promise<void> {
-  const countUp = initStats();
-  void countUp().then(() => mark('stats-end'));
+  const drawStats = initStats();
+  void drawStats().then(() => mark('stats-end'));
   void waitUntil(INTRO_WORDMARK_AT_MS).then(() => {
     mark('wordmark-start');
     expandWordmark();

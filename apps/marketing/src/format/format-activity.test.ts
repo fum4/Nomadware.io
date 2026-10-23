@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatAgentTime, formatBucketRange, formatPrsMerged } from './format-activity';
+import {
+  formatAgentTime,
+  formatBucketRange,
+  formatCaughtGates,
+  formatCaughtKinds,
+  formatIssuesCaught,
+  formatPrs,
+} from './format-activity';
 
 describe('formatAgentTime', () => {
   it('prints hours and minutes, dropping a zero part', () => {
@@ -27,10 +34,34 @@ describe('formatBucketRange', () => {
   });
 });
 
-describe('formatPrsMerged', () => {
+describe('formatPrs', () => {
   it('pluralises and groups', () => {
-    expect(formatPrsMerged(1)).toBe('1 PR merged');
-    expect(formatPrsMerged(0)).toBe('0 PRs merged');
-    expect(formatPrsMerged(1240)).toBe('1,240 PRs merged');
+    expect(formatPrs(1)).toBe('1 PR');
+    expect(formatPrs(0)).toBe('0 PRs');
+    expect(formatPrs(1240)).toBe('1,240 PRs');
+  });
+});
+
+describe('formatIssuesCaught', () => {
+  it('says issue for one, issues otherwise', () => {
+    expect(formatIssuesCaught(1)).toBe('1 issue caught');
+    expect(formatIssuesCaught(3)).toBe('3 issues caught');
+  });
+});
+
+describe('formatCaughtGates', () => {
+  it('says which gates caught them, most first; one gate on its own', () => {
+    expect(formatCaughtGates([2, 3])).toBe('3 at merge, 2 at push');
+    expect(formatCaughtGates([2, 2])).toBe('2 at push, 2 at merge');
+    expect(formatCaughtGates([3, 0])).toBe('at push');
+    expect(formatCaughtGates(null)).toBe('');
+  });
+});
+
+describe('formatCaughtKinds', () => {
+  it('lists the known categories, most first, ties in category order', () => {
+    expect(formatCaughtKinds([0, 0, 2, 3, 0, 0])).toBe('3 tests, 2 types');
+    expect(formatCaughtKinds([1, 1, 0, 0, 0, 0])).toBe('1 format, 1 lint');
+    expect(formatCaughtKinds(null)).toBe('');
   });
 });

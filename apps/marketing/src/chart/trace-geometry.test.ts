@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { centreChip, nearestIndex, pointAt, tracePaths } from './trace-geometry';
+import { centreChip, chipTop, nearestIndex, pointAt, tracePaths } from './trace-geometry';
 
 const BOUNDS = { left: -20, right: 500 };
 const CHIP_WIDTH = 200;
@@ -60,5 +60,16 @@ describe('centreChip', () => {
 
   it('keeps its left edge in on a box narrower than the chip', () => {
     expect(centreChip(100, CHIP_WIDTH, { left: 0, right: 150 })).toBe(0);
+  });
+});
+
+describe('chipTop', () => {
+  it('sits the gap above the plot, growing upward', () => {
+    expect(chipTop(80, { top: 300, height: 140 }, 10, 8)).toBe(-90);
+  });
+
+  it('goes below the plot when above would leave the viewport', () => {
+    expect(chipTop(80, { top: 60, height: 140 }, 10, 8)).toBe(150);
+    expect(chipTop(80, { top: 98, height: 140 }, 10, 8)).toBe(-90);
   });
 });

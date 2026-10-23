@@ -1,12 +1,15 @@
 ---
 // The stats card's activity chart: agent-minutes per bucket as a seismograph line, one plot per
-// window (the current one shown), drawn left to right on reveal. Hover or touch snaps a dot and a
-// guide to a bucket and shows its numbers in a chip (scripts/stats-chart.ts reads data-series).
+// window (the current one shown), a warm marker on it at each bucket that caught issues, drawn
+// left to right on a range's first showing (scripts/trace-draw.ts). Hover or touch snaps a dot and
+// a guide to a bucket and shows its numbers in a chip (scripts/stats-chart.ts reads data-series).
 import type { StatsSeries } from '@nomadware/site-stats';
 import { STAT_WINDOWS } from '@nomadware/site-stats';
 
+import { catchMarkers } from '../chart/catch-markers';
 import { tracePaths } from '../chart/trace-geometry';
 import { DEFAULT_STAT_WINDOW, STATS_CHART } from '../constants';
+import TipIcon from './tip-icon.astro';
 
 interface Props {
   series: StatsSeries;
@@ -15,8 +18,10 @@ interface Props {
 const { series, generatedAt } = Astro.props;
 const { viewWidth, viewHeight } = STATS_CHART;
 const plots = STAT_WINDOWS.map((range) => {
-  const { active, quiet } = tracePaths(series[range].agentMinutes, viewWidth, viewHeight);
-  return { range, active, quiet };
+  const { agentMinutes, caught } = series[range];
+  const { active, quiet } = tracePaths(agentMinutes, viewWidth, viewHeight);
+  const markers = catchMarkers(agentMinutes, caught);
+  return { range, active, quiet, markers, points: agentMinutes.length };
 });
 ---
 
@@ -33,21 +38,39 @@ const plots = STAT_WINDOWS.map((range) => {
         class="plot"
         data-range-label={plot.range}
         data-current={plot.range === DEFAULT_STAT_WINDOW ? '' : undefined}
+        data-points={plot.points}
       >
         <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} preserveAspectRatio="none">
           <path class="quiet" d={plot.quiet} />
           <path class="trace" d={plot.active} />
         </svg>
+        {plot.markers.map((marker) => (
+          <span
+            class="catch"
+            data-catch={marker.index}
+            style={`--x: ${marker.x}; --y: ${marker.y}; --scale: ${marker.scale.toFixed(3)}`}
+          />
+        ))}
         <span class="guide" />
         <span class="mark" />
         <span class="tip">
-          <span data-tip="when" />
-          <span data-tip="work" />
+          <span class="when" data-tip="when" />
+          <span class="activity">
+            <TipIcon name="robot" /><span data-tip="work" /><span class="sep">·</span><TipIcon
+              name="merge"
+            /><span data-tip="prs" />
+          </span>
           <span data-tip-lines>
-            <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" /> lines
+            <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" />
+          </span>
+          <span class="issues" data-tip-issues hidden>
+            <span><span data-tip="caught" /><span class="gates" data-tip="gates" /></span>
+            <span data-tip="kinds" />
+            <span class="fixed" data-tip-fixed>
+              <span class="check">✓</span> fixed in <span class="duration" data-tip="fixed" />
+            </span>
           </span>
         </span>
-        <span class="now">now</span>
       </div>
     ))
   }
@@ -58,7 +81,7 @@ const plots = STAT_WINDOWS.map((range) => {
      the page on touch; horizontal drags scrub the tooltip. */
   .chart {
     position: relative;
-    height: 240px;
+    height: 180px;
     border-bottom: 1px solid var(--line);
     background-image:
       linear-gradient(var(--line) 1px, transparent 1px),
@@ -67,38 +90,94 @@ const plots = STAT_WINDOWS.map((range) => {
     touch-action: pan-y;
   }
 
-  /* The top inset is the tooltip's own band: the chip sits there (at STATS_CHART.tipTopPx from
-     the top), clear of the trace, whose peaks touch the plot's top. Taller than the chip. */
+  /* The trace's peaks touch the plot's top; the inset keeps them off the card's header. */
   .plot {
     position: absolute;
-    inset: 84px 24px 16px;
+    inset: 24px 24px 16px;
   }
 
   .plot:not([data-current]) {
     display: none;
   }
 
-  /* Drawn left → right as one pen stroke, active and idle stretches alike: a wipe over the whole
-     plot (a dash animation would draw every separate stretch at once). The inset's -12px keeps
-     the glow. Each range draws on its first showing only (data-drawn). */
   svg {
     width: 100%;
     height: 100%;
     overflow: visible;
-    clip-path: inset(-12px 100% -12px -12px);
-    animation: trace-draw 3s cubic-bezier(0.45, 0, 0.55, 1) 0.2s forwards;
   }
 
-  @keyframes trace-draw {
-    to {
-      clip-path: inset(-12px -12px -12px -12px);
-    }
+  /* Drawn left → right as one pen stroke, active and idle stretches alike: a wipe over the whole
+     plot (a dash animation would draw every separate stretch at once), run by
+     scripts/trace-draw.ts on a range's first showing; hidden until then, shown as is once drawn
+     (data-drawn). Without JS, everything shows. */
+  :global(html.js) .plot:not([data-drawn]) svg {
+    clip-path: inset(0 100% 0 0);
   }
 
-  /* Drawn once already (scripts/stats-chart.ts): shown as is from then on. */
-  .plot[data-drawn] svg {
-    clip-path: none;
-    animation: none;
+  /* A bucket's caught issues: a warm dot on the trace (6 px for one issue), its area growing with the count
+     (--scale, chart/catch-markers.ts). HTML over the plot, not SVG: the SVG stretches
+     (preserveAspectRatio none). It pops in as the pen reaches it (data-reached), with the issues
+     counter's step. */
+  .catch {
+    position: absolute;
+    left: calc(var(--x) * 100%);
+    top: calc(var(--y) * 100%);
+    --dot: calc(6px * var(--scale));
+    width: var(--dot);
+    height: var(--dot);
+    border-radius: 50%;
+    background: var(--warm);
+    /* A ring of the plot's own colour cuts the dot out of the line under it (70%: the line still
+       shows through a little). */
+    box-shadow: 0 0 0 2px var(--plot-ring);
+    transform: translate(-50%, -50%);
+    transition:
+      opacity 0.2s ease-out,
+      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+
+  /* One warm ring (global.css ring-pulse) as the marker appears and whenever its range shows
+     again (data-pulse, restarted by scripts/marker-pulse.ts). On a ring of its own, so the
+     marker's glow stays. */
+  .catch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    --pulse-color: var(--warm-glow);
+  }
+
+  .catch[data-pulse]::after {
+    animation: ring-pulse 0.7s ease-out;
+  }
+
+  /* The hovered bucket's marker (data-hovered, scripts/stats-chart.ts) stands in for the green
+     hover dot: raised above its neighbours (and their cut-out rings), it pulses the same ring every 1.2 s
+     on a ring of its own (::before), so the one-per-show pulse on ::after is never touched. */
+  .catch[data-hovered] {
+    z-index: 1;
+  }
+
+  .catch::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    --pulse-color: var(--warm-glow);
+  }
+
+  .catch[data-hovered]::before {
+    animation: ring-pulse 1.2s ease-out infinite;
+  }
+
+  .plot[data-hover-catch] .mark {
+    display: none;
+  }
+
+  :global(html.js) .plot:not([data-drawn]) .catch:not([data-reached]) {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
   }
 
   .trace {
@@ -119,36 +198,102 @@ const plots = STAT_WINDOWS.map((range) => {
     opacity: 0.55;
   }
 
-  .tip,
-  .now {
+  .tip {
     position: absolute;
     font: 400 11px/var(--leading) var(--mono);
     white-space: nowrap;
   }
 
   /* Only while pointing (data-hover, set by scripts/stats-chart.ts), at the px corner it measured:
-     centred over the snapped point in the band above the trace, overhanging the card if need be
-     (the card doesn't clip; above everything around it). */
+     centred over the snapped point, growing upward from just above the plot (never over the
+     trace) across the header and past the card if need be (the card doesn't clip); below the plot
+     when the screen has no room above. Above everything around it. */
   .tip {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
     left: var(--tip-left);
     top: var(--tip-top);
-    padding: 4px 8px;
+    padding: 8px 11px;
     border: 1px solid var(--sig-soft);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: var(--ink);
+    box-shadow: var(--overlay-shadow);
     color: var(--fg);
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
+  }
+
+  /* The activity row's icons, each centred on the text's x-height, not its line box (see the live
+     dot). */
+  .activity {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* The header: a little more air under it than between the rows it heads. */
+  .when {
+    margin-bottom: 6px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .sep {
+    margin: 0 2px;
+  }
+
+  /* Measured against the row's x-height: flex centring leaves the 11px icons 1px high. The icons
+     are bright, the row's text dim. */
+  .activity :global(.icon) {
+    position: relative;
+    top: 1px;
+    color: var(--fg);
+  }
+
+  /* Optical, not geometric: its body sits low in the box under the antenna, so centred it reads
+     low. */
+  .activity :global(.icon-robot) {
+    top: 0;
+  }
+
+
+  /* The issues block: its own section under a hairline, warm like the issues counter. */
+  .issues {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    color: var(--warm);
+  }
+
+  .issues[hidden],
+  .issues [hidden] {
+    display: none;
+  }
+
+  .gates,
+  .fixed {
+    color: var(--dim);
+  }
+
+  .check {
+    color: var(--sig);
+  }
+
+  .duration {
+    color: var(--fg);
   }
 
   .plot:not([data-hover]) :is(.tip, .guide, .mark) {
     display: none;
   }
 
-  [data-tip='when'],
+  .when,
+  .activity,
   .deleted {
     color: var(--dim);
   }
@@ -180,19 +325,14 @@ const plots = STAT_WINDOWS.map((range) => {
     pointer-events: none;
   }
 
-  .now {
-    right: -4px;
-    bottom: -14px;
-    color: var(--faint);
-  }
 
   @media (max-width: 640px) {
     .chart {
-      height: 204px;
+      height: 144px;
     }
 
     .plot {
-      inset: 84px 14px 16px;
+      inset: 24px 14px 16px;
     }
   }
 </style>

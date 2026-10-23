@@ -1,13 +1,67 @@
 import type { StatSeries, StatsSeries, StatWindow } from '@nomadware/site-stats';
-import { bucketCount, bucketStartMs, SERIES_BUCKET_HOURS } from '@nomadware/site-stats';
+import {
+  bucketCount,
+  bucketStartMs,
+  CAUGHT_CATEGORIES,
+  CAUGHT_GATES,
+  SERIES_BUCKET_HOURS,
+} from '@nomadware/site-stats';
 
 import { HOUR_MS, MINUTE_MS } from './constants.ts';
-import type { State } from './state.ts';
+import { caughtGate } from './caught-category.ts';
+import { fixMinutes } from './fix-times.ts';
+import type { GateRun, State } from './state.ts';
 
 // The store → the activity chart's series (@nomadware/site-stats § series.ts). Aggregates only,
 // like aggregate.ts: per bucket, never per file or per repo.
 
 const zeros = (count: number): number[] => Array.from({ length: count }, () => 0);
+
+/** Per bucket, the longest time to fix among its caught issues; null if none, or one is unfixed. */
+function caughtFixMinutes(
+  state: State,
+  bucketOf: (atMs: number) => number | null,
+  buckets: number,
+): (number | null)[] {
+  const longest: (number | null)[] = Array.from({ length: buckets }, () => null);
+  const unfixed = new Set<number>();
+  const fixes = fixMinutes(state.journal);
+  state.journal.failed.forEach((run, failure) => {
+    const index = bucketOf(run.atMs);
+    if (index === null) return;
+    const minutes = fixes[failure] ?? null;
+    if (minutes === null) unfixed.add(index);
+    else longest[index] = Math.max(longest[index] ?? 0, minutes);
+  });
+  return longest.map((minutes, index) => (unfixed.has(index) ? null : minutes));
+}
+
+/**
+ * Per bucket, its caught issues split by `slotOf` (an index into `width` slots, or null for one
+ * that doesn't say); null where none says.
+ */
+function caughtSplit(
+  state: State,
+  bucketOf: (atMs: number) => number | null,
+  buckets: number,
+  width: number,
+  slotOf: (run: GateRun) => number | null,
+): (number[] | null)[] {
+  const counts: (number[] | null)[] = Array.from({ length: buckets }, () => null);
+  for (const run of state.journal.failed) {
+    const index = bucketOf(run.atMs);
+    const slot = slotOf(run);
+    if (index === null || slot === null) continue;
+    const bucket = counts[index] ?? Array.from({ length: width }, () => 0);
+    bucket[slot] = (bucket[slot] ?? 0) + 1;
+    counts[index] = bucket;
+  }
+  return counts;
+}
+
+/** A slot index, or null for a value that has none. */
+const slotIn = <T>(list: readonly T[], value: T | null | undefined): number | null =>
+  value === null || value === undefined || !list.includes(value) ? null : list.indexOf(value);
 
 function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeries {
   const bucketHours = SERIES_BUCKET_HOURS[window];
@@ -20,13 +74,31 @@ function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeri
     return index >= 0 && index < buckets ? index : null;
   };
 
+  // Per minute: its active time and tool calls; per transcript, a run in its first active bucket.
   const activeMs = zeros(buckets);
+  const actions = zeros(buckets);
+  const runs = zeros(buckets);
   for (const file of Object.values(state.transcripts)) {
-    for (const [minute, [ms]] of Object.entries(file.minutes)) {
+    let firstIndex: number | null = null;
+    for (const [minute, [ms, toolUses]] of Object.entries(file.minutes)) {
       const index = bucketOf(Number(minute) * MINUTE_MS);
-      if (index !== null) activeMs[index] = (activeMs[index] ?? 0) + ms;
+      if (index === null) continue;
+      activeMs[index] = (activeMs[index] ?? 0) + ms;
+      actions[index] = (actions[index] ?? 0) + toolUses;
+      if (firstIndex === null || index < firstIndex) firstIndex = index;
     }
+    if (firstIndex !== null) runs[firstIndex] = (runs[firstIndex] ?? 0) + 1;
   }
+
+  /** How many of `timesMs` fall in each bucket. */
+  const perBucket = (timesMs: readonly number[]): number[] => {
+    const counts = zeros(buckets);
+    for (const atMs of timesMs) {
+      const index = bucketOf(atMs);
+      if (index !== null) counts[index] = (counts[index] ?? 0) + 1;
+    }
+    return counts;
+  };
 
   // A PR and its lines count in the bucket it merged in.
   const prsMerged = zeros(buckets);
@@ -46,6 +118,17 @@ function windowSeries(state: State, nowMs: number, window: StatWindow): StatSeri
     prsMerged,
     linesAdded,
     linesDeleted,
+    runs,
+    actions,
+    checks: perBucket(state.journal.checksMs),
+    caught: perBucket(state.journal.failed.map((run) => run.atMs)),
+    caughtFixMinutes: caughtFixMinutes(state, bucketOf, buckets),
+    caughtCategories: caughtSplit(state, bucketOf, buckets, CAUGHT_CATEGORIES.length, (run) =>
+      slotIn(CAUGHT_CATEGORIES, run.category),
+    ),
+    caughtByGate: caughtSplit(state, bucketOf, buckets, CAUGHT_GATES.length, (run) =>
+      slotIn(CAUGHT_GATES, caughtGate(run.unit)),
+    ),
   };
 }
 
