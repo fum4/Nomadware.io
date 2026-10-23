@@ -126,6 +126,12 @@ export const DOT_FIELD = {
   homePull: 0.0004,
   /** At the cursor; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's pull. */
   repelForce: 0.6,
+  // TEMPORARY (NWARE-82): the "gather" test the owner is judging (`?dots=gravity`, dev only).
+  /** Pull toward the cursor at its strongest; tapers like repelForce. */
+  gatherForce: 0.25,
+  /** Inside this many CSS px of the cursor a dot is pushed back out, so they swarm, not collapse. */
+  gatherCorePx: 28,
+  gatherCorePush: 0.5,
   friction: 0.96,
   jitter: 0.05,
   initialSpeed: 0.4,

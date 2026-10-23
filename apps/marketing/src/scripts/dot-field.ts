@@ -23,6 +23,8 @@ export function initDotField(): void {
   if (!canvas || !context || !host) return;
 
   const chase = hasFinePointer() && !isMobileViewport();
+  // TEMPORARY (NWARE-82): dev-only test of dots gathering to the cursor instead of scattering.
+  const gather = import.meta.env.DEV && new URLSearchParams(location.search).get('dots') === 'gravity';
   const scale = DOT_FIELD.canvasScale;
   const pointer = { x: OFF_SCREEN, y: OFF_SCREEN };
   let dots: Dot[] = [];
@@ -63,8 +65,8 @@ export function initDotField(): void {
     const dx = dot.x - pointer.x;
     const dy = dot.y - pointer.y;
     const distance = Math.hypot(dx, dy);
-    const push = distance > 0 ? DOT_FIELD.repelForce * fieldStrength(distance / scale) : 0;
-    if (push > 0) {
+    const push = distance > 0 ? cursorPush(distance / scale) : 0;
+    if (push !== 0) {
       dot.vx += (dx / distance) * push;
       dot.vy += (dy / distance) * push;
     }
@@ -78,6 +80,15 @@ export function initDotField(): void {
     // The canvas edge stops a dot; home pulls it back from there.
     dot.x = Math.min(canvas.width, Math.max(0, dot.x + dot.vx));
     dot.y = Math.min(canvas.height, Math.max(0, dot.y + dot.vy));
+  };
+
+  // Positive pushes away from the cursor, negative pulls toward it.
+  const cursorPush = (distance: number): number => {
+    if (!gather) return DOT_FIELD.repelForce * fieldStrength(distance);
+    if (distance < DOT_FIELD.gatherCorePx) {
+      return DOT_FIELD.gatherCorePush * (1 - distance / DOT_FIELD.gatherCorePx);
+    }
+    return -DOT_FIELD.gatherForce * fieldStrength(distance);
   };
 
   const draw = (): void => {
