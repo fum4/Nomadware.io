@@ -34,9 +34,9 @@ export function formatBucketRange(startMs: number, endMs: number, timeZone?: str
 /** "1,240" — the site's grouping (format-stat.ts prints full numbers the same way). */
 export const formatCount = (value: number): string => Math.round(value).toLocaleString('en-US');
 
-/** "2 PRs merged", "1 PR merged". */
-export const formatPrsMerged = (count: number): string =>
-  `${formatCount(count)} ${count === 1 ? 'PR' : 'PRs'} merged`;
+/** "2 PRs", "1 PR" (the tooltip's merge icon says merged). */
+export const formatPrs = (count: number): string =>
+  `${formatCount(count)} ${count === 1 ? 'PR' : 'PRs'}`;
 
 const GATE_WORDS: Readonly<Record<CaughtGate, string>> = { push: 'at push', merge: 'at merge' };
 

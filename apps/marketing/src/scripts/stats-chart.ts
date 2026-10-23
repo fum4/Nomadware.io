@@ -10,7 +10,7 @@ import {
   formatCaughtKinds,
   formatCount,
   formatIssuesCaught,
-  formatPrsMerged,
+  formatPrs,
 } from '../format/format-activity';
 import type { TraceDraw } from './trace-draw';
 import { createPulseQueue } from './marker-pulse';
@@ -62,11 +62,8 @@ function describe(
   const count = series.agentMinutes.length;
   const startMs = bucketStartMs(generatedAtMs, series.bucketHours, index, count);
   setTip(plot, 'when', formatBucketRange(startMs, startMs + series.bucketHours * HOUR_MS));
-  setTip(
-    plot,
-    'work',
-    `${formatAgentTime(series.agentMinutes[index] ?? 0)} agent work · ${formatPrsMerged(series.prsMerged[index] ?? 0)}`,
-  );
+  setTip(plot, 'work', formatAgentTime(series.agentMinutes[index] ?? 0));
+  setTip(plot, 'prs', formatPrs(series.prsMerged[index] ?? 0));
   const added = series.linesAdded[index] ?? 0;
   const deleted = series.linesDeleted[index] ?? 0;
   setTip(plot, 'added', `+${formatCount(added)}`);

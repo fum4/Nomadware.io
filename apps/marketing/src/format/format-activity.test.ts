@@ -6,7 +6,7 @@ import {
   formatCaughtGates,
   formatCaughtKinds,
   formatIssuesCaught,
-  formatPrsMerged,
+  formatPrs,
 } from './format-activity';
 
 describe('formatAgentTime', () => {
@@ -34,11 +34,11 @@ describe('formatBucketRange', () => {
   });
 });
 
-describe('formatPrsMerged', () => {
+describe('formatPrs', () => {
   it('pluralises and groups', () => {
-    expect(formatPrsMerged(1)).toBe('1 PR merged');
-    expect(formatPrsMerged(0)).toBe('0 PRs merged');
-    expect(formatPrsMerged(1240)).toBe('1,240 PRs merged');
+    expect(formatPrs(1)).toBe('1 PR');
+    expect(formatPrs(0)).toBe('0 PRs');
+    expect(formatPrs(1240)).toBe('1,240 PRs');
   });
 });
 

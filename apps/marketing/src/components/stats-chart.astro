@@ -9,6 +9,7 @@ import { STAT_WINDOWS } from '@nomadware/site-stats';
 import { catchMarkers } from '../chart/catch-markers';
 import { tracePaths } from '../chart/trace-geometry';
 import { DEFAULT_STAT_WINDOW, STATS_CHART } from '../constants';
+import TipIcon from './tip-icon.astro';
 
 interface Props {
   series: StatsSeries;
@@ -53,8 +54,12 @@ const plots = STAT_WINDOWS.map((range) => {
         <span class="guide" />
         <span class="mark" />
         <span class="tip">
-          <span class="when" data-tip="when" />
-          <span data-tip="work" />
+          <span class="when"><TipIcon name="calendar" /><span data-tip="when" /></span>
+          <span class="activity">
+            <TipIcon name="robot" /><span data-tip="work" /><span class="sep">·</span><TipIcon
+              name="merge"
+            /><span data-tip="prs" />
+          </span>
           <span data-tip-lines>
             <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" />
           </span>
@@ -221,10 +226,36 @@ const plots = STAT_WINDOWS.map((range) => {
     z-index: 2;
   }
 
+  /* Icon rows: each icon centred on the text's x-height, not its line box (see the live dot). */
+  .when,
+  .activity {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .when {
     font-size: 10px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+  }
+
+  .sep {
+    margin: 0 2px;
+  }
+
+  /* Measured against each row's x-height: flex centring leaves the 11px row's icons 1px high;
+     the header's smaller type gets a smaller icon. The activity icons are dim, like the header,
+     and the numbers keep their colour. */
+  .activity :global(.icon) {
+    position: relative;
+    top: 1px;
+    color: var(--dim);
+  }
+
+  .when :global(.icon) {
+    width: 11px;
+    height: 11px;
   }
 
   /* The issues block: its own section under a hairline, warm like the issues counter. */
