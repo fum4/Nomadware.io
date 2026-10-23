@@ -8,92 +8,72 @@
 }
 
 /* Taking focus, the frame powers on like the send button's neon: a one-shot flicker of the same
-   1px border, in its lit colour with a faint glow while it flickers, that settles lit without the glow (each time focus enters the form; moving between its fields doesn't
-   replay it). Losing focus, it flickers off the same way, once it has been lit (.was-lit,
-   scripts/contact/term-frame.ts; otherwise it would play on load). */
+   1px border, in its lit colour with a faint glow while it flickers, settling lit without the
+   glow. Each time focus enters the form; moving between its fields doesn't replay it. Losing
+   focus, it just fades back (the frame's transition). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 1.113s steps(1, end) 1 forwards;
+  animation: term-frame-on 0.986s steps(1, end) 1 forwards;
 }
 
-.term.was-lit:not(:focus-within) {
-  animation: term-frame-off 0.5s steps(1, end) 1 forwards;
-}
-
-/* A double spark, a 0.5 s dark beat, then the send button's rhythm (term-surge); percentages are
-   of the 1.1 s run. */
+/* A double spark, a 0.35 s dark beat, then the send button's rhythm (term-surge); percentages are
+   of the ~1 s run. */
 @keyframes term-frame-on {
   0% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  4.85% {
+  5.48% {
     border-color: var(--line);
     box-shadow: none;
   }
-  7.28% {
+  10.55% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  10.51% {
+  14.2% {
     border-color: var(--line);
     box-shadow: none;
   }
-  55.44% {
+  49.7% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  58.67% {
+  53.35% {
     border-color: var(--line);
     box-shadow: none;
   }
-  61.1% {
+  56.09% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  68.37% {
+  64.3% {
     border-color: var(--line);
     box-shadow: none;
   }
-  70.8% {
+  67.04% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  74.03% {
+  70.69% {
     border-color: var(--line);
     box-shadow: none;
   }
-  76.46% {
+  73.43% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  93.44% {
+  92.6% {
     border-color: var(--line);
     box-shadow: none;
   }
-  95.06% {
+  94.42% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
   100% {
     border-color: var(--sig-soft);
     box-shadow: none;
-  }
-}
-
-@keyframes term-frame-off {
-  0% {
-    border-color: var(--sig-soft);
-  }
-  20% {
-    border-color: var(--line);
-  }
-  30% {
-    border-color: var(--sig-soft);
-  }
-  55%,
-  100% {
-    border-color: var(--line);
   }
 }
 
