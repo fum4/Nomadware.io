@@ -10,6 +10,21 @@ const LESS = 'less ▾';
 <div class="consent" role="dialog" aria-label="Analytics consent" data-consent hidden>
   <p class="title"><span class="dot" aria-hidden="true"></span>analytics?</p>
   <p class="lede">We'd like to remember you between visits and see how the page is used.</p>
+  <!-- Opens above the buttons, so they stay at the card's bottom edge. Collapsed: 0fr and inert. -->
+  <div class="drawer" data-consent-details inert>
+    <div class="drawer-clip">
+      <dl class="details" id="consent-details">
+        <dt>everyone</dt>
+        <dd>anonymous page views, clicks, page speed. Nothing stored on your device.</dd>
+        <dt>if you say sure</dt>
+        <dd>a cookie to recognise repeat visits + session replay (typing always hidden).</dd>
+        <dt>never</dt>
+        <dd>what you type, ads, selling data. IPs dropped after country lookup.</dd>
+        <dt>by</dt>
+        <dd>PostHog, EU servers · <a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+      </dl>
+    </div>
+  </div>
   <div class="row">
     <button
       type="button"
@@ -25,16 +40,6 @@ const LESS = 'less ▾';
       <button type="button" class="choice is-yes" data-consent-choice="granted">sure</button>
     </span>
   </div>
-  <dl class="details" id="consent-details" data-consent-details hidden>
-    <dt>everyone</dt>
-    <dd>anonymous page views, clicks, page speed. Nothing stored on your device.</dd>
-    <dt>if you say sure</dt>
-    <dd>a cookie to recognise repeat visits + session replay (typing always hidden).</dd>
-    <dt>never</dt>
-    <dd>what you type, ads, selling data. IPs dropped after country lookup.</dd>
-    <dt>by</dt>
-    <dd>PostHog, EU servers · <a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
-  </dl>
 </div>
 
 <script>
@@ -47,7 +52,7 @@ const LESS = 'less ▾';
 <style>
   .consent {
     position: fixed;
-    left: 24px;
+    right: 24px;
     bottom: 24px;
     z-index: 20;
     max-width: 330px;
@@ -153,6 +158,24 @@ const LESS = 'less ▾';
     border-color: var(--sig);
   }
 
+  /* Expands by animating its one grid row 0fr → 1fr: the card grows smoothly to the details'
+     real height, whatever it is. Not a flash, so it plays under reduced motion too
+     (scripts/motion-policy.ts). */
+  .drawer {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.22s ease;
+  }
+
+  .drawer:global(.is-open) {
+    grid-template-rows: 1fr;
+  }
+
+  .drawer-clip {
+    min-height: 0;
+    overflow: hidden;
+  }
+
   .details {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -161,10 +184,6 @@ const LESS = 'less ▾';
     padding-top: 12px;
     border-top: 1px solid var(--line);
     font-size: 11.5px;
-  }
-
-  .details[hidden] {
-    display: none;
   }
 
   dt {

@@ -3,6 +3,9 @@ import type { Consent } from './consent-store';
 import { readConsent, writeConsent } from './consent-store';
 import { applyConsent } from './posthog-client';
 
+/** consent-banner.astro: the details drawer's expanded state (animated there). */
+const OPEN_CLASS = 'is-open';
+
 const isConsent = (value: string | undefined): value is Consent =>
   value === 'granted' || value === 'denied';
 
@@ -20,7 +23,8 @@ export function initConsentBanner(): void {
   let returnFocus: HTMLElement | undefined;
 
   const expand = (open: boolean): void => {
-    details.hidden = !open;
+    details.classList.toggle(OPEN_CLASS, open);
+    details.inert = !open;
     more.setAttribute('aria-expanded', String(open));
     more.textContent = (open ? more.dataset.less : more.dataset.more) ?? '';
   };
