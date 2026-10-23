@@ -199,9 +199,18 @@ export const DOT_FIELD = {
 export const BLACK_HOLE = {
   /** The pointer must rest (DOT_FIELD.stillPx) this long before the hole starts to form. */
   appearAfterMs: 1_000,
-  /** It seeps in over growMs (ease-out) and fades over fadeMs once the pointer moves or leaves. */
+  /** It seeps in (and back to full) over growMs, ease-out; it shrinks at 1 per shrinkMs. */
   growMs: 4_500,
-  fadeMs: 500,
+  shrinkMs: 500,
+  /**
+   * Cursor speed (CSS px/s) → size: full at or below calmSpeedPx, shrinking linearly, gone at
+   * collapseSpeedPx. The speed is smoothed over speedSmoothingMs so one jerky event doesn't kill it.
+   */
+  calmSpeedPx: 40,
+  collapseSpeedPx: 900,
+  speedSmoothingMs: 120,
+  /** While alive it drifts after the cursor with this time constant. */
+  followMs: 90,
   /**
    * Horizon radius at full size, well inside the dots' ring (DOT_FIELD.gatherCorePx), so empty
    * page shows between them; it starts at horizonStartShare of it and grows with the hole.

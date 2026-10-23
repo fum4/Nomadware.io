@@ -1,13 +1,32 @@
 import { describe, expect, it } from 'vitest';
 
-import { advanceProgress, easeOutCubic, lerp } from './black-hole-math';
+import { advanceToward, easeOutCubic, followShare, lerp, targetSize } from './black-hole-math';
 
-describe('advanceProgress', () => {
-  it('grows over growMs and fades over fadeMs, clamped to 0–1', () => {
-    expect(advanceProgress(0, true, 500, 2000, 500)).toBe(0.25);
-    expect(advanceProgress(0.9, true, 500, 2000, 500)).toBe(1);
-    expect(advanceProgress(1, false, 250, 2000, 500)).toBe(0.5);
-    expect(advanceProgress(0.1, false, 250, 2000, 500)).toBe(0);
+describe('targetSize', () => {
+  it('is full while calm, shrinks with speed, gone at the collapse speed', () => {
+    expect(targetSize(0, 40, 840)).toBe(1);
+    expect(targetSize(40, 40, 840)).toBe(1);
+    expect(targetSize(440, 40, 840)).toBe(0.5);
+    expect(targetSize(840, 40, 840)).toBe(0);
+    expect(targetSize(5000, 40, 840)).toBe(0);
+  });
+});
+
+describe('advanceToward', () => {
+  it('grows over growMs and shrinks over shrinkMs, stopping at the target', () => {
+    expect(advanceToward(0, 1, 500, 2000, 500)).toBe(0.25);
+    expect(advanceToward(0.9, 1, 500, 2000, 500)).toBe(1);
+    expect(advanceToward(1, 0, 250, 2000, 500)).toBe(0.5);
+    expect(advanceToward(1, 0.7, 250, 2000, 500)).toBe(0.7);
+    expect(advanceToward(0.6, 0.7, 2000, 2000, 500)).toBe(0.7);
+  });
+});
+
+describe('followShare', () => {
+  it('is 0 with no time, approaches 1 with long time', () => {
+    expect(followShare(0, 100)).toBe(0);
+    expect(followShare(100, 100)).toBeCloseTo(1 - Math.exp(-1));
+    expect(followShare(10_000, 100)).toBeCloseTo(1);
   });
 });
 
