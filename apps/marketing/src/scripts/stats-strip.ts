@@ -12,6 +12,8 @@ interface StatElement {
   element: HTMLElement;
   key: StatKey;
   values: Partial<Record<StatWindow, number>>;
+  /** The value on screen right now (mid-count too), where the next count starts from. */
+  shown: number;
 }
 
 const easeOutExpo = (progress: number): number =>
@@ -30,25 +32,48 @@ function parseValues(raw: string | undefined): Partial<Record<StatWindow, number
 function readStats(root: HTMLElement): StatElement[] {
   return [...root.querySelectorAll<HTMLElement>('[data-stat]')].flatMap((element) => {
     const key = element.dataset.stat;
-    return isStatKey(key) ? [{ element, key, values: parseValues(element.dataset.values) }] : [];
+    if (!isStatKey(key)) return [];
+    const values = parseValues(element.dataset.values);
+    return [{ element, key, values, shown: values[DEFAULT_STAT_WINDOW] ?? 0 }];
   });
 }
 
-/** Render each stat's final value for `range` and pin that width, so counting never moves a neighbour. */
-function lockFinals(stats: StatElement[], range: StatWindow): number[] {
-  const finals = stats.map((stat) => stat.values[range] ?? 0);
-  stats.forEach((stat, index) => {
-    stat.element.style.minWidth = '';
-    stat.element.textContent = formatStat(stat.key, finals[index] ?? 0);
-  });
-  stats.forEach((stat) => (stat.element.style.minWidth = `${stat.element.offsetWidth}px`));
-  return finals;
+interface Count {
+  from: number;
+  to: number;
 }
 
-function paint(stats: StatElement[], finals: number[], progress: number): void {
+const targetsOf = (stats: StatElement[], range: StatWindow): number[] =>
+  stats.map((stat) => stat.values[range] ?? 0);
+
+/**
+ * Pin each stat's width to the wider of what it shows now and its target, so a count in either
+ * direction never moves a neighbour. In-between values print with the larger end's precision
+ * (`paint`), which is never wider than that end.
+ */
+function lockWidths(stats: StatElement[], targets: number[]): void {
+  stats.forEach((stat) => (stat.element.style.minWidth = ''));
+  const current = stats.map((stat) => stat.element.offsetWidth);
+  const texts = stats.map((stat) => stat.element.textContent);
   stats.forEach((stat, index) => {
-    const final = finals[index] ?? 0;
-    stat.element.textContent = formatStat(stat.key, final * easeOutExpo(progress), final);
+    stat.element.textContent = formatStat(stat.key, targets[index] ?? 0);
+  });
+  const target = stats.map((stat) => stat.element.offsetWidth);
+  stats.forEach((stat, index) => {
+    stat.element.textContent = texts[index] ?? '';
+    stat.element.style.minWidth = `${Math.max(current[index] ?? 0, target[index] ?? 0)}px`;
+  });
+}
+
+function paint(stats: StatElement[], counts: Count[], progress: number): void {
+  const eased = easeOutExpo(progress);
+  stats.forEach((stat, index) => {
+    const { from, to } = counts[index] ?? { from: 0, to: 0 };
+    stat.shown = progress >= 1 ? to : from + (to - from) * eased;
+    stat.element.textContent =
+      progress >= 1
+        ? formatStat(stat.key, to)
+        : formatStat(stat.key, stat.shown, Math.max(from, to));
   });
 }
 
@@ -57,17 +82,20 @@ let latestShow = 0;
 
 /**
  * Show one range; resolves when its numbers have settled (or a newer `show` took over). Every
- * number counts up from 0 (ease-out-expo) inside its locked final width.
+ * number counts from what it shows now (0 in the intro, the other range's value on a toggle, the
+ * in-flight value on a toggle mid-count) to its target, ease-out-expo, inside its locked width.
  */
 function show(stats: StatElement[], range: StatWindow): Promise<void> {
   const run = ++latestShow;
-  const finals = lockFinals(stats, range);
+  const targets = targetsOf(stats, range);
+  const counts = stats.map((stat, index) => ({ from: stat.shown, to: targets[index] ?? 0 }));
+  lockWidths(stats, targets);
   return new Promise((resolve) => {
     const start = performance.now();
     const step = (now: number): void => {
       if (run !== latestShow) return resolve();
       const progress = Math.min(1, (now - start) / COUNT_UP_DURATION_MS);
-      paint(stats, finals, progress);
+      paint(stats, counts, progress);
       if (progress < 1) requestAnimationFrame(step);
       else resolve();
     };
@@ -92,7 +120,14 @@ export function initStats(): () => Promise<void> {
   // Analytics only: independent of the intro's count-up, which has its own visibility gate.
   onceVisible(root, STATS_VIEWED_THRESHOLD, () => track('stats_viewed', { window: current }));
 
-  paint(stats, lockFinals(stats, DEFAULT_STAT_WINDOW), 0);
+  // Hold at 0 for the intro's count-up, in the final width.
+  const finals = targetsOf(stats, DEFAULT_STAT_WINDOW);
+  lockWidths(stats, finals);
+  paint(
+    stats,
+    finals.map((to) => ({ from: 0, to })),
+    0,
+  );
 
   buttons.forEach((button) =>
     button.addEventListener('click', () => {
