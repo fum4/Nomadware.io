@@ -72,7 +72,7 @@ export const HERO_TAGS = {
       'insights',
       'devtools',
     ],
-    ['backend', 'mobile', 'desktop', 'agents', 'devops'],
+    ['mobile', 'backend', 'desktop', 'agents', 'devops'],
     ['automation', 'analytics', 'dashboards', 'prototypes', 'ai search'],
     ['infra', 'cloud', 'ci/cd', 'saas', 'mvps', 'apis'],
   ],
