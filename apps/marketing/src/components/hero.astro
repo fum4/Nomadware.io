@@ -1,5 +1,5 @@
 ---
-import { HERO_TAGS } from '../constants';
+import { HERO_SPREAD, HERO_TAGS } from '../constants';
 
 const HEADLINE = 'We build software.';
 // Each slot shows its pool's first word and reserves its longest (scripts/tags-rotate.ts).
@@ -14,7 +14,11 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 
 <section class="hero" aria-labelledby="hero-title">
   <canvas class="dots" data-dot-field aria-hidden="true"></canvas>
-  <div class="copy">
+  <div
+    class="copy"
+    data-hero-copy
+    style={`--spread-above: ${HERO_SPREAD.aboveHeadlinePx}px; --spread-below: ${HERO_SPREAD.belowHeadlinePx}px`}
+  >
     <p class="eyebrow">Small studio · large output</p>
     <h1 id="hero-title">
       <span class="headline" data-scramble>{HEADLINE}</span>{' '}
@@ -30,8 +34,10 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 
 <script>
   import { initDotField } from '../scripts/dot-field';
+  import { initHeroSpread } from '../scripts/hero-spread';
   // Straight away, not when idle: the field fades in from the first frame.
   initDotField();
+  initHeroSpread();
 </script>
 
 <style>
@@ -193,9 +199,20 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
       padding: 64px 0 40px;
     }
 
+    /* Spread at the top of the page (the extra space is margin, laid out once); scrolling draws
+       the eyebrow and tags back in with transforms (scripts/hero-spread.ts: --hero-closed 0 → 1),
+       so nothing below the hero moves while the visitor scrolls. */
     h1 {
-      margin: 14px 0 18px;
+      margin: calc(14px + var(--spread-above)) 0 calc(18px + var(--spread-below));
       font-size: 42px;
+    }
+
+    .eyebrow {
+      transform: translateY(calc(var(--hero-closed, 0) * var(--spread-above)));
+    }
+
+    .tags {
+      transform: translateY(calc(var(--hero-closed, 0) * var(--spread-below) * -1));
     }
 
     .copy {

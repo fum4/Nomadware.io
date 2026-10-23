@@ -6,7 +6,7 @@ import { SITE } from '../config/site';
 <!-- data-commit: the deployed commit, for debugging only (not shown; "dev" off Vercel). -->
 <footer class="footer" data-commit={BUILD_INFO.sha}>
   <p class="studio">
-    <span class="owner">© {BUILD_INFO.year} {SITE.name}</span><span class="sep" aria-hidden="true"> · </span><span>no overhead · just software</span>
+    <span class="owner">© {BUILD_INFO.year} {SITE.copyrightHolder}</span><span class="sep" aria-hidden="true"> · </span><span>no overhead · just software</span>
   </p>
   <p class="privacy"><button type="button" data-consent-open>privacy</button></p>
 </footer>

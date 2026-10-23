@@ -21,6 +21,13 @@ export const INTRO_HEADLINE_AT_MS = 2_500;
 export const INTRO_WORDMARK_AT_MS = 3_900;
 
 /**
+ * Phones: the hero's three blocks (eyebrow, headline, tags) sit spread apart at the top of the
+ * page and draw together over the first scrollPx of scroll (scripts/hero-spread.ts). Extra px
+ * above and below the headline at rest, on top of the compact margins.
+ */
+export const HERO_SPREAD = { scrollPx: 160, aboveHeadlinePx: 36, belowHeadlinePx: 32 } as const;
+
+/**
  * Hero tags' "power issues" flicker-in (scripts/tags-flicker.ts), started at INTRO_TAGS_AT_MS,
  * before the headline scramble and over well before the stats start, so the sequence timing never
  * moves.

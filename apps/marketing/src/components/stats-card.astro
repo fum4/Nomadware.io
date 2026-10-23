@@ -29,7 +29,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 >
   <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
   <div class="head">
-    <span>agent activity · last</span>
+    <span>agent activity</span>
     <span class="seg" role="group" aria-label="Time range">
       {
         STAT_WINDOWS.map((range) => (
@@ -62,7 +62,10 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 </section>
 
 <style>
+  /* Room at the bottom for the "updated" footer (.live), under the legend. */
   .stats {
+    position: relative;
+    padding-bottom: 40px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--term);
@@ -82,11 +85,18 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     text-transform: uppercase;
   }
 
+
+  /* The header is title left, the 7d/30d toggle right; "updated" is the card's footer row, so the
+     header keeps to one line whatever the font (a wrap that depends on glyph widths shifts the
+     card when the web font swaps in). */
+
   .live {
+    position: absolute;
+    left: 18px;
+    bottom: 13px;
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: auto;
     letter-spacing: 0;
     text-transform: none;
     white-space: nowrap;
@@ -110,20 +120,37 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     animation: none;
   }
 
+  /* A thumb-sized toggle at every size: a roomy chip, and a hit area 6px taller than it on each
+     side (the ::after). Its corners are the buttons' own, so the group doesn't clip that area. */
   .seg {
     display: inline-flex;
+    margin-left: auto;
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
-    overflow: hidden;
   }
 
   .seg button {
-    padding: 3px 8px;
+    position: relative;
+    padding: 6px 13px;
     border: 0;
     background: none;
     color: var(--dim);
-    font: 500 10px/var(--leading) var(--mono);
+    font: 500 12px/var(--leading) var(--mono);
     cursor: pointer;
+  }
+
+  .seg button::after {
+    content: '';
+    position: absolute;
+    inset: -6px 0;
+  }
+
+  .seg button:first-child {
+    border-radius: calc(var(--radius-sm) - 1px) 0 0 calc(var(--radius-sm) - 1px);
+  }
+
+  .seg button:last-child {
+    border-radius: 0 calc(var(--radius-sm) - 1px) calc(var(--radius-sm) - 1px) 0;
   }
 
   .seg button[aria-pressed='true'] {
@@ -143,6 +170,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     margin: 0;
+    border-bottom: 1px solid var(--line);
   }
 
   .legend div {
@@ -176,15 +204,11 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 
   @media (max-width: 640px) {
     .head {
-      flex-wrap: wrap;
       padding: 11px 14px;
     }
 
-    /* Its own row on phones, whatever the font: a wrap that depends on glyph widths shifts the
-       card when the web font swaps in. */
     .live {
-      flex-basis: 100%;
-      margin-left: 0;
+      left: 14px;
     }
 
     .legend {
@@ -192,7 +216,8 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     }
 
     .legend div {
-      padding: 12px 14px;
+      gap: 2px;
+      padding: 13px 12px;
     }
 
     .legend div:nth-child(3n) {
@@ -204,7 +229,7 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     }
 
     .legend dd {
-      font-size: 18px;
+      font-size: 26px;
     }
 
     .legend dt {
