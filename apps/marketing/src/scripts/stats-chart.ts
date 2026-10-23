@@ -109,6 +109,15 @@ export function initStatsChart(root: HTMLElement): StatsChart {
     if (plot && isStatWindow(range)) snap(chart, plot, series[range], generatedAtMs, event.clientX);
   };
 
+  // Each range's trace draws in once, the first time it shows; after that a toggle just swaps it.
+  chart.querySelectorAll<HTMLElement>('.plot').forEach((plot) =>
+    plot
+      .querySelector('svg')
+      ?.addEventListener('animationend', () => plot.setAttribute('data-drawn', ''), {
+        once: true,
+      }),
+  );
+
   chart.addEventListener('pointerdown', follow);
   chart.addEventListener('pointermove', (event) => {
     // A touch moves only while pressed; a mouse hovers.

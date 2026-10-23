@@ -80,7 +80,7 @@ const plots = STAT_WINDOWS.map((range) => {
 
   /* Drawn left → right as one pen stroke, active and idle stretches alike: a wipe over the whole
      plot (a dash animation would draw every separate stretch at once). The inset's -12px keeps
-     the glow; display: none → block restarts it on a toggle. */
+     the glow. Each range draws on its first showing only (data-drawn). */
   svg {
     width: 100%;
     height: 100%;
@@ -93,6 +93,12 @@ const plots = STAT_WINDOWS.map((range) => {
     to {
       clip-path: inset(-12px -12px -12px -12px);
     }
+  }
+
+  /* Drawn once already (scripts/stats-chart.ts): shown as is from then on. */
+  .plot[data-drawn] svg {
+    clip-path: none;
+    animation: none;
   }
 
   .trace {
