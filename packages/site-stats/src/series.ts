@@ -8,23 +8,14 @@ import { STAT_WINDOW_DAYS } from './windows.ts';
 
 const HOUR_MS = 3_600_000;
 const HOURS_PER_DAY = 24;
-const UTC_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Hours per chart bucket, by window: 7d → 84 points, 30d → 120. */
 export const SERIES_BUCKET_HOURS: Readonly<Record<StatWindow, number>> = { '7d': 2, '30d': 6 };
 
-/** Lines changed by the PRs merged on one UTC day (same exclusions as linesAdded/linesDeleted). */
-export interface StatDay {
-  /** UTC date, `YYYY-MM-DD`. */
-  date: string;
-  linesAdded: number;
-  linesDeleted: number;
-}
-
 /**
  * One window's series, oldest first. Buckets are aligned to UTC multiples of `bucketHours` since
  * the epoch, and the last one is the bucket `generatedAt` falls in (still filling): see
- * `bucketStartMs`. Days are UTC days, the last one is `generatedAt`'s.
+ * `bucketStartMs`. Every array has one entry per bucket.
  */
 export interface StatSeries {
   bucketHours: number;
@@ -32,8 +23,9 @@ export interface StatSeries {
   agentMinutes: number[];
   /** PRs merged per bucket. */
   prsMerged: number[];
-  /** One entry per day of the window. */
-  days: StatDay[];
+  /** Lines added / deleted by the PRs merged in the bucket (same exclusions as the window's). */
+  linesAdded: number[];
+  linesDeleted: number[];
 }
 
 export type StatsSeries = Record<StatWindow, StatSeries>;
@@ -53,12 +45,6 @@ export function bucketStartMs(
   return (Math.floor(generatedAtMs / bucketMs) - (count - 1 - index)) * bucketMs;
 }
 
-/** `YYYY-MM-DD` naming a real day (a round trip through Date rejects 2026-02-30). */
-const isUtcDate = (date: string): boolean =>
-  UTC_DATE.test(date) &&
-  !Number.isNaN(Date.parse(date)) &&
-  new Date(date).toISOString().startsWith(date);
-
 const isCount = (value: unknown): value is number =>
   typeof value === 'number' && Number.isInteger(value) && value >= 0;
 
@@ -66,24 +52,17 @@ function parseCounts(value: unknown, length: number): number[] | null {
   return Array.isArray(value) && value.length === length && value.every(isCount) ? value : null;
 }
 
-function parseDay(value: unknown): StatDay | null {
-  if (!isRecord(value)) return null;
-  const { date, linesAdded, linesDeleted } = value;
-  if (typeof date !== 'string' || !isUtcDate(date)) return null;
-  return isCount(linesAdded) && isCount(linesDeleted) ? { date, linesAdded, linesDeleted } : null;
-}
-
 function parseWindowSeries(value: unknown, window: StatWindow): StatSeries | null {
   if (!isRecord(value)) return null;
   if (value['bucketHours'] !== SERIES_BUCKET_HOURS[window]) return null;
-  const agentMinutes = parseCounts(value['agentMinutes'], bucketCount(window));
-  const prsMerged = parseCounts(value['prsMerged'], bucketCount(window));
-  const rawDays = value['days'];
-  if (!agentMinutes || !prsMerged || !Array.isArray(rawDays)) return null;
-  if (rawDays.length !== STAT_WINDOW_DAYS[window]) return null;
-  const days = rawDays.map(parseDay);
-  if (!days.every((day): day is StatDay => day !== null)) return null;
-  return { bucketHours: SERIES_BUCKET_HOURS[window], agentMinutes, prsMerged, days };
+  const count = bucketCount(window);
+  const agentMinutes = parseCounts(value['agentMinutes'], count);
+  const prsMerged = parseCounts(value['prsMerged'], count);
+  const linesAdded = parseCounts(value['linesAdded'], count);
+  const linesDeleted = parseCounts(value['linesDeleted'], count);
+  if (!agentMinutes || !prsMerged || !linesAdded || !linesDeleted) return null;
+  const bucketHours = SERIES_BUCKET_HOURS[window];
+  return { bucketHours, agentMinutes, prsMerged, linesAdded, linesDeleted };
 }
 
 /** Every window's series from untrusted JSON, or null when absent or anything is malformed. */

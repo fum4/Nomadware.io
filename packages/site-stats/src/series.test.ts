@@ -4,19 +4,16 @@ import { test } from 'node:test';
 import { bucketCount, bucketStartMs, parseStatsSeries } from './series.ts';
 import { parseStatsSnapshot } from './snapshot.ts';
 
-const days = (count: number) =>
-  Array.from({ length: count }, (_, index) => ({
-    date: `2026-10-${String(index + 1).padStart(2, '0')}`,
-    linesAdded: index,
-    linesDeleted: 0,
-  }));
-const windowSeries = (bucketHours: number, buckets: number, dayCount: number) => ({
+const counts = (buckets: number, value: (index: number) => number): number[] =>
+  Array.from({ length: buckets }, (_, index) => value(index));
+const windowSeries = (bucketHours: number, buckets: number) => ({
   bucketHours,
-  agentMinutes: Array.from({ length: buckets }, (_, index) => index),
-  prsMerged: Array.from({ length: buckets }, () => 1),
-  days: days(dayCount),
+  agentMinutes: counts(buckets, (index) => index),
+  prsMerged: counts(buckets, () => 1),
+  linesAdded: counts(buckets, (index) => index * 10),
+  linesDeleted: counts(buckets, () => 0),
 });
-const SERIES = { '7d': windowSeries(2, 84, 7), '30d': windowSeries(6, 120, 30) };
+const SERIES = { '7d': windowSeries(2, 84), '30d': windowSeries(6, 120) };
 
 const COUNTS = {
   prs: 1,
@@ -45,10 +42,11 @@ test('accepts a complete series', () => {
   assert.deepEqual(parseStatsSeries(SERIES), SERIES);
 });
 
-test('rejects bad lengths, sizes, negatives, fractions and bad dates', () => {
+test('rejects bad lengths, sizes, negatives, fractions, text and a missing array', () => {
   assert.equal(parseStatsSeries(withWeek({ agentMinutes: [1, 2, 3] })), null);
   assert.equal(parseStatsSeries(withWeek({ prsMerged: SERIES['30d'].prsMerged })), null);
-  assert.equal(parseStatsSeries(withWeek({ days: days(6) })), null);
+  assert.equal(parseStatsSeries(withWeek({ linesAdded: SERIES['7d'].linesAdded.slice(1) })), null);
+  assert.equal(parseStatsSeries(withWeek({ linesDeleted: undefined })), null);
   assert.equal(parseStatsSeries(withWeek({ bucketHours: 6 })), null);
   const negative = [...SERIES['7d'].agentMinutes];
   negative[3] = -1;
@@ -58,12 +56,9 @@ test('rejects bad lengths, sizes, negatives, fractions and bad dates', () => {
   assert.equal(parseStatsSeries(withWeek({ prsMerged: fraction })), null);
   const text = [...SERIES['7d'].prsMerged].map(String);
   assert.equal(parseStatsSeries(withWeek({ prsMerged: text })), null);
-  for (const date of ['2026-02-30', '22/10/2026', '2026-10-22T00:00:00Z']) {
-    const badDay = [{ date, linesAdded: 1, linesDeleted: 1 }, ...days(6)];
-    assert.equal(parseStatsSeries(withWeek({ days: badDay })), null, date);
-  }
-  const negativeLines = [{ date: '2026-10-01', linesAdded: 1, linesDeleted: -1 }, ...days(6)];
-  assert.equal(parseStatsSeries(withWeek({ days: negativeLines })), null);
+  const negativeLines = [...SERIES['7d'].linesDeleted];
+  negativeLines[83] = -1;
+  assert.equal(parseStatsSeries(withWeek({ linesDeleted: negativeLines })), null);
   assert.equal(parseStatsSeries({ '7d': SERIES['7d'] }), null);
   assert.equal(parseStatsSeries(undefined), null);
 });
