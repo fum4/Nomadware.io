@@ -48,20 +48,22 @@ const namedCounts = (names: readonly string[], counts: readonly number[] | null)
     .toSorted((a, b) => b.count - a.count)
     .map((entry) => `${formatCount(entry.count)} ${entry.name}`);
 
+/** "1 issue caught", "5 issues caught". */
+export const formatIssuesCaught = (count: number): string =>
+  `${formatCount(count)} ${count === 1 ? 'issue' : 'issues'} caught`;
+
 /**
- * "1 issue caught · at push", "5 issues caught · 3 at push, 2 at merge": the gates that caught
- * them (CAUGHT_GATES counts), most first.
+ * "3 at merge, 2 at push": the gates that caught them (CAUGHT_GATES counts), most first; "at
+ * push" when one gate caught them all; "" when unknown.
  */
-export function formatIssuesCaught(count: number, byGate: readonly number[] | null): string {
-  const issues = `${formatCount(count)} ${count === 1 ? 'issue' : 'issues'} caught`;
+export function formatCaughtGates(byGate: readonly number[] | null): string {
   const gates = CAUGHT_GATES.filter((_, index) => (byGate?.[index] ?? 0) > 0);
   const only = gates.length === 1 ? gates[0] : undefined;
-  if (only) return `${issues} · ${GATE_WORDS[only]}`;
-  const split = namedCounts(
+  if (only) return GATE_WORDS[only];
+  return namedCounts(
     CAUGHT_GATES.map((gate) => GATE_WORDS[gate]),
     byGate,
-  );
-  return split.length === 0 ? issues : `${issues} · ${split.join(', ')}`;
+  ).join(', ');
 }
 
 /** "3 tests, 2 types": what they were (CAUGHT_CATEGORIES counts), most first; "" when unknown. */

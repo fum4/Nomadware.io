@@ -6,6 +6,7 @@ import { STATS_CHART } from '../constants';
 import {
   formatAgentTime,
   formatBucketRange,
+  formatCaughtGates,
   formatCaughtKinds,
   formatCount,
   formatIssuesCaught,
@@ -77,7 +78,9 @@ function describe(
   const caught = series.caught[index] ?? 0;
   const fixMinutes = series.caughtFixMinutes[index] ?? null;
   const kinds = formatCaughtKinds(series.caughtCategories[index] ?? null);
-  setTip(plot, 'caught', formatIssuesCaught(caught, series.caughtByGate[index] ?? null));
+  const gates = formatCaughtGates(series.caughtByGate[index] ?? null);
+  setTip(plot, 'caught', formatIssuesCaught(caught));
+  setTip(plot, 'gates', gates === '' ? '' : ` · ${gates}`);
   setTip(plot, 'kinds', kinds);
   setTip(plot, 'fixed', fixMinutes === null ? '' : formatAgentTime(fixMinutes));
   plot.querySelector('[data-tip-issues]')?.toggleAttribute('hidden', caught === 0);

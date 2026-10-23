@@ -59,7 +59,7 @@ const plots = STAT_WINDOWS.map((range) => {
             <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" /> lines
           </span>
           <span class="issues" data-tip-issues hidden>
-            <span data-tip="caught" />
+            <span><span data-tip="caught" /><span class="gates" data-tip="gates" /></span>
             <span data-tip="kinds" />
             <span class="fixed" data-tip-fixed>
               <span class="check">✓</span> fixed in <span class="duration" data-tip="fixed" />
@@ -217,6 +217,7 @@ const plots = STAT_WINDOWS.map((range) => {
     display: none;
   }
 
+  .gates,
   .fixed {
     color: var(--dim);
   }

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatAgentTime,
   formatBucketRange,
+  formatCaughtGates,
   formatCaughtKinds,
   formatIssuesCaught,
   formatPrsMerged,
@@ -43,14 +44,17 @@ describe('formatPrsMerged', () => {
 
 describe('formatIssuesCaught', () => {
   it('says issue for one, issues otherwise', () => {
-    expect(formatIssuesCaught(1, null)).toBe('1 issue caught');
-    expect(formatIssuesCaught(3, null)).toBe('3 issues caught');
+    expect(formatIssuesCaught(1)).toBe('1 issue caught');
+    expect(formatIssuesCaught(3)).toBe('3 issues caught');
   });
+});
 
-  it('says which gates caught them, most first', () => {
-    expect(formatIssuesCaught(5, [2, 3])).toBe('5 issues caught · 3 at merge, 2 at push');
-    expect(formatIssuesCaught(4, [2, 2])).toBe('4 issues caught · 2 at push, 2 at merge');
-    expect(formatIssuesCaught(3, [3, 0])).toBe('3 issues caught · at push');
+describe('formatCaughtGates', () => {
+  it('says which gates caught them, most first; one gate on its own', () => {
+    expect(formatCaughtGates([2, 3])).toBe('3 at merge, 2 at push');
+    expect(formatCaughtGates([2, 2])).toBe('2 at push, 2 at merge');
+    expect(formatCaughtGates([3, 0])).toBe('at push');
+    expect(formatCaughtGates(null)).toBe('');
   });
 });
 
