@@ -13,7 +13,8 @@ export interface Dot extends FlungBody {
   /** Its own ring radius around the cursor: a fixed nudge and a wobble phase (ringRadius). */
   ringOffsetPx: number;
   ringPhase: number;
-  /** How long its fade-in on load takes, from the field's first frame. */
+  /** On load: when its fade-in starts (after the field's first frame) and how long it takes. */
+  appearAtMs: number;
   appearMs: number;
 }
 
@@ -40,6 +41,7 @@ export function spawnDots(home: Home, density: number, scale: number): Dot[] {
     flungAt: Number.NEGATIVE_INFINITY,
     ringOffsetPx: (Math.random() * 2 - 1) * DOT_FIELD.ringScatterPx,
     ringPhase: Math.random() * 2 * Math.PI,
+    appearAtMs: DOT_FIELD.appearDelayMs + Math.random() * DOT_FIELD.appearSpreadMs,
     appearMs:
       DOT_FIELD.appearMinMs + Math.random() * (DOT_FIELD.appearMaxMs - DOT_FIELD.appearMinMs),
   }));
@@ -47,8 +49,9 @@ export function spawnDots(home: Home, density: number, scale: number): Dot[] {
 
 /** A dot's opacity `sinceFirstMs` after the field's first frame, or null once every dot is in. */
 export function appearAlpha(dot: Dot, sinceFirstMs: number): number | null {
-  const fading = sinceFirstMs - DOT_FIELD.appearDelayMs;
-  if (fading >= DOT_FIELD.appearMaxMs) return null;
-  // Eased out: most of its brightness in the first moments, so the field shows up at once.
+  const { appearDelayMs, appearSpreadMs, appearMaxMs } = DOT_FIELD;
+  if (sinceFirstMs >= appearDelayMs + appearSpreadMs + appearMaxMs) return null;
+  // Eased out: each dot brightens quickly once its turn comes, so the field fills in dot by dot.
+  const fading = sinceFirstMs - dot.appearAtMs;
   return easeOutCubic(Math.min(1, Math.max(0, fading) / dot.appearMs));
 }
