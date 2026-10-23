@@ -68,6 +68,7 @@ export function scrambleHeadline(onProgress?: (share: number) => void): Promise<
         overlay.remove();
         target.removeAttribute('style');
         target.classList.remove(SCRAMBLING);
+        target.dataset.scrambled = '';
         resolve();
         return;
       }

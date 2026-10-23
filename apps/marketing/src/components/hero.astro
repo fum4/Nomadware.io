@@ -1,5 +1,5 @@
 ---
-import { HERO_TAGS } from '../constants';
+import { HERO_TAGS, INTRO_HEADLINE_FALLBACK_MS } from '../constants';
 
 const HEADLINE = 'We build software.';
 // Each slot shows its pool's first word and reserves its longest (scripts/tags-rotate.ts).
@@ -17,7 +17,11 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
   <div class="copy">
     <p class="eyebrow">Small studio · large output</p>
     <h1 id="hero-title">
-      <span class="headline" data-scramble>{HEADLINE}</span>{' '}
+      <span
+        class="headline"
+        data-scramble
+        style={`--headline-fallback: ${INTRO_HEADLINE_FALLBACK_MS}ms`}>{HEADLINE}</span
+      >{' '}
       <!-- Two blocks: breaks after the comma at every width; the space keeps the text one sentence. -->
       <span class="subline"><span>Human judgment,</span>{' '}<span>at agent speed.</span></span>
     </h1>
@@ -160,6 +164,20 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 
   .subline > span {
     display: block;
+  }
+
+  /* Blank until its scramble (the intro starts it after a beat), so the finished text never shows
+     first; shown anyway after INTRO_HEADLINE_FALLBACK_MS should the script never run. Opacity, not
+     colour: the scramble reads the headline's colour as its ink. */
+  :global(html.js) .headline:not(:global(.is-scrambling), [data-scrambled]) {
+    opacity: 0;
+    animation: headline-fallback 0s var(--headline-fallback) forwards;
+  }
+
+  @keyframes headline-fallback {
+    to {
+      opacity: 1;
+    }
   }
 
   /* Built by scripts/headline-scramble.ts: the real text stays laid out (painted only up to the

@@ -1,5 +1,6 @@
 import {
   INTRO_GAP_MS,
+  INTRO_HEADLINE_DELAY_MS,
   INTRO_TAGS_AT_SCRAMBLE_SHARE,
   INTRO_WORDMARK_MAX_WAIT_MS,
 } from '../constants';
@@ -15,7 +16,8 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
 const mark = (phase: string): void => void performance.mark(`intro:${phase}`);
 
 /**
- * The page-load choreography, each step started by the previous one finishing: headline scramble
+ * The page-load choreography, each step started by the previous one finishing: a beat
+ * (INTRO_HEADLINE_DELAY_MS, the headline blank) → headline scramble
  * → gap → stats count-up (once the card is in view) → gap → nav wordmark, and from then on the
  * tags rotate. The tags power on alongside, from INTRO_TAGS_AT_SCRAMBLE_SHARE of the scramble
  * (or when it ends, if it never reports), never lengthening anything. The wordmark never waits
@@ -34,6 +36,7 @@ export async function playIntro(): Promise<void> {
     void flickerTags().then(() => mark('tags-end'));
   };
 
+  await wait(INTRO_HEADLINE_DELAY_MS);
   mark('headline-start');
   await scrambleHeadline((share) => {
     if (share >= INTRO_TAGS_AT_SCRAMBLE_SHARE) startTags();
