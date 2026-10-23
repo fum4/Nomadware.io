@@ -12,8 +12,8 @@ interface Dot extends Body {
   captured: boolean;
   /** When it last left the field (performance.now()), -Infinity if never. */
   releasedAt: number;
-  /** Its fade-in on load starts this long after the field's first frame. */
-  appearDelayMs: number;
+  /** How long its fade-in on load takes, from the field's first frame. */
+  appearMs: number;
 }
 
 const OFF_SCREEN = -9_999;
@@ -74,7 +74,8 @@ export function initDotField(): void {
         highlight: Math.random() < DOT_FIELD.highlightShare,
         captured: false,
         releasedAt: Number.NEGATIVE_INFINITY,
-        appearDelayMs: Math.random() * DOT_FIELD.appearSpreadMs,
+        appearMs:
+          DOT_FIELD.appearMinMs + Math.random() * (DOT_FIELD.appearMaxMs - DOT_FIELD.appearMinMs),
       }));
     }
   };
@@ -151,12 +152,11 @@ export function initDotField(): void {
     context.clearRect(0, 0, canvas.width, canvas.height);
     hole?.draw(context);
     const sinceFirst = now - firstFrame;
-    const appearing = sinceFirst < DOT_FIELD.appearSpreadMs + DOT_FIELD.appearFadeMs;
+    const appearing = sinceFirst < DOT_FIELD.appearMaxMs;
     for (const dot of dots) {
       const size = dot.highlight ? DOT_FIELD.highlightSize : DOT_FIELD.size;
       if (appearing) {
-        const shown = (sinceFirst - dot.appearDelayMs) / DOT_FIELD.appearFadeMs;
-        context.globalAlpha = Math.min(1, Math.max(0, shown));
+        context.globalAlpha = Math.min(1, sinceFirst / dot.appearMs);
       }
       context.fillStyle = dot.highlight ? DOT_FIELD.highlightColor : DOT_FIELD.color;
       context.fillRect(dot.x, dot.y, size, size);

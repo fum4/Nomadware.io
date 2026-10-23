@@ -129,12 +129,12 @@ export const DOT_FIELD = {
   maxStepFrames: 3,
   highlightShare: 0.15,
   /**
-   * On load each dot fades in (0 → its colour over appearFadeMs) after a random delay of up to
-   * appearSpreadMs from the field's first frame: the field condenses rather than pops in.
+   * On load every dot starts fading in (0 → its colour) on the field's first frame, each over its
+   * own random span between appearMinMs and appearMaxMs: the field condenses rather than pops in.
    * A fade, not a flash, so it plays whatever prefers-reduced-motion says (scripts/motion-policy.ts).
    */
-  appearSpreadMs: 1_300,
-  appearFadeMs: 500,
+  appearMinMs: 400,
+  appearMaxMs: 1_600,
   /** How far past the content column the dots' home reaches, CSS px. */
   homeSpillPx: 96,
   /** Per frame, the share of its distance outside home a dot's speed gains back toward it. */

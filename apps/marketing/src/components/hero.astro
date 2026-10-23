@@ -30,8 +30,8 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 
 <script>
   import { initDotField } from '../scripts/dot-field';
-  import { whenIdle } from '../scripts/motion';
-  whenIdle(initDotField);
+  // Straight away, not when idle: the field fades in from the first frame.
+  initDotField();
 </script>
 
 <style>
