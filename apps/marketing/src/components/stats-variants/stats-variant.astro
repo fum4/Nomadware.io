@@ -1,0 +1,25 @@
+---
+// TEMPORARY (NWARE-82): renders one of the stats-card variants the owner is comparing
+// (config/stats-variants.ts). Every variant keeps the strip's contract for scripts/stats-strip.ts:
+// a [data-stats] root, StatValue numbers, button[data-range] toggles, [data-range-label] parts;
+// the intro (scripts/intro-sequence.ts) wires them like the strip.
+import type { LoadedStats } from '../../data/load-stats';
+import type { StatsVariantId } from '../../config/stats-variants';
+import Board from './stats-board.astro';
+import Headline from './stats-headline.astro';
+import Heartbeat from './stats-heartbeat.astro';
+import Receipt from './stats-receipt.astro';
+import Sentence from './stats-sentence.astro';
+
+interface Props {
+  variant: Exclude<StatsVariantId, 'current'>;
+  stats: LoadedStats;
+  renderedAt: string;
+}
+const { variant, stats, renderedAt } = Astro.props;
+const VARIANTS = { a: Headline, b: Board, c: Sentence, d: Heartbeat, e: Receipt };
+const Variant = VARIANTS[variant];
+---
+
+<Variant stats={stats} renderedAt={renderedAt} />
+

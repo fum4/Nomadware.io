@@ -1,0 +1,216 @@
+---
+// TEMPORARY (NWARE-82) variant b, "Split-flap board": the stats as an airport departures board,
+// every number in split-flap tiles that flip as it counts (flaps.astro, board-flaps.ts).
+import { STAT_WINDOWS } from '@nomadware/site-stats';
+
+import type { LoadedStats } from '../../data/load-stats';
+import { DEFAULT_STAT_WINDOW } from '../../data/stats-snapshot';
+import RelativeTime from '../relative-time.astro';
+import Flaps from './flaps.astro';
+
+interface Props {
+  stats: LoadedStats;
+  renderedAt: string;
+}
+const { stats, renderedAt } = Astro.props;
+const { snapshot, source } = stats;
+---
+
+<section class="board" aria-labelledby="stats-title" data-stats data-stats-source={source}>
+  <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
+  <div class="head">
+    <span class="title">SHIPPED</span>
+    <span class="seg" role="group" aria-label="Time range">
+      {
+        STAT_WINDOWS.map((range) => (
+          <button
+            type="button"
+            data-range={range}
+            aria-pressed={range === DEFAULT_STAT_WINDOW ? 'true' : 'false'}
+          >
+            LAST {range.toUpperCase()}
+          </button>
+        ))
+      }
+    </span>
+    <span class="live"
+      ><span class="dot" aria-hidden="true"></span>updated <RelativeTime
+        iso={snapshot.generatedAt}
+        renderedAt={renderedAt}
+      /></span
+    >
+  </div>
+  <dl class="rows">
+    <div><dt>PRS MERGED</dt><dd><Flaps stat="prs" snapshot={snapshot} /></dd></div>
+    <div><dt>AGENT RUNS</dt><dd><Flaps stat="runs" snapshot={snapshot} /></dd></div>
+    <div><dt>AGENT-HOURS</dt><dd><Flaps stat="agentHours" snapshot={snapshot} /></dd></div>
+    <div><dt>TOOL CALLS</dt><dd><Flaps stat="actions" snapshot={snapshot} /></dd></div>
+    <div>
+      <dt>CHECKS</dt>
+      <dd>
+        <Flaps stat="checks" snapshot={snapshot} /><span class="mid">·</span><span class="warm"
+          ><Flaps stat="caught" snapshot={snapshot} /></span
+        ><span class="unit">ISSUES CAUGHT</span>
+      </dd>
+    </div>
+    <div>
+      <dt>LINES</dt>
+      <dd>
+        <span class="unit">+</span><Flaps stat="linesAdded" snapshot={snapshot} /><span
+          class="unit">−</span
+        ><Flaps stat="linesDeleted" snapshot={snapshot} />
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<script>
+  import { initBoardFlaps } from './board-flaps';
+  initBoardFlaps();
+</script>
+
+<style>
+  .board {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--term);
+    font: 500 15px/var(--leading) var(--mono);
+    letter-spacing: 0.06em;
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  .title {
+    color: var(--sig);
+    letter-spacing: 0.2em;
+  }
+
+  .seg {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .seg button {
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: none;
+    color: var(--dim);
+    font: inherit;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+  }
+
+  .seg button[aria-pressed='true'] {
+    border-color: var(--sig);
+    color: var(--sig);
+  }
+
+  .live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    letter-spacing: 0;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sig);
+  }
+
+  .rows {
+    margin: 0;
+    padding: 10px 20px 14px;
+  }
+
+  .rows div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .rows div:last-child {
+    border-bottom: 0;
+  }
+
+  /* Label, then a dotted leader to the right-hand tiles. */
+  dt {
+    display: flex;
+    flex: 1;
+    gap: 12px;
+    color: var(--dim);
+  }
+
+  dt::after {
+    content: '';
+    flex: 1;
+    margin-bottom: 0.4em;
+    border-bottom: 2px dotted var(--line);
+  }
+
+  dd {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .mid,
+  .unit {
+    color: var(--dim);
+    font-size: 12px;
+  }
+
+  .warm :global(.tile) {
+    color: var(--warm);
+  }
+
+  @media (max-width: 640px) {
+    .board {
+      font-size: 12px;
+    }
+
+    .head {
+      flex-wrap: wrap;
+      padding: 11px 14px;
+    }
+
+    /* Its own row on phones, whatever the font: a wrap that depends on glyph widths shifts the
+       card when the web font swaps in. */
+    .live {
+      flex-basis: 100%;
+      margin-left: 0;
+    }
+
+    .rows {
+      padding: 8px 14px 10px;
+    }
+
+    .rows div {
+      gap: 8px;
+    }
+
+    dt {
+      font-size: 10.5px;
+    }
+
+    .mid,
+    .unit {
+      font-size: 10px;
+    }
+  }
+</style>

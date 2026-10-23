@@ -34,6 +34,15 @@
   --halo-column: rgba(12, 11, 18, 0.6);
   --halo-text: rgba(12, 11, 18, 0.42);
 
+  /* TEMPORARY (NWARE-82): the receipt stats variant's thermal paper and its print. */
+  --paper: #ebe9e1;
+  --paper-ink: #24222b;
+  --paper-faint: #77747f;
+  /* TEMPORARY (NWARE-82): the board stats variant's split-flap tiles (top / bottom half). */
+  --flap-top: #1c1b25;
+  --flap-bottom: #16151d;
+  --flap-seam: rgba(0, 0, 0, 0.6);
+
   /* Floating cards over the page (the consent banner). */
   --overlay: rgba(19, 18, 28, 0.92);
   --overlay-line: rgba(255, 255, 255, 0.09);

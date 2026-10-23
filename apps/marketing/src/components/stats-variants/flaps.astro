@@ -1,0 +1,82 @@
+---
+// TEMPORARY (NWARE-82), stats variant b: one board number as split-flap tiles (board-flaps.ts),
+// with the real StatValue kept for readers and the count-up.
+import type { StatKey, StatsSnapshot } from '@nomadware/site-stats';
+import { STAT_WINDOWS } from '@nomadware/site-stats';
+
+import { formatStat } from '../../format/format-stat';
+import StatValue from '../stat-value.astro';
+
+interface Props {
+  stat: StatKey;
+  snapshot: StatsSnapshot;
+}
+const { stat, snapshot } = Astro.props;
+// As many tiles as the widest value any range prints.
+const count = Math.max(
+  ...STAT_WINDOWS.map((range) => formatStat(stat, snapshot.windows[range][stat]).length),
+);
+---
+
+<span class="flaps" data-flaps>
+  <span class="value"><StatValue stat={stat} snapshot={snapshot} /></span>
+  <span class="tiles" aria-hidden="true">
+    {Array.from({ length: count }, () => <span class="tile" data-flap> </span>)}
+  </span>
+</span>
+
+<style>
+  .flaps {
+    display: inline-flex;
+  }
+
+  .value {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .tiles {
+    display: inline-flex;
+    gap: 2px;
+  }
+
+  /* A flap: dark tile, a hairline across the middle where the two halves meet. */
+  .tile {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 1.05em;
+    height: 1.45em;
+    border-radius: 3px;
+    background: linear-gradient(var(--flap-top) 50%, var(--flap-bottom) 50%);
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    white-space: pre;
+    perspective: 200px;
+  }
+
+  .tile::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 1px;
+    background: var(--flap-seam);
+  }
+
+  .tile:global(.is-flipping) {
+    animation: flap 0.16s ease-out;
+  }
+
+  @keyframes flap {
+    from {
+      transform: rotateX(80deg);
+    }
+    to {
+      transform: none;
+    }
+  }
+</style>

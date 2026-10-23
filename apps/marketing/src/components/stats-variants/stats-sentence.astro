@@ -1,0 +1,131 @@
+---
+// TEMPORARY (NWARE-82) variant c, "Sentence": the stats as one readable sentence, numbers counting
+// inline, the range picked inside the sentence itself.
+import { STAT_WINDOWS } from '@nomadware/site-stats';
+
+import type { LoadedStats } from '../../data/load-stats';
+import { DEFAULT_STAT_WINDOW } from '../../data/stats-snapshot';
+import RelativeTime from '../relative-time.astro';
+import StatValue from '../stat-value.astro';
+
+interface Props {
+  stats: LoadedStats;
+  renderedAt: string;
+}
+const { stats, renderedAt } = Astro.props;
+const { snapshot, source } = stats;
+const days = (range: string): string => `${Number.parseInt(range, 10)} days`;
+---
+
+<section class="sentence" aria-labelledby="stats-title" data-stats data-stats-source={source}>
+  <h2 id="stats-title" class="sr-only">What the studio shipped</h2>
+  <p class="text">
+    In the last
+    <span class="seg" role="group" aria-label="Time range">
+      {
+        STAT_WINDOWS.map((range) => (
+          <button
+            type="button"
+            data-range={range}
+            aria-pressed={range === DEFAULT_STAT_WINDOW ? 'true' : 'false'}
+          >
+            {days(range)}
+          </button>
+        ))
+      }
+    </span>
+    we merged <b><StatValue stat="prs" snapshot={snapshot} /></b> pull requests, ran <b
+      ><StatValue stat="runs" snapshot={snapshot} /></b
+    > agents for <b><StatValue stat="agentHours" snapshot={snapshot} /></b> hours, made <b
+      ><StatValue stat="actions" snapshot={snapshot} /></b
+    > tool calls and caught <b class="warm"><StatValue stat="caught" snapshot={snapshot} /></b> issues
+    across <b><StatValue stat="checks" snapshot={snapshot} /></b> checks — <b
+      >+<StatValue stat="linesAdded" snapshot={snapshot} /></b
+    > lines in, <b class="out"><StatValue stat="linesDeleted" snapshot={snapshot} /></b> out.
+  </p>
+  <p class="live">
+    <span class="dot" aria-hidden="true"></span>live numbers · updated <RelativeTime
+      iso={snapshot.generatedAt}
+      renderedAt={renderedAt}
+    />
+  </p>
+</section>
+
+<style>
+  .sentence {
+    max-width: 860px;
+  }
+
+  .text {
+    margin: 0;
+    font: 400 30px/1.45 var(--sans);
+    letter-spacing: -0.02em;
+    color: var(--dim);
+  }
+
+  b {
+    color: var(--fg);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 -0.35em var(--sig-soft);
+  }
+
+  b.warm {
+    color: var(--warm);
+    box-shadow: inset 0 -0.35em rgba(255, 138, 76, 0.2);
+  }
+
+  b.out {
+    color: var(--soft);
+    box-shadow: none;
+  }
+
+  .seg {
+    display: inline-flex;
+    margin: 0 0.2em;
+    vertical-align: 0.15em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .seg button {
+    padding: 2px 10px;
+    border: 0;
+    background: none;
+    color: var(--dim);
+    font: 500 15px/var(--leading) var(--mono);
+    cursor: pointer;
+  }
+
+  .seg button[aria-pressed='true'] {
+    background: var(--sig);
+    color: var(--ink);
+  }
+
+  .live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 18px 0 0;
+    font: 400 11px/var(--leading) var(--mono);
+    color: var(--faint);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sig);
+  }
+
+  @media (max-width: 640px) {
+    .text {
+      font-size: 21px;
+    }
+
+    .seg button {
+      font-size: 12px;
+    }
+  }
+</style>

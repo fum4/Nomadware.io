@@ -1,0 +1,57 @@
+---
+// TEMPORARY (NWARE-82), local preview only: a floating pill to flip between the stats variants.
+import type { StatsVariantId } from '../../config/stats-variants';
+import { STATS_VARIANT_IDS, STATS_VARIANT_NAMES } from '../../config/stats-variants';
+
+interface Props {
+  current: StatsVariantId;
+}
+const { current } = Astro.props;
+---
+
+<nav class="switcher" aria-label="Stats variant (preview only)">
+  <span class="tag">stats</span>
+  {
+    STATS_VARIANT_IDS.map((id) => (
+      <a href={`?stats=${id}`} aria-current={id === current ? 'page' : undefined}>
+        {id === 'current' ? 'now' : `${id} · ${STATS_VARIANT_NAMES[id]}`}
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .switcher {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: calc(100vw - 32px);
+    padding: 6px;
+    border: 1px solid var(--overlay-line);
+    border-radius: var(--radius-sm);
+    background: var(--overlay);
+    box-shadow: var(--overlay-shadow);
+    font: 500 11px/var(--leading) var(--mono);
+  }
+
+  .tag {
+    padding: 3px 6px;
+    color: var(--faint);
+  }
+
+  a {
+    padding: 3px 7px;
+    border-radius: 4px;
+    color: var(--dim);
+    text-decoration: none;
+  }
+
+  a[aria-current='page'] {
+    background: var(--sig);
+    color: var(--ink);
+  }
+</style>
