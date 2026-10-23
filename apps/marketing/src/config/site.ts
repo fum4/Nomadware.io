@@ -1,6 +1,8 @@
 // Site identity: the one home for names, URLs and SEO copy used by the head, JSON-LD and footer.
 export const SITE = {
   name: 'Nomadware',
+  /** The © line's holder (site-footer.astro); the brand name stays `name` everywhere else. */
+  copyrightHolder: 'NWARE',
   url: 'https://nomadware.io/',
   email: 'contact@nomadware.io',
   title: 'Nomadware — Software engineering, at agent speed',
