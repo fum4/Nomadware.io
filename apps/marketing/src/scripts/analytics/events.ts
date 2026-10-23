@@ -1,8 +1,8 @@
 import type { StatWindow } from '@nomadware/site-stats';
-import type { PostFailure } from '../contact/post-contact';
+import type { SendFailure } from '../contact/failure-message';
 
 /** Why a send didn't go through: blocked client-side, no Turnstile token, or the post's failure. */
-export type ContactFailReason = 'validation' | 'turnstile' | PostFailure;
+export type ContactFailReason = 'validation' | SendFailure;
 
 /**
  * Every custom event the site sends, with its properties (`null` = none). The names are a

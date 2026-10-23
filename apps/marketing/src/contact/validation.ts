@@ -1,6 +1,6 @@
 import { CONTACT } from '../constants';
 
-// The contact form's rules, shared by the browser (readiness, the email hint) and the endpoint
+// The contact form's rules, shared by the browser (readiness, the problems line) and the endpoint
 // (the authority). One home, so the two can't disagree about what a valid submission is.
 
 /** Something before the @, a dot-separated domain after it, no whitespace anywhere. */
@@ -29,18 +29,43 @@ export const isEmail = (value: string): boolean => {
   return email.length <= CONTACT.maxEmailLength && EMAIL_PATTERN.test(email);
 };
 
-const isName = (value: string): boolean => {
+/** The draft's fields, in the order the form shows them. */
+export const CONTACT_FIELDS = ['name', 'email', 'brief'] as const;
+export type ContactField = (typeof CONTACT_FIELDS)[number];
+
+/** What can be wrong with each field; one problem per field at most. */
+export type ContactProblem =
+  | { field: 'name'; kind: 'missing' | 'too_long' }
+  | { field: 'email'; kind: 'missing' | 'invalid' }
+  | { field: 'brief'; kind: 'missing' | 'too_short' | 'too_long' };
+
+function nameProblem(value: string): ContactProblem | null {
   const name = cleanLine(value);
-  return name.length > 0 && name.length <= CONTACT.maxNameLength;
-};
+  if (name.length === 0) return { field: 'name', kind: 'missing' };
+  if (name.length > CONTACT.maxNameLength) return { field: 'name', kind: 'too_long' };
+  return null;
+}
 
-const isBrief = (value: string): boolean => {
+function emailProblem(value: string): ContactProblem | null {
+  if (cleanLine(value).length === 0) return { field: 'email', kind: 'missing' };
+  return isEmail(value) ? null : { field: 'email', kind: 'invalid' };
+}
+
+function briefProblem(value: string): ContactProblem | null {
   const brief = cleanText(value);
-  return brief.length >= CONTACT.minBriefLength && brief.length <= CONTACT.maxBriefLength;
-};
+  if (brief.length === 0) return { field: 'brief', kind: 'missing' };
+  if (brief.length < CONTACT.minBriefLength) return { field: 'brief', kind: 'too_short' };
+  if (brief.length > CONTACT.maxBriefLength) return { field: 'brief', kind: 'too_long' };
+  return null;
+}
 
-export const isComplete = ({ name, email, brief }: ContactDraft): boolean =>
-  isName(name) && isEmail(email) && isBrief(brief);
+/** Everything wrong with a draft, in field order; empty when it can be sent. */
+export const contactProblems = ({ name, email, brief }: ContactDraft): ContactProblem[] =>
+  [nameProblem(name), emailProblem(email), briefProblem(brief)].filter(
+    (problem): problem is ContactProblem => problem !== null,
+  );
+
+export const isComplete = (draft: ContactDraft): boolean => contactProblems(draft).length === 0;
 
 /** The cleaned draft, or null when any field breaks the rules. */
 export function cleanDraft(draft: ContactDraft): ContactDraft | null {

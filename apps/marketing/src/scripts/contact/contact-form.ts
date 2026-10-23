@@ -1,25 +1,21 @@
 import { CONTACT } from '../../constants';
-import { SITE } from '../../config/site';
-import { isComplete, isEmail } from '../../contact/validation';
+import { isComplete } from '../../contact/validation';
 import type { ContactDraft } from '../../contact/validation';
 import { track } from '../analytics/track';
 import { hasFinePointer, isMobileViewport, onceVisible } from '../motion';
 import { caretOnFirstLine } from './caret-edge';
 import type { ContactLine } from './contact-line';
 import { readLines } from './contact-line';
+import type { SendFailure } from './failure-message';
+import { failureMessage } from './failure-message';
+import { createOutput } from './form-output';
 import { paintLine } from './paint-line';
-import type { PostResult } from './post-contact';
 import { postContact } from './post-contact';
+import type { Reveal } from './problem-reveal';
+import { QUIET, revealAll, revealField, shownProblems } from './problem-reveal';
 import { createChallenge } from './turnstile';
 
 const STATE = { idle: 'is-idle', typing: 'is-typing', ready: 'is-ready' } as const;
-
-function setFieldError(line: ContactLine, on: boolean): void {
-  if (!line.error) return;
-  line.error.classList.toggle('is-on', on);
-  line.error.textContent = on ? (line.error.dataset.error ?? '') : '';
-  line.control.setAttribute('aria-invalid', String(on));
-}
 
 export function initContactForm(): void {
   const form = document.querySelector<HTMLFormElement>('[data-contact]');
@@ -31,10 +27,12 @@ export function initContactForm(): void {
   if (!form || !output || !button || !trap || !challengeMount || !sitekey) return;
   form.noValidate = true;
   const lines = readLines(form);
+  const out = createOutput(output, lines);
   const challenge = createChallenge(challengeMount, sitekey);
   const buttonLabel = button.textContent ?? '';
   let typingTimer = 0;
   let sending = false;
+  let reveal: Reveal = QUIET;
   // Analytics: the desktop auto-focus below is not the visitor engaging, so it doesn't count.
   let autoFocusing = false;
   let engaged = false;
@@ -54,13 +52,11 @@ export function initContactForm(): void {
     (form.classList.contains(STATE.idle) && line === lines[0]);
   const paint = (line: ContactLine, fresh = false): void =>
     paintLine(line, showsCaret(line), fresh);
-
-  const say = (tone: 'is-ok' | 'is-bad', mark: string, message: string): void => {
-    const symbol = document.createElement('span');
-    symbol.className = tone;
-    symbol.textContent = mark;
-    output.replaceChildren(symbol, ` ${message}`);
-    output.classList.add('is-on');
+  /** Re-check after any change: the ready state, and the problems line once it may speak. */
+  const check = (): void => {
+    const current = draft();
+    form.classList.toggle(STATE.ready, isComplete(current));
+    out.problems(shownProblems(current, reveal));
   };
 
   const setSending = (on: boolean): void => {
@@ -76,7 +72,8 @@ export function initContactForm(): void {
       line.root.classList.remove('is-done');
       paint(line);
     });
-    form.classList.remove(STATE.ready);
+    reveal = QUIET;
+    check();
   };
 
   const send = async (): Promise<void> => {
@@ -84,12 +81,13 @@ export function initContactForm(): void {
     const current = draft();
     if (!isComplete(current)) {
       track('contact_form_failed', { reason: 'validation' });
-      say('is-bad', '✗', 'name, a valid email and a few words about the project, please');
+      reveal = revealAll(reveal);
+      check();
       return;
     }
     setSending(true);
-    // No token (script blocked, challenge failed, timed out) stays this: the same failure line.
-    let result: PostResult | { sent: false; reason: 'turnstile' } = {
+    // No token (script blocked, challenge failed, timed out) stays this: the spam-check line.
+    let result: { sent: true } | { sent: false; reason: SendFailure } = {
       sent: false,
       reason: 'turnstile',
     };
@@ -105,11 +103,11 @@ export function initContactForm(): void {
     }
     if (result.sent) {
       track('contact_form_succeeded');
-      say('is-ok', '✓', `sent. we'll reply to ${current.email.trim()} shortly.`);
       clearFields();
+      out.result('is-ok', '✓', `sent. we'll reply to ${current.email.trim()} shortly.`);
     } else {
       track('contact_form_failed', { reason: result.reason });
-      say('is-bad', '✗', `couldn't send — try again or write to ${SITE.email}`);
+      out.result('is-bad', '✗', failureMessage(result.reason));
     }
   };
 
@@ -124,7 +122,6 @@ export function initContactForm(): void {
 
   lines.forEach((line, index) => {
     const { control } = line;
-    const isEmailLine = line.root.dataset.field === 'email';
     paint(line);
 
     control.addEventListener('focus', () => {
@@ -139,7 +136,8 @@ export function initContactForm(): void {
       line.root.classList.remove('is-active');
       line.root.classList.toggle('is-done', control.value.length > 0);
       paint(line);
-      if (isEmailLine) setFieldError(line, control.value.length > 0 && !isEmail(control.value));
+      reveal = revealField(reveal, line.field, draft());
+      check();
     });
     control.addEventListener('input', () => {
       if (!started) track('contact_form_started');
@@ -151,8 +149,7 @@ export function initContactForm(): void {
         CONTACT.typingIdleMs,
       );
       paint(line, true);
-      form.classList.toggle(STATE.ready, isComplete(draft()));
-      if (isEmailLine && isEmail(control.value)) setFieldError(line, false);
+      check();
     });
     // Caret moves without typing (arrows, clicks, selection) repaint without the glow.
     // (`control` is an input-or-textarea union, so listeners see plain Events: narrow them.)

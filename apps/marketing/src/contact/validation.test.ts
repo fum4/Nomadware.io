@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { CONTACT } from '../constants';
-import { cleanDraft, isComplete, isEmail } from './validation';
+import { cleanDraft, contactProblems, isComplete, isEmail } from './validation';
 
-const valid = { name: 'Ada Lovelace', email: 'ada@example.com', brief: 'An engine for numbers.' };
+const valid = {
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  brief: 'An analytical engine for numbers, with a printer for the results.',
+};
 
 describe('isEmail', () => {
   it.each(['ada@example.com', 'a.b+tag@sub.example.co.uk', '  ada@example.com  '])(
@@ -38,8 +42,8 @@ describe('isComplete', () => {
   });
 
   it('needs a brief between the bounds', () => {
-    expect(isComplete({ ...valid, brief: 'abc' })).toBe(false);
-    expect(isComplete({ ...valid, brief: 'abcd' })).toBe(true);
+    expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.minBriefLength - 1) })).toBe(false);
+    expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.minBriefLength) })).toBe(true);
     expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.maxBriefLength) })).toBe(true);
     expect(isComplete({ ...valid, brief: 'x'.repeat(CONTACT.maxBriefLength + 1) })).toBe(false);
   });
@@ -49,17 +53,64 @@ describe('isComplete', () => {
   });
 });
 
+const kinds = (draft: typeof valid): string[] =>
+  contactProblems(draft).map(({ field, kind }) => `${field}:${kind}`);
+
+describe('contactProblems', () => {
+  it('is empty for a valid draft', () => expect(contactProblems(valid)).toEqual([]));
+
+  it('lists every field, in form order, when all are empty', () => {
+    expect(kinds({ name: '', email: '', brief: '' })).toEqual([
+      'name:missing',
+      'email:missing',
+      'brief:missing',
+    ]);
+  });
+
+  it('counts whitespace and control characters as missing', () => {
+    expect(kinds({ name: ' \u0000 ', email: '  ', brief: '\n\t ' })).toEqual([
+      'name:missing',
+      'email:missing',
+      'brief:missing',
+    ]);
+  });
+
+  it('tells a malformed email from a missing one', () => {
+    expect(kinds({ ...valid, email: 'ada@' })).toEqual(['email:invalid']);
+    expect(kinds({ ...valid, email: 'a'.repeat(CONTACT.maxEmailLength) + '@x.io' })).toEqual([
+      'email:invalid',
+    ]);
+  });
+
+  it('tells a short or long brief from a missing one', () => {
+    expect(kinds({ ...valid, brief: 'abc' })).toEqual(['brief:too_short']);
+    expect(kinds({ ...valid, brief: 'x'.repeat(CONTACT.maxBriefLength + 1) })).toEqual([
+      'brief:too_long',
+    ]);
+  });
+
+  it('flags a name over the cap', () => {
+    expect(kinds({ ...valid, name: 'x'.repeat(CONTACT.maxNameLength + 1) })).toEqual([
+      'name:too_long',
+    ]);
+  });
+
+  it('names only the broken fields', () => {
+    expect(kinds({ ...valid, name: '', brief: 'ab' })).toEqual(['name:missing', 'brief:too_short']);
+  });
+});
+
 describe('cleanDraft', () => {
   it('strips control characters: all of them from lines, all but tab/newline from the brief', () => {
     const cleaned = cleanDraft({
       name: ' Ada\r\nBcc: evil@x.com\u0000 ',
       email: 'ada@example.com\u0007',
-      brief: 'line one\r\nline\ttwo\u0000\u001b[31m',
+      brief: 'line one\r\nline\ttwo\u0000\u001b[31m — a booking app for clinics, with payments',
     });
     expect(cleaned).toEqual({
       name: 'AdaBcc: evil@x.com',
       email: 'ada@example.com',
-      brief: 'line one\nline\ttwo[31m',
+      brief: 'line one\nline\ttwo[31m — a booking app for clinics, with payments',
     });
   });
 
