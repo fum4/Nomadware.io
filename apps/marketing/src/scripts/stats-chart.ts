@@ -12,6 +12,7 @@ import {
   formatPrsMerged,
 } from '../format/format-activity';
 import type { TraceDraw } from './trace-draw';
+import { pulseMarkers } from './marker-pulse';
 import { drawPlot, runTraceDraw } from './trace-draw';
 
 const HOUR_MS = 3_600_000;
@@ -19,14 +20,17 @@ const HOUR_MS = 3_600_000;
 /**
  * The chart as stats-card.ts sees it: its series (null without a chart), a range's first draw
  * (`onReach` gets the pen's share of the width every frame; without a chart, the same clock with
- * nothing drawn) and hiding the tooltip (on a range toggle).
+ * nothing drawn), its markers' pulse and hiding the tooltip (on a range toggle).
  */
 export interface StatsChart {
   series: StatsSeries | null;
   draw: (range: StatWindow, onReach: (reach: number) => void) => TraceDraw;
+  /** Pulse a drawn range's caught markers, all together (it shows again on a toggle). */
+  pulse: (range: StatWindow) => void;
   reset: () => void;
 }
 
+const noop = (): void => undefined;
 const drawNothing = (onReach: (reach: number) => void): TraceDraw =>
   runTraceDraw(null, onReach, () => undefined);
 
@@ -111,8 +115,9 @@ function snap(plot: HTMLElement, series: StatSeries, generatedAtMs: number, clie
 export function initStatsChart(root: HTMLElement): StatsChart {
   const chart = root.querySelector<HTMLElement>('[data-stats-chart]');
   const data = chart ? readSeries(chart) : null;
-  if (!chart || !data)
-    return { series: null, draw: (_, onReach) => drawNothing(onReach), reset: () => undefined };
+  if (!chart || !data) {
+    return { series: null, draw: (_, onReach) => drawNothing(onReach), pulse: noop, reset: noop };
+  }
   const { series, generatedAtMs } = data;
 
   const reset = (): void =>
@@ -126,10 +131,14 @@ export function initStatsChart(root: HTMLElement): StatsChart {
     if (plot && isStatWindow(range)) snap(plot, series[range], generatedAtMs, event.clientX);
   };
 
+  const plotOf = (range: StatWindow): HTMLElement | null =>
+    chart.querySelector<HTMLElement>(`.plot[data-range-label="${range}"]`);
   const draw = (range: StatWindow, onReach: (reach: number) => void): TraceDraw => {
-    const plot = chart.querySelector<HTMLElement>(`.plot[data-range-label="${range}"]`);
+    const plot = plotOf(range);
     return plot ? drawPlot(plot, onReach) : drawNothing(onReach);
   };
+  const pulse = (range: StatWindow): void =>
+    pulseMarkers([...(plotOf(range)?.querySelectorAll<HTMLElement>('[data-catch]') ?? [])]);
 
   chart.addEventListener('pointerdown', follow);
   chart.addEventListener('pointermove', (event) => {
@@ -145,5 +154,5 @@ export function initStatsChart(root: HTMLElement): StatsChart {
     if (event.target instanceof Node && !chart.contains(event.target)) reset();
   });
 
-  return { series, draw, reset };
+  return { series, draw, pulse, reset };
 }

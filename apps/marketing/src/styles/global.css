@@ -138,3 +138,15 @@ a {
     padding: 18px 20px 24px;
   }
 }
+
+/* A dot's pulse: one ring of --pulse-color expanding off it and fading. The stats card's live dot
+   (looping) and the chart's caught markers (once, as each appears or its range shows) share it. */
+@keyframes ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--pulse-color);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}

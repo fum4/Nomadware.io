@@ -95,6 +95,7 @@ export function initStats(): () => Promise<void> {
     inFlight?.cancel();
     if (drawnRanges.has(range)) {
       recount(stats, range);
+      chart.pulse(range);
       return Promise.resolve();
     }
     const { draw, drawn } = drawRange(stats, chart, range);

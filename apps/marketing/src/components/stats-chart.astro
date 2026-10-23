@@ -127,6 +127,21 @@ const plots = STAT_WINDOWS.map((range) => {
     pointer-events: none;
   }
 
+  /* One warm ring (global.css ring-pulse) as the marker appears and whenever its range shows
+     again (data-pulse, restarted by scripts/marker-pulse.ts). On a ring of its own, so the
+     marker's glow stays. */
+  .catch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    --pulse-color: var(--warm-glow);
+  }
+
+  .catch[data-pulse]::after {
+    animation: ring-pulse 0.7s ease-out;
+  }
+
   :global(html.js) .plot:not([data-drawn]) .catch:not([data-reached]) {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.2);

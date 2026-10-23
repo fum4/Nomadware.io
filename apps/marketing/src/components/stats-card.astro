@@ -100,23 +100,14 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     height: 6px;
     border-radius: 50%;
     background: var(--sig);
-    animation: pulse 2s infinite;
+    --pulse-color: var(--sig-glow);
+    animation: ring-pulse 2s infinite;
   }
 
   /* Same box, so nothing moves: only the colour and the pulse go. */
   .stale .dot {
     background: var(--faint);
     animation: none;
-  }
-
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 var(--sig-glow);
-    }
-    70%,
-    100% {
-      box-shadow: 0 0 0 6px transparent;
-    }
   }
 
   .seg {
