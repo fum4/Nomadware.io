@@ -5,6 +5,9 @@ import { FINE_POINTER_QUERY, MOBILE_QUERY } from '../constants';
 
 export const isMobileViewport = (): boolean => matchMedia(MOBILE_QUERY).matches;
 
+/** An Apple device (Mac, iPhone, iPad — iPadOS reports itself as a Mac): ⌘ rather than Ctrl. */
+export const isApplePlatform = (): boolean => /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+
 /** A mouse-first device: the only place we auto-focus inputs or chase the cursor. */
 export const hasFinePointer = (): boolean => matchMedia(FINE_POINTER_QUERY).matches;
 

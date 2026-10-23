@@ -255,6 +255,11 @@ export const CONTACT = {
   /** Form auto-focuses "name" once this share of it is on screen (desktop only). */
   autoFocusThreshold: 0.9,
   typingIdleMs: 500,
+  /**
+   * The send shortcut's hint: either modifier sends everywhere (contact-form.ts), the hint names
+   * the platform's own. Server-rendered for Apple; scripts/contact/send-hint.ts swaps it elsewhere.
+   */
+  sendKeys: { apple: '⌘ ⏎', other: 'Ctrl ⏎' },
   /** Field limits, enforced by the client (maxlength, readiness) and the endpoint alike. */
   maxNameLength: 120,
   /** RFC 5321's practical ceiling for a whole address. */
