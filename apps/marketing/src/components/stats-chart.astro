@@ -130,6 +130,36 @@ const plots = STAT_WINDOWS.map((range) => {
     pointer-events: none;
   }
 
+  /* TEMPORARY: caught-marker treatments to compare (?markers=1..5, scripts/marker-variants.ts
+     sets data-markers on the card). Delete the losers once one is picked. */
+  /* 1 cut-out: a solid ring of the plot's colour punches the dot out of the line. */
+  :global([data-markers='1']) .catch {
+    box-shadow: 0 0 0 2px var(--plot-bg);
+  }
+
+  /* 2 hollow: a warm ring, the plot's colour inside. */
+  :global([data-markers='2']) .catch {
+    border: 1.5px solid var(--warm);
+    background: var(--plot-bg);
+    box-shadow: none;
+  }
+
+  /* 3 rail: off the trace, on a rail just above the plot's baseline, at the bucket's x. */
+  :global([data-markers='3']) .catch {
+    top: calc(100% - 3px);
+  }
+
+  /* 4 red-pink: the whole issues colour (markers, counter, tooltip row) goes red-pink. */
+  :global([data-markers='4']) {
+    --warm: var(--hot);
+    --warm-glow: var(--hot-glow);
+  }
+
+  /* 5 fade: a soft dark halo under the dot, over the line, fading out to ~3× its radius. */
+  :global([data-markers='5']) .catch {
+    box-shadow: 0 0 7px 3px var(--plot-veil);
+  }
+
   /* One warm ring (global.css ring-pulse) as the marker appears and whenever its range shows
      again (data-pulse, restarted by scripts/marker-pulse.ts). On a ring of its own, so the
      marker's glow stays. */
