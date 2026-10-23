@@ -5,7 +5,7 @@ export const SITE = {
   email: 'contact@nomadware.io',
   title: 'Nomadware — Software engineering, at agent speed',
   description:
-    'Nomadware is a small software studio with large output: web, mobile, backend and infra, built with human judgment and shipped at agent speed.',
+    'Bring us your idea. We unpack, question and sharpen it. We design, build and ship the code that connects it all.',
   locale: 'en_US',
   themeColor: '#0c0b12',
   ogImage: {
