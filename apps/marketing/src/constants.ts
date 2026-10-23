@@ -311,6 +311,15 @@ export const STATS_CHART = {
   markerMaxArea: 2,
 } as const;
 
+/**
+ * The caught markers' pulses (scripts/marker-pulse.ts): one after another, each at least
+ * spacingMs after the last, the spacing tightened so a queue drains within maxRippleMs.
+ */
+export const MARKER_PULSE = {
+  spacingMs: 120,
+  maxRippleMs: 1_500,
+} as const;
+
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */
 export const STATS_FETCH_TIMEOUT_MS = 800;
 /** Older than this, the snapshot reads as stale: the live dot goes grey and stops pulsing. */

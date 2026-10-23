@@ -13,7 +13,7 @@ import {
   formatPrsMerged,
 } from '../format/format-activity';
 import type { TraceDraw } from './trace-draw';
-import { pulseMarkers } from './marker-pulse';
+import { createPulseQueue } from './marker-pulse';
 import { drawPlot, runTraceDraw } from './trace-draw';
 
 const HOUR_MS = 3_600_000;
@@ -26,7 +26,7 @@ const HOUR_MS = 3_600_000;
 export interface StatsChart {
   series: StatsSeries | null;
   draw: (range: StatWindow, onReach: (reach: number) => void) => TraceDraw;
-  /** Pulse a drawn range's caught markers, all together (it shows again on a toggle). */
+  /** Ripple a drawn range's caught markers left to right (it shows again on a toggle). */
   pulse: (range: StatWindow) => void;
   reset: () => void;
 }
@@ -137,14 +137,19 @@ export function initStatsChart(root: HTMLElement): StatsChart {
     if (plot && isStatWindow(range)) snap(plot, series[range], generatedAtMs, event.clientX);
   };
 
+  // One queue for the whole chart: a toggle drops the other range's waiting pulses.
+  const pulses = createPulseQueue();
   const plotOf = (range: StatWindow): HTMLElement | null =>
     chart.querySelector<HTMLElement>(`.plot[data-range-label="${range}"]`);
   const draw = (range: StatWindow, onReach: (reach: number) => void): TraceDraw => {
     const plot = plotOf(range);
-    return plot ? drawPlot(plot, onReach) : drawNothing(onReach);
+    pulses.cancel();
+    return plot ? drawPlot(plot, pulses, onReach) : drawNothing(onReach);
   };
-  const pulse = (range: StatWindow): void =>
-    pulseMarkers([...(plotOf(range)?.querySelectorAll<HTMLElement>('[data-catch]') ?? [])]);
+  const pulse = (range: StatWindow): void => {
+    pulses.cancel();
+    pulses.add([...(plotOf(range)?.querySelectorAll<HTMLElement>('[data-catch]') ?? [])]);
+  };
 
   chart.addEventListener('pointerdown', follow);
   chart.addEventListener('pointermove', (event) => {

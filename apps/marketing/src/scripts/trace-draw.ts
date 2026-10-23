@@ -1,6 +1,6 @@
 import { pointsReached } from '../chart/synced-count';
 import { TRACE_DRAW } from '../constants';
-import { pulseMarkers } from './marker-pulse';
+import type { PulseQueue } from './marker-pulse';
 
 // A range's first showing on the stats card, on one clock: the trace's wipe (a Web Animation on
 // the plot's SVG clip, so the browser runs it) and, read from it every frame, how far the pen has
@@ -66,11 +66,15 @@ export function runTraceDraw(
 }
 
 /**
- * Draw one plot of the chart: the wipe, its caught markers popping (and pulsing) as the pen
- * reaches their point (the same `pointsReached` the legend counts with, so a marker and its count
+ * Draw one plot of the chart: the wipe, its caught markers popping as the pen reaches their
+ * point (each queuing its pulse on `pulses`) (the same `pointsReached` the legend counts with, so a marker and its count
  * land together), and `data-drawn` at the end: from then on the plot shows as is.
  */
-export function drawPlot(plot: HTMLElement, onReach: (reach: number) => void): TraceDraw {
+export function drawPlot(
+  plot: HTMLElement,
+  pulses: PulseQueue,
+  onReach: (reach: number) => void,
+): TraceDraw {
   const points = Number(plot.dataset.points);
   const markers = [...plot.querySelectorAll<HTMLElement>('[data-catch]')].map((element) => ({
     element,
@@ -85,7 +89,7 @@ export function drawPlot(plot: HTMLElement, onReach: (reach: number) => void): T
         ({ element, index }) => index < passed && !element.hasAttribute('data-reached'),
       );
       appearing.forEach(({ element }) => element.setAttribute('data-reached', ''));
-      pulseMarkers(appearing.map(({ element }) => element));
+      pulses.add(appearing.map(({ element }) => element));
       onReach(reach);
     },
     () => plot.setAttribute('data-drawn', ''),
