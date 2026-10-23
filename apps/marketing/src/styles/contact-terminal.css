@@ -13,65 +13,65 @@
    scripts/contact/term-frame.ts; otherwise it would play on load). */
 .term:focus-within {
   border-color: var(--sig-soft);
-  animation: term-frame-on 1.613s steps(1, end) 1 forwards;
+  animation: term-frame-on 1.113s steps(1, end) 1 forwards;
 }
 
 .term.was-lit:not(:focus-within) {
   animation: term-frame-off 0.5s steps(1, end) 1 forwards;
 }
 
-/* A double spark, a 1 s dark beat, then the send button's rhythm (term-surge); percentages are
-   of the 1.6 s run. */
+/* A double spark, a 0.5 s dark beat, then the send button's rhythm (term-surge); percentages are
+   of the 1.1 s run. */
 @keyframes term-frame-on {
   0% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  3.35% {
+  4.85% {
     border-color: var(--line);
     box-shadow: none;
   }
-  5.02% {
+  7.28% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  7.25% {
+  10.51% {
     border-color: var(--line);
     box-shadow: none;
   }
-  69.25% {
+  55.44% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  71.48% {
+  58.67% {
     border-color: var(--line);
     box-shadow: none;
   }
-  73.16% {
+  61.1% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  78.18% {
+  68.37% {
     border-color: var(--line);
     box-shadow: none;
   }
-  79.85% {
+  70.8% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  82.08% {
+  74.03% {
     border-color: var(--line);
     box-shadow: none;
   }
-  83.76% {
+  76.46% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
-  95.47% {
+  93.44% {
     border-color: var(--line);
     box-shadow: none;
   }
-  96.59% {
+  95.06% {
     border-color: var(--sig-soft);
     box-shadow: 0 0 5px color-mix(in srgb, var(--sig) 25%, transparent);
   }
