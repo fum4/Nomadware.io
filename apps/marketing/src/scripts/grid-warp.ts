@@ -121,13 +121,20 @@ export function initGridWarp(): void {
     }
   };
 
+  let lastTick = 0;
   const tick = (now: number): void => {
-    const target = now - lastMove < GRID_WARP.idleMs ? 1 : 0;
+    const elapsed = lastTick === 0 ? 16 : now - lastTick;
+    lastTick = now;
+    const moving = now - lastMove < GRID_WARP.idleMs;
     well.x += (pointer.x - well.x) * GRID_WARP.follow;
     well.y += (pointer.y - well.y) * GRID_WARP.follow;
-    well.depth += (target - well.depth) * GRID_WARP.ease;
+    // Filling: a quick ease toward full. Draining: exponential, so it reaches restDepth exactly
+    // fadeOutMs after the pointer stopped — fast at first, ever slower (an ease-out).
+    if (moving) well.depth += (1 - well.depth) * GRID_WARP.ease;
+    else well.depth *= GRID_WARP.restDepth ** (elapsed / GRID_WARP.fadeOutMs);
     draw();
-    const settled = target === 0 && well.depth <= GRID_WARP.restDepth;
+    const settled = !moving && well.depth <= GRID_WARP.restDepth;
+    if (settled) lastTick = 0;
     frameId = settled ? 0 : requestAnimationFrame(tick);
   };
 

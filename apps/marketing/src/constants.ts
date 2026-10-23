@@ -101,10 +101,12 @@ export const GRID_WARP = {
   sampleStepPx: 10,
   /** Per frame, how far the well's centre closes on the pointer (0–1). */
   follow: 0.22,
-  /** Per frame, how far the well's depth eases to its target (0–1). */
+  /** Per frame, how far the well's depth eases in while the pointer moves (0–1). */
   ease: 0.1,
-  /** The well fills while the pointer moves and drains this long after it stops. */
-  idleMs: 700,
+  /** The pointer counts as stopped this long after its last move. */
+  idleMs: 300,
+  /** Once stopped, the bend and its glow drain from full to rest over this long, easing out. */
+  fadeOutMs: 2_800,
   /** Inner share of the radius tinted --grid-glow-core before it turns --grid-glow. */
   glowCoreShare: 0.15,
   /** Below this depth the well counts as gone: the loop stops on a straight grid. */
