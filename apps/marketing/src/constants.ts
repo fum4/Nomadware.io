@@ -145,7 +145,7 @@ export const DOT_FIELD = {
    * Plays whatever prefers-reduced-motion says (README § Motion).
    */
   /** The first fade-in waits this long after the field's first frame. */
-  appearDelayMs: 0,
+  appearDelayMs: 500,
   appearSpreadMs: 2_500,
   appearMinMs: 500,
   appearMaxMs: 1_200,
