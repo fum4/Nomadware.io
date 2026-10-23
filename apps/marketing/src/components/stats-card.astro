@@ -132,20 +132,36 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
     animation: none;
   }
 
+  /* A thumb-sized toggle at every size: a roomy chip, and a hit area 6px taller than it on each
+     side (the ::after). Its corners are the buttons' own, so the group doesn't clip that area. */
   .seg {
     display: inline-flex;
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
-    overflow: hidden;
   }
 
   .seg button {
-    padding: 3px 8px;
+    position: relative;
+    padding: 6px 13px;
     border: 0;
     background: none;
     color: var(--dim);
-    font: 500 10px/var(--leading) var(--mono);
+    font: 500 12px/var(--leading) var(--mono);
     cursor: pointer;
+  }
+
+  .seg button::after {
+    content: '';
+    position: absolute;
+    inset: -6px 0;
+  }
+
+  .seg button:first-child {
+    border-radius: calc(var(--radius-sm) - 1px) 0 0 calc(var(--radius-sm) - 1px);
+  }
+
+  .seg button:last-child {
+    border-radius: 0 calc(var(--radius-sm) - 1px) calc(var(--radius-sm) - 1px) 0;
   }
 
   .seg button[aria-pressed='true'] {
@@ -204,32 +220,6 @@ const stale = Date.parse(renderedAt) - Date.parse(snapshot.generatedAt) > STATS_
 
     .live {
       left: 14px;
-    }
-
-    /* A thumb-sized toggle: a bigger chip, and a hit area 6px taller than it on each side (the
-       ::after). Its corners are the buttons' own, so the group doesn't clip that area. */
-    .seg {
-      overflow: visible;
-    }
-
-    .seg button {
-      position: relative;
-      padding: 6px 13px;
-      font-size: 12px;
-    }
-
-    .seg button::after {
-      content: '';
-      position: absolute;
-      inset: -6px 0;
-    }
-
-    .seg button:first-child {
-      border-radius: calc(var(--radius-sm) - 1px) 0 0 calc(var(--radius-sm) - 1px);
-    }
-
-    .seg button:last-child {
-      border-radius: 0 calc(var(--radius-sm) - 1px) calc(var(--radius-sm) - 1px) 0;
     }
 
     .legend {
