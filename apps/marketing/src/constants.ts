@@ -134,9 +134,12 @@ export const DOT_FIELD = {
   homePull: 0.0004,
   /** Pull toward the cursor at its strongest; tapers to 0 at CURSOR_FIELD.radiusPx, like the grid's. */
   gatherForce: 0.25,
-  /** Inside this many CSS px of the cursor a dot is pushed back out, so the cursor stays clear. */
-  gatherCorePx: 16,
-  gatherCorePush: 0.5,
+  /**
+   * Inside this many CSS px of the cursor a dot is pushed back out, hard enough that the pull and
+   * the crowd behind can't press it in: the gathered dots settle as a ring round an empty core.
+   */
+  gatherCorePx: 44,
+  gatherCorePush: 1.5,
   /**
    * Dots closer than this (CSS px) push each other apart (scripts/dot-separation.ts): what packs
    * the gathered dots into an even disc instead of a heap on the side they came from.
