@@ -12,9 +12,11 @@ import '../styles/global.css';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Marks JS as available before first paint, so no-JS fallbacks never flash. -->
+    <!-- Marks JS as available before first paint, so no-JS fallbacks never flash. A reload opens
+         at the top, where the intro plays, not where the reader left off (a #link still lands). -->
     <script is:inline>
       document.documentElement.classList.add('js');
+      history.scrollRestoration = 'manual';
     </script>
     <Font cssVariable="--font-geist" preload />
     <Font cssVariable="--font-geist-mono" />
