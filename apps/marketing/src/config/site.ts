@@ -5,7 +5,7 @@ export const SITE = {
   email: 'contact@nomadware.io',
   title: 'Nomadware — Software engineering, at agent speed',
   description:
-    'Bring us your idea. We unpack, question and sharpen it. We design, build and ship the code that connects it all.',
+    'Bring us your idea. We unpack and sharpen it. We design, build and ship the code that connects it all.',
   locale: 'en_US',
   themeColor: '#0c0b12',
   ogImage: {
