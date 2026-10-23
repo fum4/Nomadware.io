@@ -1,5 +1,7 @@
 import { CURSOR_FIELD, GRID_WARP } from '../constants';
 import { fieldStrength } from './cursor-field';
+import type { Rgba } from './grid-glow';
+import { glowGradient, parseColor } from './grid-glow';
 import { hasFinePointer, isMobileViewport } from './motion';
 
 /** global.css: the frame stops painting its CSS grid once the canvas has painted the same one. */
@@ -30,6 +32,10 @@ export function initGridWarp(): void {
   let grid = 0;
   let line = 0;
   let color = '';
+  let glow: Rgba = [0, 0, 0, 0];
+  let glowCore: Rgba = [0, 0, 0, 0];
+  /** The bent stretches only: stroked a second time with the glow. */
+  let bentPath = new Path2D();
   let ratio = 1;
   let lastMove = -Infinity;
   let frameId = 0;
@@ -39,6 +45,8 @@ export function initGridWarp(): void {
     grid = Number.parseFloat(style.getPropertyValue('--grid'));
     line = Number.parseFloat(style.getPropertyValue('--grid-line'));
     color = style.getPropertyValue('--grid-color').trim();
+    glow = parseColor(context, style.getPropertyValue('--grid-glow'));
+    glowCore = parseColor(context, style.getPropertyValue('--grid-glow-core'));
   };
 
   const resize = (): void => {
@@ -72,10 +80,13 @@ export function initGridWarp(): void {
     const reachFrom = Math.max(0, (vertical ? well.y : well.x) - CURSOR_FIELD.radiusPx);
     const reachTo = Math.min(length, (vertical ? well.y : well.x) + CURSOR_FIELD.radiusPx);
     context.moveTo(...toXY(fixed + centre, 0));
+    bentPath.moveTo(...bentAt(reachFrom));
     for (let along = reachFrom; along < reachTo; along += GRID_WARP.sampleStepPx) {
       context.lineTo(...bentAt(along));
+      bentPath.lineTo(...bentAt(along));
     }
     context.lineTo(...bentAt(reachTo));
+    bentPath.lineTo(...bentAt(reachTo));
     context.lineTo(...toXY(fixed + centre, length));
   };
 
@@ -91,6 +102,7 @@ export function initGridWarp(): void {
     context.lineWidth = line;
     const bent = well.depth > GRID_WARP.restDepth;
     const reach = CURSOR_FIELD.radiusPx;
+    bentPath = new Path2D();
     context.beginPath();
     const firstX = origin.left + Math.ceil(-origin.left / grid) * grid;
     for (let x = firstX; x < width; x += grid) {
@@ -103,6 +115,10 @@ export function initGridWarp(): void {
       else context.fillRect(0, y, width, line);
     }
     context.stroke();
+    if (bent) {
+      context.strokeStyle = glowGradient(context, well, glowCore, glow);
+      context.stroke(bentPath);
+    }
   };
 
   const tick = (now: number): void => {

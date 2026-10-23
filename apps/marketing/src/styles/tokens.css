@@ -5,6 +5,11 @@
   /* The page's grid paper (global.css .frame); borders keep --line. Fainter on desktop, where
      it shows in the wide gutters beside the column halo; phones (below) keep it stronger. */
   --grid-color: rgba(255, 255, 255, 0.045);
+  /* Added on top of a grid line where the cursor bends it (scripts/grid-warp.ts), at full
+     strength at the cursor and fading with the bend: white (≈3× the line in total), with a faint
+     lime core. */
+  --grid-glow: rgba(255, 255, 255, 0.09);
+  --grid-glow-core: rgba(198, 255, 74, 0.11);
   --fg: #ecebf3;
   /* Between --fg and --dim: a lead line under a --fg heading (how-we-work subtitles). */
   --soft: #b9b7c8;

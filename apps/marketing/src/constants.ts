@@ -95,6 +95,8 @@ export const GRID_WARP = {
   ease: 0.1,
   /** The well fills while the pointer moves and drains this long after it stops. */
   idleMs: 700,
+  /** Inner share of the radius tinted --grid-glow-core before it turns --grid-glow. */
+  glowCoreShare: 0.15,
   /** Below this depth the well counts as gone: the loop stops on a straight grid. */
   restDepth: 0.002,
 } as const;
