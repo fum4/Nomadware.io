@@ -11,3 +11,8 @@ export function fieldStrength(distance: number): number {
   const falloff = 1 - t * t;
   return falloff * falloff;
 }
+
+/** Whether the cursor is over a control (CURSOR_FIELD.quietOver), where the field lets go. */
+export function overControl(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest(CURSOR_FIELD.quietOver) !== null;
+}

@@ -1,5 +1,6 @@
 import { CURSOR_FIELD, GRID_WARP } from '../constants';
 import { warpBands } from './band-warp';
+import { overControl } from './cursor-field';
 import { bendPoint, wellIsBending } from './grid-bend';
 import type { Rgba } from './grid-glow';
 import { glowGradient, parseColor } from './grid-glow';
@@ -142,6 +143,12 @@ export function initGridWarp(): void {
     'pointermove',
     (event) => {
       if (event.pointerType !== 'mouse') return;
+      // Over a control the well drains where it is, as if the cursor had left the page.
+      if (overControl(event.target)) {
+        present = false;
+        wake();
+        return;
+      }
       pointer.x = event.clientX;
       pointer.y = event.clientY;
       // Arriving from outside: the well starts under the cursor rather than sweeping in.

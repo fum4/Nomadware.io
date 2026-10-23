@@ -1,4 +1,5 @@
 import { DOT_FIELD } from '../constants';
+import { overControl } from './cursor-field';
 
 // The pointer over the hero, as the dot field (dot-field.ts) sees it: where it is (canvas px)
 // and how long it has rested.
@@ -24,6 +25,12 @@ export function trackPointer(
   // Where the pointer last moved more than stillPx from, and when: it is still once stillMs pass.
   const anchor = { x: OFF_SCREEN, y: OFF_SCREEN, at: 0 };
   host.addEventListener('pointermove', (event) => {
+    // Over a control the dots let go, as if the cursor had left the hero.
+    if (overControl(event.target)) {
+      position.x = OFF_SCREEN;
+      position.y = OFF_SCREEN;
+      return;
+    }
     const bounds = canvas.getBoundingClientRect();
     position.x = (event.clientX - bounds.left) * scale;
     position.y = (event.clientY - bounds.top) * scale;

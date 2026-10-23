@@ -97,6 +97,8 @@ export const RELATIVE_TIME_REFRESH_MS = 60_000;
  */
 export const CURSOR_FIELD = {
   radiusPx: 220,
+  /** Over one of these the field lets go, as if the cursor had left: a control is for clicking. */
+  quietOver: 'a[href], button, [role="button"], summary, select, label',
 } as const;
 
 /** The grid's bend toward the cursor (scripts/grid-warp.ts). Lengths in CSS px. */
