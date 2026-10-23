@@ -1,130 +1,83 @@
-import type { StatKey, StatWindow } from '@nomadware/site-stats';
-import { isStatKey, isStatWindow } from '@nomadware/site-stats';
+import type { StatWindow } from '@nomadware/site-stats';
+import { isStatWindow } from '@nomadware/site-stats';
 
-import {
-  COUNT_UP_INTRO_MS,
-  COUNT_UP_TOGGLE_MS,
-  COUNT_UP_VISIBLE_THRESHOLD,
-  DEFAULT_STAT_WINDOW,
-} from '../constants';
-import { formatStat } from '../format/format-stat';
+import { countAlong } from '../chart/synced-count';
+import { COUNT_UP_TOGGLE_MS, COUNT_UP_VISIBLE_THRESHOLD, DEFAULT_STAT_WINDOW } from '../constants';
 import { STATS_VIEWED_THRESHOLD } from './analytics/constants';
 import { track } from './analytics/track';
+import { easeOutExpo } from './easing';
 import { onceVisible } from './motion';
+import type { StatElement } from './stat-elements';
+import { lockWidths, paintValues, readStats, targetsOf } from './stat-elements';
+import type { StatsChart } from './stats-chart';
 import { initStatsChart } from './stats-chart';
-import { easeInOutExpo, easeOutExpo } from './easing';
+import type { TraceDraw } from './trace-draw';
 
-/** How a count runs: its curve and its length. */
-interface CountMotion {
-  ease: (t: number) => number;
-  durationMs: number;
-}
-
-/** The intro builds up and lands softly; a toggle answers at once. */
-const INTRO_COUNT: CountMotion = { ease: easeInOutExpo, durationMs: COUNT_UP_INTRO_MS };
-const TOGGLE_COUNT: CountMotion = { ease: easeOutExpo, durationMs: COUNT_UP_TOGGLE_MS };
-
-interface StatElement {
-  element: HTMLElement;
-  key: StatKey;
-  values: Partial<Record<StatWindow, number>>;
-  /** The value on screen right now (mid-count too), where the next count starts from. */
-  shown: number;
-}
-
-function parseValues(raw: string | undefined): Partial<Record<StatWindow, number>> {
-  const parsed: unknown = JSON.parse(raw ?? '{}');
-  const values: Partial<Record<StatWindow, number>> = {};
-  if (typeof parsed !== 'object' || parsed === null) return values;
-  for (const [range, value] of Object.entries(parsed)) {
-    if (isStatWindow(range) && typeof value === 'number') values[range] = value;
-  }
-  return values;
-}
-
-function readStats(root: HTMLElement): StatElement[] {
-  return [...root.querySelectorAll<HTMLElement>('[data-stat]')].flatMap((element) => {
-    const key = element.dataset.stat;
-    if (!isStatKey(key)) return [];
-    const values = parseValues(element.dataset.values);
-    return [{ element, key, values, shown: values[DEFAULT_STAT_WINDOW] ?? 0 }];
-  });
-}
-
-interface Count {
-  from: number;
-  to: number;
-}
-
-const targetsOf = (stats: StatElement[], range: StatWindow): number[] =>
-  stats.map((stat) => stat.values[range] ?? 0);
+/** Bumped by every count, so a toggle mid-count stops the older one instead of racing it. */
+let latestCount = 0;
 
 /**
- * Pin each stat's width to the wider of what it shows now and its target, so a count in either
- * direction never moves a neighbour. In-between values print with the larger end's precision
- * (`paint`), which is never wider than that end.
+ * A range's first showing: its trace draws and every number counts in step with the pen, from 0
+ * to its total (synced-count.ts). Resolves when drawn (true) or cut short by a toggle (false).
  */
-function lockWidths(stats: StatElement[], targets: number[]): void {
-  stats.forEach((stat) => (stat.element.style.minWidth = ''));
-  const current = stats.map((stat) => stat.element.offsetWidth);
-  const texts = stats.map((stat) => stat.element.textContent);
-  stats.forEach((stat, index) => {
-    stat.element.textContent = formatStat(stat.key, targets[index] ?? 0);
-  });
-  const target = stats.map((stat) => stat.element.offsetWidth);
-  stats.forEach((stat, index) => {
-    stat.element.textContent = texts[index] ?? '';
-    stat.element.style.minWidth = `${Math.max(current[index] ?? 0, target[index] ?? 0)}px`;
-  });
-}
-
-function paint(
+function drawRange(
   stats: StatElement[],
-  counts: Count[],
-  progress: number,
-  ease: (t: number) => number,
-): void {
-  const eased = ease(progress);
-  stats.forEach((stat, index) => {
-    const { from, to } = counts[index] ?? { from: 0, to: 0 };
-    stat.shown = progress >= 1 ? to : from + (to - from) * eased;
-    stat.element.textContent =
-      progress >= 1
-        ? formatStat(stat.key, to)
-        : formatStat(stat.key, stat.shown, Math.max(from, to));
-  });
-}
-
-/** Bumped by every `show`, so a toggle mid-count stops the older count instead of racing it. */
-let latestShow = 0;
-
-/**
- * Show one range; resolves when its numbers have settled (or a newer `show` took over). Every
- * number counts from what it shows now (0 in the intro, the other range's value on a toggle, the
- * in-flight value on a toggle mid-count) to its target as `motion` says, inside its locked width.
- */
-function show(stats: StatElement[], range: StatWindow, motion: CountMotion): Promise<void> {
-  const run = ++latestShow;
+  chart: StatsChart,
+  range: StatWindow,
+): { draw: TraceDraw; drawn: Promise<boolean> } {
+  const run = ++latestCount;
   const targets = targetsOf(stats, range);
-  const counts = stats.map((stat, index) => ({ from: stat.shown, to: targets[index] ?? 0 }));
   lockWidths(stats, targets);
-  return new Promise((resolve) => {
-    const start = performance.now();
-    const step = (now: number): void => {
-      if (run !== latestShow) return resolve();
-      const progress = Math.min(1, (now - start) / motion.durationMs);
-      paint(stats, counts, progress, motion.ease);
-      if (progress < 1) requestAnimationFrame(step);
-      else resolve();
-    };
-    requestAnimationFrame(step);
+  const counters = stats.map((stat, index) =>
+    countAlong(stat.key, targets[index] ?? 0, chart.series?.[range]),
+  );
+  const draw = chart.draw(range, (reach) => {
+    if (run === latestCount) {
+      paintValues(
+        stats,
+        counters.map((at) => at(reach)),
+        targets,
+        false,
+      );
+    }
   });
+  const drawn = draw.finished.then((done) => {
+    if (done && run === latestCount) paintValues(stats, targets, targets, true);
+    return done;
+  });
+  return { draw, drawn };
 }
 
 /**
- * Wire the 7d/30d toggle (numbers and chart; the chart's tooltip hides) and hold
- * the numbers at 0 for the intro. Returns the intro's count-up: it waits until the card is in
- * view, then resolves when the count settles (at once if the visitor already picked a range).
+ * A toggle to a range already drawn: every number counts from what it shows now (the in-flight
+ * value on a toggle mid-count) to its target, a near-instant start that lands softly.
+ */
+function recount(stats: StatElement[], range: StatWindow): void {
+  const run = ++latestCount;
+  const targets = targetsOf(stats, range);
+  const from = stats.map((stat) => stat.shown);
+  const precisions = targets.map((to, index) => Math.max(from[index] ?? 0, to));
+  lockWidths(stats, targets);
+  const start = performance.now();
+  const step = (now: number): void => {
+    if (run !== latestCount) return;
+    const progress = Math.min(1, (now - start) / COUNT_UP_TOGGLE_MS);
+    const eased = easeOutExpo(progress);
+    const values = targets.map(
+      (to, index) => (from[index] ?? 0) + (to - (from[index] ?? 0)) * eased,
+    );
+    paintValues(stats, progress >= 1 ? targets : values, precisions, progress >= 1);
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+/**
+ * Wire the 7d/30d toggle (numbers and chart; the chart's tooltip hides) and hold the numbers at 0
+ * for the intro. Each range draws once, the first time it shows (the default one in the intro, a
+ * toggle's on its click); after that a toggle recounts. A toggle mid-draw cancels it: that range
+ * draws again next time. Returns the intro's draw: it waits until the card is in view, then
+ * resolves when drawn (at once if the visitor already picked a range).
  */
 export function initStats(): () => Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-stats]');
@@ -134,19 +87,34 @@ export function initStats(): () => Promise<void> {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('button[data-range]')];
   let picked = false;
   let current: StatWindow = DEFAULT_STAT_WINDOW;
+  const drawnRanges = new Set<StatWindow>();
+  let inFlight: TraceDraw | null = null;
   const chart = initStatsChart(root);
 
-  // Analytics only: independent of the intro's count-up, which has its own visibility gate.
+  const show = (range: StatWindow): Promise<void> => {
+    inFlight?.cancel();
+    if (drawnRanges.has(range)) {
+      recount(stats, range);
+      return Promise.resolve();
+    }
+    const { draw, drawn } = drawRange(stats, chart, range);
+    inFlight = draw;
+    return drawn.then((done) => {
+      if (done) drawnRanges.add(range);
+    });
+  };
+
+  // Analytics only: independent of the intro's draw, which has its own visibility gate.
   onceVisible(root, STATS_VIEWED_THRESHOLD, () => track('stats_viewed', { window: current }));
 
-  // Hold at 0 for the intro's count-up, in the final width.
+  // Hold at 0 for the intro's draw, in the final width.
   const finals = targetsOf(stats, DEFAULT_STAT_WINDOW);
   lockWidths(stats, finals);
-  paint(
+  paintValues(
     stats,
-    finals.map((to) => ({ from: 0, to })),
-    0,
-    INTRO_COUNT.ease,
+    finals.map(() => 0),
+    finals,
+    false,
   );
 
   buttons.forEach((button) =>
@@ -161,7 +129,7 @@ export function initStats(): () => Promise<void> {
       current = range;
       chart.reset();
       track('stats_window_toggled', { window: range });
-      void show(stats, range, TOGGLE_COUNT);
+      void show(range);
     }),
   );
 
@@ -172,7 +140,7 @@ export function initStats(): () => Promise<void> {
           onceVisible(root, COUNT_UP_VISIBLE_THRESHOLD, () => {
             if (picked) return resolve();
             performance.mark('intro:stats-start');
-            resolve(show(stats, DEFAULT_STAT_WINDOW, INTRO_COUNT));
+            resolve(show(DEFAULT_STAT_WINDOW));
           }),
         );
 }

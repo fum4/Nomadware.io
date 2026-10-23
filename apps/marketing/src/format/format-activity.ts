@@ -35,3 +35,7 @@ export const formatCount = (value: number): string => Math.round(value).toLocale
 /** "2 PRs merged", "1 PR merged". */
 export const formatPrsMerged = (count: number): string =>
   `${formatCount(count)} ${count === 1 ? 'PR' : 'PRs'} merged`;
+
+/** "1 issue caught", "3 issues caught". */
+export const formatIssuesCaught = (count: number): string =>
+  `${formatCount(count)} ${count === 1 ? 'issue' : 'issues'} caught`;

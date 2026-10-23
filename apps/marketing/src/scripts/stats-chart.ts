@@ -1,4 +1,4 @@
-import type { StatSeries, StatsSeries } from '@nomadware/site-stats';
+import type { StatSeries, StatsSeries, StatWindow } from '@nomadware/site-stats';
 import { bucketStartMs, isStatWindow, parseStatsSeries } from '@nomadware/site-stats';
 
 import { centreChip, nearestIndex, pointAt } from '../chart/trace-geometry';
@@ -7,15 +7,27 @@ import {
   formatAgentTime,
   formatBucketRange,
   formatCount,
+  formatIssuesCaught,
   formatPrsMerged,
 } from '../format/format-activity';
+import type { TraceDraw } from './trace-draw';
+import { drawPlot, runTraceDraw } from './trace-draw';
 
 const HOUR_MS = 3_600_000;
 
-/** The chart's hover tooltip, as stats-card.ts sees it: hide it (on a range toggle). */
+/**
+ * The chart as stats-card.ts sees it: its series (null without a chart), a range's first draw
+ * (`onReach` gets the pen's share of the width every frame; without a chart, the same clock with
+ * nothing drawn) and hiding the tooltip (on a range toggle).
+ */
 export interface StatsChart {
+  series: StatsSeries | null;
+  draw: (range: StatWindow, onReach: (reach: number) => void) => TraceDraw;
   reset: () => void;
 }
+
+const drawNothing = (onReach: (reach: number) => void): TraceDraw =>
+  runTraceDraw(null, onReach, () => undefined);
 
 function readSeries(chart: HTMLElement): { series: StatsSeries; generatedAtMs: number } | null {
   const series = parseStatsSeries(JSON.parse(chart.dataset.series ?? 'null'));
@@ -31,7 +43,10 @@ const setTip = (plot: HTMLElement, name: string, text: string): void => {
   if (slot) slot.textContent = text;
 };
 
-/** Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines (if any). */
+/**
+ * Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines and the
+ * issues caught (each row only if any).
+ */
 function describe(
   plot: HTMLElement,
   series: StatSeries,
@@ -54,6 +69,9 @@ function describe(
   plot
     .querySelector<HTMLElement>('[data-tip-lines]')
     ?.toggleAttribute('hidden', added + deleted === 0);
+  const caught = series.caught[index] ?? 0;
+  setTip(plot, 'caught', formatIssuesCaught(caught));
+  plot.querySelector<HTMLElement>('[data-tip="caught"]')?.toggleAttribute('hidden', caught === 0);
 }
 
 /** Snap to the bucket nearest the pointer: guide, dot, and the tooltip centred over the guide. */
@@ -88,14 +106,15 @@ function snap(
 }
 
 /**
- * Wire the chart's tooltip: a mouse snaps it to the nearest bucket and leaving hides it; a touch
- * (tap or horizontal drag) does the same and keeps it until a tap elsewhere or a scroll takes
- * over. No animation, so nothing for the motion policy to decide.
+ * Wire the chart: each range's first draw (trace-draw.ts) and its tooltip: a mouse snaps it to the
+ * nearest bucket and leaving hides it; a touch (tap or horizontal drag) does the same and keeps it
+ * until a tap elsewhere or a scroll takes over.
  */
 export function initStatsChart(root: HTMLElement): StatsChart {
   const chart = root.querySelector<HTMLElement>('[data-stats-chart]');
   const data = chart ? readSeries(chart) : null;
-  if (!chart || !data) return { reset: () => undefined };
+  if (!chart || !data)
+    return { series: null, draw: (_, onReach) => drawNothing(onReach), reset: () => undefined };
   const { series, generatedAtMs } = data;
 
   const reset = (): void =>
@@ -109,14 +128,10 @@ export function initStatsChart(root: HTMLElement): StatsChart {
     if (plot && isStatWindow(range)) snap(chart, plot, series[range], generatedAtMs, event.clientX);
   };
 
-  // Each range's trace draws in once, the first time it shows; after that a toggle just swaps it.
-  chart.querySelectorAll<HTMLElement>('.plot').forEach((plot) =>
-    plot
-      .querySelector('svg')
-      ?.addEventListener('animationend', () => plot.setAttribute('data-drawn', ''), {
-        once: true,
-      }),
-  );
+  const draw = (range: StatWindow, onReach: (reach: number) => void): TraceDraw => {
+    const plot = chart.querySelector<HTMLElement>(`.plot[data-range-label="${range}"]`);
+    return plot ? drawPlot(plot, onReach) : drawNothing(onReach);
+  };
 
   chart.addEventListener('pointerdown', follow);
   chart.addEventListener('pointermove', (event) => {
@@ -132,5 +147,5 @@ export function initStatsChart(root: HTMLElement): StatsChart {
     if (event.target instanceof Node && !chart.contains(event.target)) reset();
   });
 
-  return { reset };
+  return { series, draw, reset };
 }

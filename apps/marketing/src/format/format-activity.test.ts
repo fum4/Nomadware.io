@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatAgentTime, formatBucketRange, formatPrsMerged } from './format-activity';
+import {
+  formatAgentTime,
+  formatBucketRange,
+  formatIssuesCaught,
+  formatPrsMerged,
+} from './format-activity';
 
 describe('formatAgentTime', () => {
   it('prints hours and minutes, dropping a zero part', () => {
@@ -32,5 +37,12 @@ describe('formatPrsMerged', () => {
     expect(formatPrsMerged(1)).toBe('1 PR merged');
     expect(formatPrsMerged(0)).toBe('0 PRs merged');
     expect(formatPrsMerged(1240)).toBe('1,240 PRs merged');
+  });
+});
+
+describe('formatIssuesCaught', () => {
+  it('says issue for one, issues otherwise', () => {
+    expect(formatIssuesCaught(1)).toBe('1 issue caught');
+    expect(formatIssuesCaught(3)).toBe('3 issues caught');
   });
 });

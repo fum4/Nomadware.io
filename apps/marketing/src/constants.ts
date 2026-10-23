@@ -76,8 +76,19 @@ export const WORDMARK_LETTER_STAGGER_S = 0.08;
 export const SCRAMBLE_STEP_MS = 40;
 export const SCRAMBLE_GLYPHS = '▚▞▙▟01<>/{}#';
 
-/** The stats' count-up on load (it crawls in and out, so it needs the room) and on a 7d/30d toggle. */
-export const COUNT_UP_INTRO_MS = 2_500;
+/**
+ * The stats card's first showing of a range (scripts/trace-draw.ts): the trace drawn left → right
+ * as one pen stroke, a wipe on the plot's SVG, with the legend counting in step with it. Starts
+ * once COUNT_UP_VISIBLE_THRESHOLD of the card is in view.
+ */
+export const TRACE_DRAW = {
+  durationMs: 3_000,
+  delayMs: 200,
+  easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+  /** The wipe reaches this far past the plot on every side, so the trace's glow isn't cut. */
+  glowPx: 12,
+} as const;
+/** The stats' recount on a 7d/30d toggle to a range already drawn once. */
 export const COUNT_UP_TOGGLE_MS = 1_600;
 export const COUNT_UP_VISIBLE_THRESHOLD = 0.3;
 
@@ -292,6 +303,11 @@ export const STATS_CHART = {
   /** The hover tooltip: px below the chart's top edge, and kept from the viewport's sides. */
   tipTopPx: 6,
   tipViewportMarginPx: 8,
+  /**
+   * Caught-issue counts closer than this share of the plot's width crowd each other: below 640px
+   * the smaller hides (≈11 px on a phone's ≈320 px plot; a desktop plot has room for all).
+   */
+  markerLabelGapShare: 0.035,
 } as const;
 
 /** Live stats (data/load-stats.ts): the R2 read gives up after this and the bundled snapshot shows. */
