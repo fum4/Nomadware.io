@@ -1,5 +1,6 @@
 import { BLACK_HOLE } from '../constants';
-import { advanceToward, easeOutCubic, followShare, lerp, targetSize } from './black-hole-math';
+import { advanceToward, followShare, lerp, targetSize } from './black-hole-math';
+import { easeOutCubic } from './easing';
 
 /** The hero's black hole, as the dot field (scripts/dot-field.ts) drives and draws it. */
 export interface BlackHole {

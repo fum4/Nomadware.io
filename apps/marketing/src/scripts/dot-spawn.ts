@@ -1,5 +1,6 @@
 import { DOT_FIELD } from '../constants';
 import type { FlungBody } from './dot-burst';
+import { easeOutCubic } from './easing';
 
 // A hero dot's birth (dot-field.ts): where it starts, its own traits, how it fades in on load.
 
@@ -47,5 +48,6 @@ export function spawnDots(home: Home, density: number, scale: number): Dot[] {
 /** A dot's opacity `sinceFirstMs` after the field's first frame, or null once every dot is in. */
 export function appearAlpha(dot: Dot, sinceFirstMs: number): number | null {
   if (sinceFirstMs >= DOT_FIELD.appearMaxMs) return null;
-  return Math.min(1, sinceFirstMs / dot.appearMs);
+  // Eased out: most of its brightness in the first moments, so the field shows up at once.
+  return easeOutCubic(Math.min(1, sinceFirstMs / dot.appearMs));
 }

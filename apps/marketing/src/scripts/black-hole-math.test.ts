@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { advanceToward, easeOutCubic, followShare, lerp, targetSize } from './black-hole-math';
+import { advanceToward, followShare, lerp, targetSize } from './black-hole-math';
 
 describe('targetSize', () => {
   it('is full while calm, shrinks with speed, gone at the collapse speed', () => {
@@ -27,14 +27,6 @@ describe('followShare', () => {
     expect(followShare(0, 100)).toBe(0);
     expect(followShare(100, 100)).toBeCloseTo(1 - Math.exp(-1));
     expect(followShare(10_000, 100)).toBeCloseTo(1);
-  });
-});
-
-describe('easeOutCubic', () => {
-  it('runs 0 → 1, most of the way early', () => {
-    expect(easeOutCubic(0)).toBe(0);
-    expect(easeOutCubic(1)).toBe(1);
-    expect(easeOutCubic(0.5)).toBe(0.875);
   });
 });
 

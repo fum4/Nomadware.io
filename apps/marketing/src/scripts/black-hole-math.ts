@@ -1,8 +1,5 @@
 // The black hole's pure math (scripts/black-hole.ts): its lifecycle and easing. No DOM, so it is unit-tested.
 
-/** Fast start, gentle landing. */
-export const easeOutCubic = (t: number): number => 1 - (1 - t) ** 3;
-
 /**
  * The size (0 = gone, 1 = full) the hole heads for at a cursor `speed` (CSS px/s): full while
  * calm, shrinking linearly as the cursor speeds up, gone at `collapseSpeed` and beyond.

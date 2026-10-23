@@ -134,7 +134,8 @@ export const DOT_FIELD = {
   highlightShare: 0.15,
   /**
    * On load every dot starts fading in (0 → its colour) on the field's first frame, each over its
-   * own random span between appearMinMs and appearMaxMs: the field condenses rather than pops in.
+   * own random span between appearMinMs and appearMaxMs, eased out (bright early): the field
+   * condenses rather than pops in.
    * A fade, not a flash, so it plays whatever prefers-reduced-motion says (scripts/motion-policy.ts).
    */
   appearMinMs: 400,
