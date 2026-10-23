@@ -42,7 +42,7 @@ const plots = STAT_WINDOWS.map((range) => ({
         <span class="tip">
           <span data-tip="when" />
           <span data-tip="work" />
-          <span>
+          <span data-tip-lines>
             <span class="added" data-tip="added" /> <span class="deleted" data-tip="deleted" /> lines
           </span>
         </span>
@@ -114,7 +114,7 @@ const plots = STAT_WINDOWS.map((range) => ({
   .tip {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
     left: var(--tip-left);
     top: var(--tip-top);
     padding: 4px 8px;

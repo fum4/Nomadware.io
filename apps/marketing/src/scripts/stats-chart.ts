@@ -31,7 +31,7 @@ const setTip = (plot: HTMLElement, name: string, text: string): void => {
   if (slot) slot.textContent = text;
 };
 
-/** Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines. */
+/** Fill the tooltip with bucket `index`: when, its agent work and merged PRs, their lines (if any). */
 function describe(
   plot: HTMLElement,
   series: StatSeries,
@@ -46,8 +46,14 @@ function describe(
     'work',
     `${formatAgentTime(series.agentMinutes[index] ?? 0)} agent work · ${formatPrsMerged(series.prsMerged[index] ?? 0)}`,
   );
-  setTip(plot, 'added', `+${formatCount(series.linesAdded[index] ?? 0)}`);
-  setTip(plot, 'deleted', `−${formatCount(series.linesDeleted[index] ?? 0)}`);
+  const added = series.linesAdded[index] ?? 0;
+  const deleted = series.linesDeleted[index] ?? 0;
+  setTip(plot, 'added', `+${formatCount(added)}`);
+  setTip(plot, 'deleted', `−${formatCount(deleted)}`);
+  // A bucket with no merged lines gets no "+0 −0 lines" row.
+  plot
+    .querySelector<HTMLElement>('[data-tip-lines]')
+    ?.toggleAttribute('hidden', added + deleted === 0);
 }
 
 /** Snap to the bucket nearest the pointer: guide, dot, and the tooltip centred over the guide. */
