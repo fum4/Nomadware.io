@@ -344,12 +344,3 @@ export const STATS_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
  * a visitor never waits on a render (stats only move every 5 minutes anyway).
  */
 export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
-
-/**
- * TEMPORARY (NWARE-82): phone layouts of the stats card under comparison, picked with `?card=N`
- * (scripts/stats-card-variant.ts, styles/stats-card-variants.css). Delete all three once one wins.
- */
-export const STATS_CARD_VARIANT = {
-  param: 'card',
-  values: ['1', '2', '3', '4', '5'],
-} as const;
