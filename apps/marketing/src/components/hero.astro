@@ -33,13 +33,11 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 </section>
 
 <script>
-  import { bisectOff } from '../scripts/bisect';
   import { initDotField } from '../scripts/dot-field';
   import { initHeroSpread } from '../scripts/hero-spread';
   // Straight away, not when idle: the field fades in from the first frame.
-  // TEMPORARY (NWARE-82): bisect switches.
-  if (!bisectOff('dots')) initDotField();
-  if (!bisectOff('spread')) initHeroSpread();
+  initDotField();
+  initHeroSpread();
 </script>
 
 <style>

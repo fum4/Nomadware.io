@@ -25,10 +25,8 @@ const { id, title, band = false, extraCells = 0 } = Astro.props;
 </section>
 
 <script>
-  import { bisectOff } from '../scripts/bisect';
   import { snapGridBands } from '../scripts/grid-band';
-  // TEMPORARY (NWARE-82): bisect switch.
-  if (!bisectOff('band')) snapGridBands();
+  snapGridBands();
 </script>
 
 <style>

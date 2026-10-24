@@ -1,5 +1,4 @@
 import { HERO_SPREAD } from '../constants';
-import { countMeasure } from './bisect';
 import { isMobileViewport } from './motion';
 
 /**
@@ -28,7 +27,6 @@ export function initHeroSpread(): void {
     () => {
       if (window.innerWidth === width) return;
       width = window.innerWidth;
-      countMeasure('spread');
       schedule();
     },
     { passive: true },

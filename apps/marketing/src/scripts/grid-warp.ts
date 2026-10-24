@@ -1,6 +1,5 @@
 import { CURSOR_FIELD, GRID_WARP } from '../constants';
 import { warpBands } from './band-warp';
-import { bisectOff } from './bisect';
 import { overControl } from './cursor-field';
 import { bendPoint, wellIsBending } from './grid-bend';
 import type { Rgba } from './grid-glow';
@@ -109,8 +108,7 @@ export function initGridWarp(): void {
       context.stroke(bentPath);
     }
     // The bands' edges sit on grid lines: they bend with them.
-    // TEMPORARY (NWARE-82): bisect switch.
-    if (!bisectOff('band')) warpBands(well, origin, width);
+    warpBands(well, origin, width);
   };
 
   let lastTick = 0;

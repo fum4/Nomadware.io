@@ -1,7 +1,6 @@
 import { CURSOR_FIELD, DOT_FIELD } from '../constants';
 import type { BlackHole } from './black-hole';
 import { createBlackHole } from './black-hole';
-import { countMeasure } from './bisect';
 import { burst, isFlung } from './dot-burst';
 import { cursorPull, releaseEnvelope, ringRadius } from './dot-forces';
 import { NO_POINTER, trackPointer } from './dot-pointer';
@@ -53,7 +52,6 @@ export function initDotField(): void {
     const width = Math.round(canvas.offsetWidth * scale);
     const height = Math.round(canvas.offsetHeight * scale);
     if (width === canvas.width && height === canvas.height) return;
-    countMeasure('dots');
     canvas.width = width;
     canvas.height = height;
     const box = canvas.getBoundingClientRect();

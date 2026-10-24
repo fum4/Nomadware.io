@@ -1,5 +1,4 @@
 ---
-import { bisectOff, parseOff } from '../scripts/bisect';
 import PageSection from './page-section.astro';
 
 // `detail` is a list of runs; every second run (odd index) is set in italics.
@@ -33,15 +32,12 @@ const PRINCIPLES = [
   },
 ];
 
-// TEMPORARY (NWARE-82): `?off=switcher` (dev only) renders the stacked layout.
-const canPin = !bisectOff('switcher', parseOff(Astro.url.search));
-
 const number = (index: number): string => String(index + 1).padStart(2, '0');
 ---
 
 <!-- One extra cell above: more air under the stats card. -->
 <PageSection id="how-we-work" title="How we work" band extraCells={1}>
-  <div class:list={['track', { 'can-pin': canPin }]} data-principles>
+  <div class="track" data-principles>
     <div class="stage" data-principles-stage>
       <div class="list" role="tablist" aria-label="Principles" aria-orientation="vertical">
         {
@@ -147,9 +143,9 @@ const number = (index: number): string => String(index + 1).padStart(2, '0');
     }
   }
 
-  /* Pinned: `is-pinned`, set by principle-switcher.ts on a `can-pin` track where the viewport is
-     tall enough (principle-pin.ts; a class, not a media query, so an on-screen keyboard can't
-     unpin it), so with JS only. The stage IS the band: the section's own band (page-section.astro) is off, and the stage paints the page
+  /* Pinned: `is-pinned`, set by principle-switcher.ts where the viewport is tall enough
+     (principle-pin.ts; a class, not a media query, so an on-screen keyboard can't unpin it), so
+     with JS only. The stage IS the band: the section's own band (page-section.astro) is off, and the stage paints the page
      behind a band itself, opaque, full-bleed (::before): ink, grid paper, column halo (global.css
      --column-halo), band tint. Its top sits on a grid line (principle-switcher.ts: --snap), so
      its grid lines are the page's. Its height (--stage-h: the viewport, phones the screen,

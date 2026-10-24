@@ -1,5 +1,4 @@
 import { FINE_POINTER_QUERY, MOBILE_QUERY, PRINCIPLE_SWITCHER } from '../constants';
-import { countMeasure } from './bisect';
 import { nextPage } from './principle-page';
 import { canPinAt } from './principle-pin';
 
@@ -33,8 +32,7 @@ function pagePosition(track: HTMLElement, stage: HTMLElement, pages: number): nu
 export function initPrincipleSwitcher(): void {
   const track = document.querySelector<HTMLElement>('[data-principles]');
   const stage = track?.querySelector<HTMLElement>('[data-principles-stage]');
-  // `can-pin`: the server rendered the pinnable track (how-we-work.astro).
-  if (!track || !stage || !track.classList.contains('can-pin')) return;
+  if (!track || !stage) return;
   const tabs = [...track.querySelectorAll<HTMLButtonElement>('[data-principle-tab]')];
   const panels = [...track.querySelectorAll<HTMLElement>('[data-principle-panel]')];
   const pages = tabs.length;
@@ -85,7 +83,6 @@ export function initPrincipleSwitcher(): void {
     }
     const grid = readGrid();
     if (!(grid > 0)) return;
-    countMeasure('snap');
     const paperBox = paper.getBoundingClientRect();
     const box = track.getBoundingClientRect();
     const snapped = Number.parseFloat(getComputedStyle(track).marginTop) || 0;
@@ -106,7 +103,6 @@ export function initPrincipleSwitcher(): void {
     const width = window.innerWidth;
     if (!(grid > 0) || (!finePointer.matches && width === sizedWidth)) return;
     sizedWidth = width;
-    countMeasure('switcher');
     const visible = window.innerHeight;
     const pin = canPinAt(width, visible);
     if (pin !== pinned) {
