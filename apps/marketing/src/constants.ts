@@ -215,39 +215,38 @@ export const DOT_FIELD = {
 } as const;
 
 /**
- * Phones and tablets (no fine pointer): tilting the device lets the hero dots drift toward its
- * lower side, as if they had weight (scripts/dot-tilt.ts). Only *changes* of tilt push: the pose
- * the phone is held in is the neutral one, re-learnt continuously. Tilt is measured as gravity's
- * component in the screen's plane (in g: 0 flat, 1 upright), so 0.0123 g ≈ 1° at a 45° hold.
+ * Phones and tablets (no fine pointer): tilting the device shifts the whole hero dot field the
+ * other way, as if it lay deep behind the glass (scripts/dot-tilt.ts). Only a change from the pose
+ * the phone is held in shifts it; that pose is re-learnt slowly. Tilt is measured as sin of the
+ * angle gravity turned through, so 0.035 ≈ 2°, 0.34 ≈ 20°.
  */
 export const DOT_TILT = {
-  /** Sensor noise: the reading is low-passed with this time constant. */
-  smoothingMs: 100,
+  /** The shift glides to where the tilt points with this time constant: fluid, never a snap. */
+  smoothingMs: 120,
   /**
-   * The readings this long after the first one (or a new grip: regripChange, a turn of the
-   * screen) set the neutral pose; no push meanwhile.
+   * The held pose follows the reading with this time constant: a tilt held still keeps most of
+   * its shift for ~10 s and drifts back to centre over about a minute.
    */
-  calibrationMs: 500,
+  baselineMs: 25_000,
   /**
-   * The neutral pose follows the reading with this time constant, so a phone held at a new angle
-   * stops pushing: a full-saturation step fades below the dead zone in ≈ 2 × recentreMs (5 s).
+   * A turn bigger than this (degrees: lying it flat from a hold, turning toward landscape before
+   * the screen follows) is a new grip, not a tilt: the held pose jumps there and the field glides
+   * back to centre instead of sitting at full shift for a minute.
    */
-  recentreMs: 2_500,
+  regripDeg: 60,
+  /** Tilts smaller than this (≈ 2°) are hand tremor: no shift. */
+  deadZone: 0.035,
+  /** The shift is full at this tilt (≈ 20°) and beyond. */
+  saturation: 0.34,
+  /** The full shift of a lime dot, CSS px. */
+  amplitudePx: 30,
+  /** A grey dot shifts this share of it: the lime ones read as nearer, a hint of depth. */
+  greyDepth: 0.75,
   /**
-   * A change bigger than this (g: from a 45° hold, ≈ 50° of roll, laying it nearly flat, or a
-   * quarter turn toward landscape) is a new grip, not a tilt: calibration starts over there
-   * instead of the dots being shoved for seconds.
+   * `devicemotion` samples weaker than this (in g) point nowhere (free fall, a dead sensor):
+   * ignored.
    */
-  regripChange: 0.55,
-  /** Changes smaller than this (g, ≈ 3° at a 45° hold) are hand tremor: no push. */
-  deadZone: 0.04,
-  /** The push saturates at this change (g, ≈ 24° at a 45° hold; ≈ 20° held at 30°). */
-  saturation: 0.3,
-  /**
-   * Canvas px per frame² at saturation, in the field's frame-time scaling (DOT_FIELD.frameMs):
-   * with DOT_FIELD.friction a dot tops out at 25 × this per frame, a few CSS px a second.
-   */
-  accel: 0.02,
+  minMotionG: 0.3,
 } as const;
 
 /**
