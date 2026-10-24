@@ -1,4 +1,6 @@
 ---
+import { PRINCIPLE_SWITCHER } from '../constants';
+import { bisectOff, parseOff } from '../scripts/bisect';
 import PageSection from './page-section.astro';
 
 // `detail` is a list of runs; every second run (odd index) is set in italics.
@@ -18,7 +20,7 @@ const PRINCIPLES = [
     detail: [
       "Most projects don't fail, they ",
       'stall',
-      ", so our agents keep the work moving around the clock. We build the pipelines, workflows and guardrails that keep them in check. Our harness delivers continuously and ensures every change is proven before it gets out of our lab.",
+      ', so our agents keep the work moving around the clock. We build the pipelines, workflows and guardrails that keep them in check. Our harness delivers continuously and ensures every change is proven before it gets out of our lab.',
     ],
   },
   {
@@ -27,36 +29,85 @@ const PRINCIPLES = [
     detail: [
       'Most delays live in the ',
       'gaps',
-      ' between people. We closed them with knowledge and tools: every decision, rule and piece of context sits within our agents\' reach — they never wait on an answer. The same trail lets us observe, step in and steer, with the right information a glance away.',
+      " between people. We closed them with knowledge and tools: every decision, rule and piece of context sits within our agents' reach — they never wait on an answer. The same trail lets us observe, step in and steer, with the right information a glance away.",
     ],
   },
 ];
+
+// TEMPORARY (NWARE-82): `?off=switcher` (dev only) renders the stacked layout.
+const canPin = !bisectOff('switcher', parseOff(Astro.url.search));
+
+const number = (index: number): string => String(index + 1).padStart(2, '0');
+// Fallback scroll per page until principle-switcher.ts sizes the track in px.
+const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_SWITCHER.pageSvh.wide * 100}svh`;
 ---
 
 <!-- One extra cell above: more air under the stats card. -->
 <PageSection id="how-we-work" title="How we work" band extraCells={1}>
-  <ul class="rows">
-    {
-      PRINCIPLES.map(({ title, subtitle, detail }) => (
-        <li>
-          <h3>{title}</h3>
-          <p class="subtitle">{subtitle}</p>
-          <p class="detail">{detail.map((run, index) => (index % 2 === 1 ? <em>{run}</em> : run))}</p>
-        </li>
-      ))
-    }
-  </ul>
+  <div class:list={['track', { 'can-pin': canPin }]} data-principles style={trackStyle}>
+    <div class="stage" data-principles-stage>
+      <div class="list" role="tablist" aria-label="Principles" aria-orientation="vertical">
+        {
+          PRINCIPLES.map(({ title }, index) => (
+            <button
+              class="tab"
+              type="button"
+              role="tab"
+              id={`principle-tab-${index}`}
+              aria-controls={`principle-${index}`}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              tabindex={index === 0 ? 0 : -1}
+              data-principle-tab
+            >
+              <span class="tab-num">{number(index)}</span>
+              <span class="tab-name">{title}</span>
+              <span class="bar" aria-hidden="true" data-principle-bar />
+            </button>
+          ))
+        }
+      </div>
+      <div class="panels">
+        {
+          PRINCIPLES.map(({ title, subtitle, detail }, index) => (
+            <div
+              class:list={['panel', { 'is-active': index === 0 }]}
+              role="tabpanel"
+              id={`principle-${index}`}
+              aria-labelledby={`principle-tab-${index}`}
+              data-principle-panel
+            >
+              <p class="count" aria-hidden="true">
+                <span>{number(index)}</span> / {number(PRINCIPLES.length - 1)}
+              </p>
+              <h3>{title}</h3>
+              <p class="subtitle">{subtitle}</p>
+              <p class="detail">
+                {detail.map((run, runIndex) => (runIndex % 2 === 1 ? <em>{run}</em> : run))}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
 </PageSection>
 
+<script>
+  import { initPrincipleSwitcher } from '../scripts/principle-switcher';
+  initPrincipleSwitcher();
+</script>
+
 <style>
-  /* Title → one-liner → the longer why, each a step quieter (same type, colour steps down);
-     rows separated by space alone. */
-  .rows {
+  /* Stacked (no JS, short viewports): no tab list, each principle with its own title,
+     title → one-liner → the longer why, each a step quieter. */
+  .list,
+  .count {
+    display: none;
+  }
+
+  .panels {
     display: grid;
     gap: 48px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
   h3 {
@@ -69,33 +120,302 @@ const PRINCIPLES = [
 
   /* pretty: the browser avoids a lone word on the last line (no-op where unsupported). */
   p {
-    max-width: 60ch;
     margin: 0;
-    font-size: 14px;
-    line-height: 1.55;
     text-wrap: pretty;
   }
 
   .subtitle {
+    max-width: 60ch;
+    font-size: 14px;
+    line-height: 1.55;
     color: var(--soft);
   }
 
-  /* 3ch wider than the subtitle: sets the longest detail (Product mindset) in three lines at
-     desktop widths. 62.5ch is the threshold; 63ch leaves ~4px across font renderers. */
   .detail {
     max-width: 63ch;
     margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.55;
     color: var(--subdued);
   }
 
   @media (max-width: 640px) {
     /* Stacked, each row is long: the space between them has to do the dividing. */
-    .rows {
+    .panels {
       gap: 96px;
     }
 
     h3 {
       font-size: 20px;
     }
+  }
+
+  /* Pinned: same query as PRINCIPLE_SWITCHER.pinQuery (constants.ts), with JS only, on a
+     `can-pin` track. The stage IS
+     the band: the section's own band (page-section.astro) is off, and the stage paints the page
+     behind a band itself, opaque, full-bleed (::before): ink, grid paper, column halo (global.css
+     --column-halo), band tint. Its top sits on a grid line (principle-switcher.ts: --snap), so
+     its grid lines are the page's. Its height (--stage-h: the viewport, phones the screen,
+     rounded up to whole cells) and the track's scroll (--track-room: whole cells) are px set by
+     principle-switcher.ts, never viewport units: a phone's toolbars change those mid-scroll.
+     While pinned nothing behind it shows, the desktop's grid canvas included; at release the
+     stage's lines are on the page's again. */
+  @media (min-width: 641px) and (min-height: 600px), (max-width: 640px) and (min-height: 500px) {
+    :global(html.js #how-we-work.is-band:has(.can-pin)::before) {
+      display: none;
+    }
+
+    :global(html.js) .track.can-pin {
+      margin-top: var(--snap, 0px);
+    }
+
+    :global(html.js) .track.can-pin::after {
+      content: '';
+      display: block;
+      height: var(--track-room, calc(var(--pages) * var(--page-fallback)));
+    }
+
+    :global(html.js) .can-pin .stage {
+      position: sticky;
+      top: 0;
+      display: grid;
+      grid-template-columns: calc(var(--grid) * 5) minmax(0, 1fr);
+      gap: calc(var(--grid) * 1.5);
+      align-items: center;
+      align-content: center;
+      height: var(--stage-h, 100lvh);
+      padding-bottom: calc(var(--stage-h, 100lvh) - var(--visible-h, 100svh));
+    }
+
+    :global(html.js) .can-pin .stage::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: var(--bleed-left, calc(50% - 50vw));
+      z-index: -1;
+      width: var(--bleed-width, 100vw);
+      height: 100%;
+      background-color: var(--ink);
+      background-image:
+        linear-gradient(var(--band), var(--band)),
+        var(--column-halo),
+        linear-gradient(var(--grid-color) var(--grid-line), transparent var(--grid-line)),
+        linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
+      background-size:
+        auto,
+        auto,
+        var(--grid) var(--grid),
+        var(--grid) var(--grid);
+    }
+
+    :global(html.js) .can-pin .list {
+      display: grid;
+      border-left: 1px solid var(--line);
+    }
+
+    :global(html.js) .can-pin .panels {
+      gap: 0;
+    }
+
+    /* All three in one cell: the stage is as tall as the tallest, whichever shows. */
+    :global(html.js) .can-pin .panel {
+      grid-area: 1 / 1;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition:
+        opacity 0.2s,
+        transform 0.2s,
+        visibility 0s 0.2s;
+    }
+
+    :global(html.js) .can-pin .panel.is-active {
+      visibility: visible;
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 0.28s 0.06s,
+        transform 0.28s 0.06s;
+    }
+
+    :global(html.js) .can-pin .count {
+      display: block;
+      margin-bottom: 20px;
+      font: 400 11px/var(--leading) var(--mono);
+      letter-spacing: 0.12em;
+      color: var(--dim);
+    }
+
+    :global(html.js) .can-pin .count span {
+      color: var(--sig);
+    }
+
+    /* The tab names the principle; screen readers still get it in the panel. */
+    :global(html.js) .can-pin h3 {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    :global(html.js) .can-pin .subtitle {
+      max-width: 18ch;
+      font-weight: 500;
+      font-size: 48px;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      color: var(--fg);
+    }
+
+    :global(html.js) .can-pin .detail {
+      max-width: 56ch;
+      margin-top: 24px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+  }
+
+  /* Phones, pinned: the tabs as a row of numbers near the top (the title shows in the panel), the
+     current one's bar along its bottom. */
+  @media (max-width: 640px) and (min-height: 500px) {
+    :global(html.js) .can-pin .stage {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+      align-content: start;
+      padding-top: calc(var(--grid) * 2);
+    }
+
+    :global(html.js) .can-pin .list {
+      grid-template-columns: repeat(3, 1fr);
+      border-left: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    :global(html.js) .can-pin .tab {
+      grid-template-columns: auto;
+      justify-content: center;
+      padding: 14px 0;
+    }
+
+    :global(html.js) .can-pin .tab-num {
+      font-size: 13px;
+    }
+
+    :global(html.js) .can-pin .tab-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    :global(html.js) .can-pin .bar {
+      top: auto;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+
+    :global(html.js) .can-pin .tab[aria-selected='true'] .bar {
+      transform: scaleX(var(--page-progress, 0));
+    }
+
+    :global(html.js) .can-pin .count {
+      display: none;
+    }
+
+    :global(html.js) .can-pin h3 {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+      margin-bottom: 14px;
+      font-size: 13px;
+      font-family: var(--mono);
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sig);
+    }
+
+    :global(html.js) .can-pin .subtitle {
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    :global(html.js) .can-pin .detail {
+      margin-top: 18px;
+      font-size: 14px;
+    }
+  }
+
+  .tab {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4ch 1fr;
+    align-items: baseline;
+    padding: 20px 0 20px 24px;
+    border: 0;
+    background: none;
+    color: var(--faint);
+    text-align: start;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .tab:hover {
+    color: var(--soft);
+  }
+
+  .tab[aria-selected='true'] {
+    color: var(--fg);
+  }
+
+  .tab:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .tab-num {
+    font: 400 11px/var(--leading) var(--mono);
+    letter-spacing: 0.08em;
+  }
+
+  .tab[aria-selected='true'] .tab-num {
+    color: var(--sig);
+  }
+
+  .tab-name {
+    font-weight: 500;
+    font-size: 22px;
+    line-height: var(--leading);
+    letter-spacing: -0.02em;
+  }
+
+  /* On the list's left rule, the current tab's marker: how far the scroll is through its page
+     (--page-progress 0 → 1, set by principle-switcher.ts). */
+  .bar {
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 1px;
+    height: 100%;
+    background: var(--sig);
+    box-shadow: 0 0 8px var(--sig-glow);
+    transform-origin: top;
+    transform: scaleY(0);
+    /* Its own layer: the scroll moves it every frame without repainting the stage. */
+    will-change: transform;
+  }
+
+  .tab[aria-selected='true'] .bar {
+    transform: scaleY(var(--page-progress, 0));
   }
 </style>

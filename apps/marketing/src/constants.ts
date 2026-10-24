@@ -315,6 +315,14 @@ export const CONTACT = {
   endpoint: '/api/contact',
   /** How long "send" waits for the Turnstile token before giving up. */
   challengeTimeoutMs: 15_000,
+  /**
+   * Touch devices: with the on-screen keyboard up, the page scrolls the whole terminal into the
+   * visible area above it (scripts/contact/keyboard-follow.ts, math in keyboard-fit.ts), once:
+   * settleMs after the last focus move, keyboard resize, form resize or browser pan. The keyboard
+   * counts as up once the visual viewport is keyboardMinPx shorter than when focus entered the
+   * form; marginPx is kept clear above and below; corrections within tolerancePx are skipped.
+   */
+  keyboard: { keyboardMinPx: 120, marginPx: 12, tolerancePx: 2, settleMs: 150 },
 } as const;
 
 /** The contact endpoint's server-side tunables (src/contact/, src/pages/api/contact.ts). */
@@ -381,3 +389,20 @@ export const STATS_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
  * a visitor never waits on a render (stats only move every 5 minutes anyway).
  */
 export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
+
+/**
+ * The How-we-work switcher (scripts/principle-switcher.ts): where the viewport is tall enough the
+ * section is a scroll track whose stage, one viewport tall, is the band: it scrolls in, pins
+ * while the scroll moves through one "page" per principle, then scrolls out.
+ */
+export const PRINCIPLE_SWITCHER = {
+  /** Pinned only here (same as the CSS in how-we-work.astro); elsewhere the principles stack. */
+  pinQuery:
+    '(min-width: 641px) and (min-height: 600px), (max-width: 640px) and (min-height: 500px)',
+  /** Scroll per principle, as a share of the viewport height (on touch: as first measured): desktop, phones. */
+  pageSvh: { wide: 0.7, phone: 0.5 },
+  /** How far (share of a page) the scroll must pass a boundary before the page switches back. */
+  hysteresis: 0.06,
+  /** Where (share of a page) a tab click or arrow key lands in its page: past the hysteresis. */
+  landing: 0.1,
+} as const;

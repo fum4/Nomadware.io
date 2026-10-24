@@ -31,5 +31,8 @@ Astro.response.headers.set('Cache-Control', STATS_PAGE_CACHE_CONTROL);
 <script>
   // Headline, stats and wordmark animate in one order (scripts/intro-sequence.ts).
   import { playIntro } from '../scripts/intro-sequence';
-  void playIntro();
+  import { applyBisectStyles, bisectOff } from '../scripts/bisect';
+  // TEMPORARY (NWARE-82): bisect switches.
+  applyBisectStyles();
+  if (!bisectOff('intro')) void playIntro();
 </script>

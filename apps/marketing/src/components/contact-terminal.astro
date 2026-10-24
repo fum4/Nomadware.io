@@ -73,7 +73,12 @@ import PageSection from './page-section.astro';
 
 <script>
   import { initContactForm } from '../scripts/contact/contact-form';
+  import { initKeyboardFollow } from '../scripts/contact/keyboard-follow';
   import { initSendHint } from '../scripts/contact/send-hint';
+  import { bisectOff } from '../scripts/bisect';
   initContactForm();
   initSendHint();
+  const form = document.querySelector<HTMLElement>('[data-contact]');
+  // TEMPORARY (NWARE-82): bisect switch.
+  if (form && !bisectOff('keyboard')) initKeyboardFollow(form);
 </script>
