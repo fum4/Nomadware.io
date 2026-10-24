@@ -1,4 +1,5 @@
 import { FINE_POINTER_QUERY, MOBILE_QUERY, PRINCIPLE_SWITCHER } from '../constants';
+import { countMeasure } from './bisect';
 import { nextPage } from './principle-page';
 import { canPinAt } from './principle-pin';
 
@@ -84,6 +85,7 @@ export function initPrincipleSwitcher(): void {
     }
     const grid = readGrid();
     if (!(grid > 0)) return;
+    countMeasure('snap');
     const paperBox = paper.getBoundingClientRect();
     const box = track.getBoundingClientRect();
     const snapped = Number.parseFloat(getComputedStyle(track).marginTop) || 0;
@@ -104,6 +106,7 @@ export function initPrincipleSwitcher(): void {
     const width = window.innerWidth;
     if (!(grid > 0) || (!finePointer.matches && width === sizedWidth)) return;
     sizedWidth = width;
+    countMeasure('switcher');
     const visible = window.innerHeight;
     const pin = canPinAt(width, visible);
     if (pin !== pinned) {

@@ -1,5 +1,4 @@
 ---
-import { PRINCIPLE_SWITCHER } from '../constants';
 import { bisectOff, parseOff } from '../scripts/bisect';
 import PageSection from './page-section.astro';
 
@@ -38,13 +37,11 @@ const PRINCIPLES = [
 const canPin = !bisectOff('switcher', parseOff(Astro.url.search));
 
 const number = (index: number): string => String(index + 1).padStart(2, '0');
-// Fallback scroll per page until principle-switcher.ts sizes the track in px.
-const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_SWITCHER.pageSvh.wide * 100}svh`;
 ---
 
 <!-- One extra cell above: more air under the stats card. -->
 <PageSection id="how-we-work" title="How we work" band extraCells={1}>
-  <div class:list={['track', { 'can-pin': canPin }]} data-principles style={trackStyle}>
+  <div class:list={['track', { 'can-pin': canPin }]} data-principles>
     <div class="stage" data-principles-stage>
       <div class="list" role="tablist" aria-label="Principles" aria-orientation="vertical">
         {
@@ -171,7 +168,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
   :global(html.js) .track.is-pinned::after {
     content: '';
     display: block;
-    height: var(--track-room, calc(var(--pages) * var(--page-fallback)));
+    height: var(--track-room);
   }
 
   :global(html.js) .is-pinned .stage {
@@ -182,8 +179,8 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
     gap: calc(var(--grid) * 1.5);
     align-items: center;
     align-content: center;
-    height: var(--stage-h, 100lvh);
-    padding-bottom: calc(var(--stage-h, 100lvh) - var(--visible-h, 100svh));
+    height: var(--stage-h);
+    padding-bottom: calc(var(--stage-h) - var(--visible-h));
   }
 
   :global(html.js) .is-pinned .stage::before {

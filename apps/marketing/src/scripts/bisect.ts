@@ -37,6 +37,17 @@ const CSS_OFF: Partial<Record<BisectSwitch, string>> = {
   consent: '[data-consent] { display: none !important; }',
 };
 
+const measures = new Map<string, number>();
+
+/** Counts one re-measure by a layout script (dev only), for the `?probe` readout. */
+export function countMeasure(name: string): void {
+  if (!import.meta.env.DEV) return;
+  measures.set(name, (measures.get(name) ?? 0) + 1);
+}
+
+/** Every layout script's re-measures so far, by name. */
+export const measureCounts = (): ReadonlyMap<string, number> => measures;
+
 /** `?probe`: the live viewport readout (scripts/viewport-probe.ts). */
 export const probeOn = (search: string): boolean =>
   import.meta.env.DEV && new URLSearchParams(search).has('probe');

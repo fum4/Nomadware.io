@@ -1,10 +1,13 @@
 import { HERO_SPREAD } from '../constants';
+import { countMeasure } from './bisect';
 import { isMobileViewport } from './motion';
 
 /**
  * Phones only: spread the hero's three blocks apart at the top of the page and draw them back
  * together as the visitor scrolls (and apart again on the way back up). The spread is margin
- * (laid out once, at rest); scrolling closes it with transforms, so nothing below moves.
+ * (laid out once, at rest); scrolling closes it with transforms, so nothing below moves. Only a
+ * width change (the phone breakpoint) re-reads it on resize: a touch browser's toolbars change
+ * the height mid-scroll, and that changes nothing here.
  */
 export function initHeroSpread(): void {
   const copy = document.querySelector<HTMLElement>('[data-hero-copy]');
@@ -19,6 +22,16 @@ export function initHeroSpread(): void {
     if (frame === 0) frame = requestAnimationFrame(update);
   };
   window.addEventListener('scroll', schedule, { passive: true });
-  window.addEventListener('resize', schedule, { passive: true });
+  let width = window.innerWidth;
+  window.addEventListener(
+    'resize',
+    () => {
+      if (window.innerWidth === width) return;
+      width = window.innerWidth;
+      countMeasure('spread');
+      schedule();
+    },
+    { passive: true },
+  );
   update();
 }

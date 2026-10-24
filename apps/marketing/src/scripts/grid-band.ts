@@ -5,6 +5,7 @@
 // and moves its ::before with a transform: the section's own layout never changes, so nothing
 // shifts (zero CLS) and re-running can't feed back into itself.
 
+import { countMeasure } from './bisect';
 import { bandEdges } from './grid-band-edges';
 
 /** A snapped band, in px from the grid paper's top left (what band-warp.ts bends). */
@@ -34,6 +35,7 @@ export function snapGridBands(): void {
     const grid = Number.parseFloat(style.getPropertyValue('--grid'));
     const line = Number.parseFloat(style.getPropertyValue('--grid-line'));
     if (!(grid > 0) || !(line >= 0)) return;
+    countMeasure('band');
     const paperBox = paper.getBoundingClientRect();
     const origin = paperBox.top;
     const snaps = bands.map((band) => {

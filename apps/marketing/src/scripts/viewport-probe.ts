@@ -3,6 +3,8 @@
 // screenshot before and after opening the keyboard says what changed. Loaded only in dev
 // (index.astro); remove with scripts/bisect.ts.
 
+import { measureCounts } from './bisect';
+
 const round = (value: number): string => value.toFixed(2);
 
 export function initViewportProbe(): void {
@@ -59,6 +61,7 @@ export function initViewportProbe(): void {
       `doc ${document.documentElement.scrollHeight} stage/visible/room ${vars.join(' ')}`,
       `pinned ${track?.classList.contains('is-pinned') ? 'y' : 'n'} max stage off ${round(stageOff)} form shifts ${formShifts}`,
       `events resize ${counts.resize} vv resize ${counts.vvResize} vv scroll ${counts.vvScroll}`,
+      `re-measures ${[...measureCounts()].map(([name, count]) => `${name} ${count}`).join(' ') || 'none'}`,
     ].join('\n');
   };
   render();
