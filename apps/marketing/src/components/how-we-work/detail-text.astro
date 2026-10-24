@@ -1,9 +1,0 @@
----
-// A principle's detail runs, every second one in italics (principles.ts).
-interface Props {
-  runs: readonly string[];
-}
-const { runs } = Astro.props;
----
-
-{runs.map((run, index) => (index % 2 === 1 ? <em>{run}</em> : run))}

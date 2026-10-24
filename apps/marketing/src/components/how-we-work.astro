@@ -1,53 +1,112 @@
 ---
-import { HWW_LAYOUT } from '../constants';
-import DetailText from './how-we-work/detail-text.astro';
-import HwwCircuit from './how-we-work/hww-circuit.astro';
-import HwwConfig from './how-we-work/hww-config.astro';
-import HwwIndex from './how-we-work/hww-index.astro';
-import HwwStatements from './how-we-work/hww-statements.astro';
-import HwwTabs from './how-we-work/hww-tabs.astro';
-import { PRINCIPLES } from './how-we-work/principles';
+import { PRINCIPLE_SWITCHER } from '../constants';
 import PageSection from './page-section.astro';
 
-// TEMPORARY (NWARE-82): `?hww=1..5` renders one of the layout directions under review; anything
-// else renders today's stacked rows.
-const requested = Number(Astro.url.searchParams.get(HWW_LAYOUT.param));
-const variant = Number.isInteger(requested) && requested >= 1 && requested <= HWW_LAYOUT.count ? requested : 0;
+// `detail` is a list of runs; every second run (odd index) is set in italics.
+const PRINCIPLES = [
+  {
+    title: 'Product mindset',
+    subtitle: 'We build for our users. We ship what moves the needle.',
+    detail: [
+      "A feature only matters if it makes someone's day easier, so that's what we measure our work by. The best products disappear into someone's routine. They feel obvious, they just work — that kind of ",
+      'simple',
+      ' is never an accident.',
+    ],
+  },
+  {
+    title: 'Always in motion',
+    subtitle: 'Agents work around the clock. Every morning starts with progress.',
+    detail: [
+      "Most projects don't fail, they ",
+      'stall',
+      ', so our agents keep the work moving around the clock. We build the pipelines, workflows and guardrails that keep them in check. Our harness delivers continuously and ensures every change is proven before it gets out of our lab.',
+    ],
+  },
+  {
+    title: 'Zero friction',
+    subtitle: 'Every change goes from idea to production in one continuous, elegant flow.',
+    detail: [
+      'Most delays live in the ',
+      'gaps',
+      " between people. We closed them with knowledge and tools: every decision, rule and piece of context sits within our agents' reach — they never wait on an answer. The same trail lets us observe, step in and steer, with the right information a glance away.",
+    ],
+  },
+];
+
+const number = (index: number): string => String(index + 1).padStart(2, '0');
+const pageScroll = `${PRINCIPLE_SWITCHER.pageVh * 100}vh`;
 ---
 
 <!-- One extra cell above: more air under the stats card. -->
 <PageSection id="how-we-work" title="How we work" band extraCells={1}>
-  {variant === 1 && <HwwIndex />}
-  {variant === 2 && <HwwTabs />}
-  {variant === 3 && <HwwConfig />}
-  {variant === 4 && <HwwCircuit />}
-  {variant === 5 && <HwwStatements />}
-  {
-    variant === 0 && (
-      <ul class="rows">
-        {PRINCIPLES.map(({ title, subtitle, detail }) => (
-          <li>
-            <h3>{title}</h3>
-            <p class="subtitle">{subtitle}</p>
-            <p class="detail">
-              <DetailText runs={detail} />
-            </p>
-          </li>
-        ))}
-      </ul>
-    )
-  }
+  <div
+    class="track"
+    data-principles
+    style={`--pages: ${PRINCIPLES.length}; --page-scroll: ${pageScroll}`}
+  >
+    <div class="stage" data-principles-stage>
+      <div class="list" role="tablist" aria-label="Principles" aria-orientation="vertical">
+        {
+          PRINCIPLES.map(({ title }, index) => (
+            <button
+              class="tab"
+              type="button"
+              role="tab"
+              id={`principle-tab-${index}`}
+              aria-controls={`principle-${index}`}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              tabindex={index === 0 ? 0 : -1}
+              data-principle-tab
+            >
+              <span class="tab-num">{number(index)}</span>
+              <span class="tab-name">{title}</span>
+              <span class="bar" aria-hidden="true" />
+            </button>
+          ))
+        }
+      </div>
+      <div class="panels">
+        {
+          PRINCIPLES.map(({ title, subtitle, detail }, index) => (
+            <div
+              class:list={['panel', { 'is-active': index === 0 }]}
+              role="tabpanel"
+              id={`principle-${index}`}
+              aria-labelledby={`principle-tab-${index}`}
+              data-principle-panel
+            >
+              <p class="count" aria-hidden="true">
+                <span>{number(index)}</span> / {number(PRINCIPLES.length - 1)}
+              </p>
+              <h3>{title}</h3>
+              <p class="subtitle">{subtitle}</p>
+              <p class="detail">
+                {detail.map((run, runIndex) => (runIndex % 2 === 1 ? <em>{run}</em> : run))}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
 </PageSection>
 
+<script>
+  import { initPrincipleSwitcher } from '../scripts/principle-switcher';
+  initPrincipleSwitcher();
+</script>
+
 <style>
-  /* Title → one-liner → the longer why, each a step quieter (same type, colour steps down);
-     rows separated by space alone. */
-  .rows {
+  /* Stacked (phones, short viewports, no JS): no tab list, each principle with its own title,
+     title → one-liner → the longer why, each a step quieter. */
+  .list,
+  .count {
+    display: none;
+  }
+
+  .panels {
     display: grid;
     gap: 48px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
   h3 {
@@ -60,33 +119,184 @@ const variant = Number.isInteger(requested) && requested >= 1 && requested <= HW
 
   /* pretty: the browser avoids a lone word on the last line (no-op where unsupported). */
   p {
-    max-width: 60ch;
     margin: 0;
-    font-size: 14px;
-    line-height: 1.55;
     text-wrap: pretty;
   }
 
   .subtitle {
+    max-width: 60ch;
+    font-size: 14px;
+    line-height: 1.55;
     color: var(--soft);
   }
 
-  /* 3ch wider than the subtitle: sets the longest detail (Product mindset) in three lines at
-     desktop widths. 62.5ch is the threshold; 63ch leaves ~4px across font renderers. */
   .detail {
     max-width: 63ch;
     margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.55;
     color: var(--subdued);
   }
 
   @media (max-width: 640px) {
     /* Stacked, each row is long: the space between them has to do the dividing. */
-    .rows {
+    .panels {
       gap: 96px;
     }
 
     h3 {
       font-size: 20px;
     }
+  }
+
+  /* Pinned: same query as PRINCIPLE_SWITCHER.pinQuery (constants.ts), with JS only. The track is
+     the stage plus one page of scroll per principle; the stage sticks centred in the viewport
+     (--stage-h, measured by principle-switcher.ts) while the track scrolls past, and never leaves
+     the track, so it stays inside the band. */
+  @media (min-width: 641px) and (min-height: 600px) {
+    /* The scroll room is content (a sticky box only moves within its parent's content box,
+       never into its padding). */
+    :global(html.js) .track::after {
+      content: '';
+      display: block;
+      height: calc(var(--pages) * var(--page-scroll));
+    }
+
+    :global(html.js) .stage {
+      position: sticky;
+      top: calc(50vh - var(--stage-h, 384px) / 2);
+      display: grid;
+      grid-template-columns: calc(var(--grid) * 5) minmax(0, 1fr);
+      gap: calc(var(--grid) * 1.5);
+      align-items: center;
+    }
+
+    :global(html.js) .list {
+      display: grid;
+      border-left: 1px solid var(--line);
+    }
+
+    :global(html.js) .panels {
+      gap: 0;
+    }
+
+    /* All three in one cell: the stage is as tall as the tallest, whichever shows. */
+    :global(html.js) .panel {
+      grid-area: 1 / 1;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition:
+        opacity 0.2s,
+        transform 0.2s,
+        visibility 0s 0.2s;
+    }
+
+    :global(html.js) .panel.is-active {
+      visibility: visible;
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 0.28s 0.06s,
+        transform 0.28s 0.06s;
+    }
+
+    :global(html.js) .count {
+      display: block;
+      margin-bottom: 20px;
+      font: 400 11px/var(--leading) var(--mono);
+      letter-spacing: 0.12em;
+      color: var(--dim);
+    }
+
+    :global(html.js) .count span {
+      color: var(--sig);
+    }
+
+    /* The tab names the principle; screen readers still get it in the panel. */
+    :global(html.js) h3 {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    :global(html.js) .subtitle {
+      max-width: 18ch;
+      font-weight: 500;
+      font-size: 48px;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      color: var(--fg);
+    }
+
+    :global(html.js) .detail {
+      max-width: 56ch;
+      margin-top: 24px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+  }
+
+  .tab {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4ch 1fr;
+    align-items: baseline;
+    padding: 20px 0 20px 24px;
+    border: 0;
+    background: none;
+    color: var(--faint);
+    text-align: start;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .tab:hover {
+    color: var(--soft);
+  }
+
+  .tab[aria-selected='true'] {
+    color: var(--fg);
+  }
+
+  .tab:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .tab-num {
+    font: 400 11px/var(--leading) var(--mono);
+    letter-spacing: 0.08em;
+  }
+
+  .tab[aria-selected='true'] .tab-num {
+    color: var(--sig);
+  }
+
+  .tab-name {
+    font-weight: 500;
+    font-size: 22px;
+    line-height: var(--leading);
+    letter-spacing: -0.02em;
+  }
+
+  /* On the list's left rule, the current tab's marker: how far the scroll is through its page
+     (--page-progress 0 → 1, set by principle-switcher.ts). */
+  .bar {
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 1px;
+    height: 100%;
+    background: var(--sig);
+    box-shadow: 0 0 8px var(--sig-glow);
+    transform-origin: top;
+    transform: scaleY(0);
+  }
+
+  .tab[aria-selected='true'] .bar {
+    transform: scaleY(var(--page-progress, 0));
   }
 </style>

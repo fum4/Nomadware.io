@@ -383,20 +383,16 @@ export const STATS_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
 
 /**
- * TEMPORARY (NWARE-82): the How-we-work layout directions under review
- * (components/how-we-work/), picked with `?hww=1..count`; no param renders today's layout.
+ * The How-we-work switcher (scripts/principle-switcher.ts): on a desktop tall enough, the section
+ * is a scroll track with the switcher pinned in it, one "page" of scroll per principle.
  */
-export const HWW_LAYOUT = {
-  param: 'hww',
-  count: 5,
-  /** Direction 2 (switcher): how long each principle shows before the next one takes over. */
-  tabsAdvanceMs: 8_000,
-  /** Direction 3 (config file): the stagger between lines as the file "prints" into view. */
-  configLineStaggerMs: 45,
-  /**
-   * Direction 5 (statements): a statement lights from where its top crosses this share of the
-   * viewport's height down to `litEnd`.
-   */
-  litStart: 0.9,
-  litEnd: 0.45,
+export const PRINCIPLE_SWITCHER = {
+  /** Pinned only from this up (and above MOBILE_QUERY); shorter, the principles simply stack. */
+  pinQuery: '(min-width: 641px) and (min-height: 600px)',
+  /** Scroll per principle, as a share of the viewport height. */
+  pageVh: 0.7,
+  /** How far (share of a page) the scroll must pass a boundary before the page switches back. */
+  hysteresis: 0.06,
+  /** Where (share of a page) a tab click or arrow key lands in its page: past the hysteresis. */
+  landing: 0.1,
 } as const;
