@@ -44,6 +44,32 @@ describe('a form that fits above the keyboard', () => {
     );
   });
 
+  it('with the visual viewport panned (offsetTop > 0), leaves a form already whole in it alone', () => {
+    // The terminal started low; iOS's scroll-to-focus panned the view 340 px and already
+    // revealed it all: no correction on top of iOS's (the overshoot this guards against).
+    const view = { top: 340, bottom: 810 };
+    expect(fit({ view, form: { top: 360, bottom: 790 }, focus: { top: 600, bottom: 630 } })).toBe(
+      0,
+    );
+  });
+
+  it('is idempotent: once its delta is applied, the next answer is 0', () => {
+    const view = { top: 340, bottom: 810 };
+    const cases = [
+      { form: { top: 500, bottom: 900 }, focus: { top: 700, bottom: 730 } },
+      { form: { top: 100, bottom: 500 }, focus: { top: 150, bottom: 180 } },
+      { form: { top: 200, bottom: 900 }, focus: { top: 400, bottom: 430 } },
+    ];
+    for (const { form, focus } of cases) {
+      const delta = fit({ view, form, focus });
+      const moved = (span: { top: number; bottom: number }) => ({
+        top: span.top - delta,
+        bottom: span.bottom - delta,
+      });
+      expect(fit({ view, form: moved(form), focus: moved(focus) })).toBe(0);
+    }
+  });
+
   it('ignores corrections within the tolerance (no back-and-forth)', () => {
     expect(fit({ form: { top: 100, bottom: 460 } })).toBe(0);
     expect(fit({ form: { top: 100, bottom: 461 } })).toBe(3);

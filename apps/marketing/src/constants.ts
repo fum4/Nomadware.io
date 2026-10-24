@@ -317,12 +317,19 @@ export const CONTACT = {
   challengeTimeoutMs: 15_000,
   /**
    * Touch devices: with the on-screen keyboard up, the page scrolls the whole terminal into the
-   * visible area above it (scripts/contact/keyboard-follow.ts, math in keyboard-fit.ts), once:
-   * settleMs after the last focus move, keyboard resize, form resize or browser pan. The keyboard
-   * counts as up once the visual viewport is keyboardMinPx shorter than when focus entered the
-   * form; marginPx is kept clear above and below; corrections within tolerancePx are skipped.
+   * visible area above it (scripts/contact/keyboard-follow.ts, math in keyboard-fit.ts), at most
+   * once per visit to the form, after the browser's own scroll-to-focus is done: the visual
+   * viewport unchanged for settle.viewportFrames frames and the scroll for settle.scrollQuietMs
+   * (settle-watch.ts; past settle.maxWaitMs it corrects anyway). The keyboard counts as up once
+   * the visual viewport is keyboardMinPx shorter than before focus entered the form; marginPx is
+   * kept clear above and below; corrections within tolerancePx are skipped.
    */
-  keyboard: { keyboardMinPx: 120, marginPx: 12, tolerancePx: 2, settleMs: 150 },
+  keyboard: {
+    keyboardMinPx: 120,
+    marginPx: 12,
+    tolerancePx: 2,
+    settle: { viewportFrames: 2, scrollQuietMs: 300, maxWaitMs: 2000 },
+  },
 } as const;
 
 /** The contact endpoint's server-side tunables (src/contact/, src/pages/api/contact.ts). */
