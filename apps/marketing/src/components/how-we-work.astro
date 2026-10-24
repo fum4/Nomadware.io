@@ -150,9 +150,9 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
     }
   }
 
-  /* Pinned: same query as PRINCIPLE_SWITCHER.pinQuery (constants.ts), with JS only, on a
-     `can-pin` track. The stage IS
-     the band: the section's own band (page-section.astro) is off, and the stage paints the page
+  /* Pinned: `is-pinned`, set by principle-switcher.ts on a `can-pin` track where the viewport is
+     tall enough (principle-pin.ts; a class, not a media query, so an on-screen keyboard can't
+     unpin it), so with JS only. The stage IS the band: the section's own band (page-section.astro) is off, and the stage paints the page
      behind a band itself, opaque, full-bleed (::before): ink, grid paper, column halo (global.css
      --column-halo), band tint. Its top sits on a grid line (principle-switcher.ts: --snap), so
      its grid lines are the page's. Its height (--stage-h: the viewport, phones the screen,
@@ -160,150 +160,148 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
      principle-switcher.ts, never viewport units: a phone's toolbars change those mid-scroll.
      While pinned nothing behind it shows, the desktop's grid canvas included; at release the
      stage's lines are on the page's again. */
-  @media (min-width: 641px) and (min-height: 600px), (max-width: 640px) and (min-height: 500px) {
-    :global(html.js #how-we-work.is-band:has(.can-pin)::before) {
-      display: none;
-    }
+  :global(html.js #how-we-work.is-band:has(.is-pinned)::before) {
+    display: none;
+  }
 
-    :global(html.js) .track.can-pin {
-      margin-top: var(--snap, 0px);
-    }
+  :global(html.js) .track.is-pinned {
+    margin-top: var(--snap, 0px);
+  }
 
-    :global(html.js) .track.can-pin::after {
-      content: '';
-      display: block;
-      height: var(--track-room, calc(var(--pages) * var(--page-fallback)));
-    }
+  :global(html.js) .track.is-pinned::after {
+    content: '';
+    display: block;
+    height: var(--track-room, calc(var(--pages) * var(--page-fallback)));
+  }
 
-    :global(html.js) .can-pin .stage {
-      position: sticky;
-      top: 0;
-      display: grid;
-      grid-template-columns: calc(var(--grid) * 5) minmax(0, 1fr);
-      gap: calc(var(--grid) * 1.5);
-      align-items: center;
-      align-content: center;
-      height: var(--stage-h, 100lvh);
-      padding-bottom: calc(var(--stage-h, 100lvh) - var(--visible-h, 100svh));
-    }
+  :global(html.js) .is-pinned .stage {
+    position: sticky;
+    top: 0;
+    display: grid;
+    grid-template-columns: calc(var(--grid) * 5) minmax(0, 1fr);
+    gap: calc(var(--grid) * 1.5);
+    align-items: center;
+    align-content: center;
+    height: var(--stage-h, 100lvh);
+    padding-bottom: calc(var(--stage-h, 100lvh) - var(--visible-h, 100svh));
+  }
 
-    :global(html.js) .can-pin .stage::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: var(--bleed-left, calc(50% - 50vw));
-      z-index: -1;
-      width: var(--bleed-width, 100vw);
-      height: 100%;
-      background-color: var(--ink);
-      background-image:
-        linear-gradient(var(--band), var(--band)),
-        var(--column-halo),
-        linear-gradient(var(--grid-color) var(--grid-line), transparent var(--grid-line)),
-        linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
-      background-size:
-        auto,
-        auto,
-        var(--grid) var(--grid),
-        var(--grid) var(--grid);
-    }
+  :global(html.js) .is-pinned .stage::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--bleed-left, calc(50% - 50vw));
+    z-index: -1;
+    width: var(--bleed-width, 100vw);
+    height: 100%;
+    background-color: var(--ink);
+    background-image:
+      linear-gradient(var(--band), var(--band)),
+      var(--column-halo),
+      linear-gradient(var(--grid-color) var(--grid-line), transparent var(--grid-line)),
+      linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
+    background-size:
+      auto,
+      auto,
+      var(--grid) var(--grid),
+      var(--grid) var(--grid);
+  }
 
-    :global(html.js) .can-pin .list {
-      display: grid;
-      border-left: 1px solid var(--line);
-    }
+  :global(html.js) .is-pinned .list {
+    display: grid;
+    border-left: 1px solid var(--line);
+  }
 
-    :global(html.js) .can-pin .panels {
-      gap: 0;
-    }
+  :global(html.js) .is-pinned .panels {
+    gap: 0;
+  }
 
-    /* All three in one cell: the stage is as tall as the tallest, whichever shows. */
-    :global(html.js) .can-pin .panel {
-      grid-area: 1 / 1;
-      visibility: hidden;
-      opacity: 0;
-      transform: translateY(10px);
-      transition:
-        opacity 0.2s,
-        transform 0.2s,
-        visibility 0s 0.2s;
-    }
+  /* All three in one cell: the stage is as tall as the tallest, whichever shows. */
+  :global(html.js) .is-pinned .panel {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.2s,
+      transform 0.2s,
+      visibility 0s 0.2s;
+  }
 
-    :global(html.js) .can-pin .panel.is-active {
-      visibility: visible;
-      opacity: 1;
-      transform: none;
-      transition:
-        opacity 0.28s 0.06s,
-        transform 0.28s 0.06s;
-    }
+  :global(html.js) .is-pinned .panel.is-active {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.28s 0.06s,
+      transform 0.28s 0.06s;
+  }
 
-    :global(html.js) .can-pin .count {
-      display: block;
-      margin-bottom: 20px;
-      font: 400 11px/var(--leading) var(--mono);
-      letter-spacing: 0.12em;
-      color: var(--dim);
-    }
+  :global(html.js) .is-pinned .count {
+    display: block;
+    margin-bottom: 20px;
+    font: 400 11px/var(--leading) var(--mono);
+    letter-spacing: 0.12em;
+    color: var(--dim);
+  }
 
-    :global(html.js) .can-pin .count span {
-      color: var(--sig);
-    }
+  :global(html.js) .is-pinned .count span {
+    color: var(--sig);
+  }
 
-    /* The tab names the principle; screen readers still get it in the panel. */
-    :global(html.js) .can-pin h3 {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
+  /* The tab names the principle; screen readers still get it in the panel. */
+  :global(html.js) .is-pinned h3 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 
-    :global(html.js) .can-pin .subtitle {
-      max-width: 18ch;
-      font-weight: 500;
-      font-size: 48px;
-      line-height: 1.05;
-      letter-spacing: -0.035em;
-      color: var(--fg);
-    }
+  :global(html.js) .is-pinned .subtitle {
+    max-width: 18ch;
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    color: var(--fg);
+  }
 
-    :global(html.js) .can-pin .detail {
-      max-width: 56ch;
-      margin-top: 24px;
-      font-size: 15px;
-      line-height: 1.6;
-    }
+  :global(html.js) .is-pinned .detail {
+    max-width: 56ch;
+    margin-top: 24px;
+    font-size: 15px;
+    line-height: 1.6;
   }
 
   /* Phones, pinned: the tabs as a row of numbers near the top (the title shows in the panel), the
      current one's bar along its bottom. */
-  @media (max-width: 640px) and (min-height: 500px) {
-    :global(html.js) .can-pin .stage {
+  @media (max-width: 640px) {
+    :global(html.js) .is-pinned .stage {
       grid-template-columns: minmax(0, 1fr);
       gap: 40px;
       align-content: start;
       padding-top: calc(var(--grid) * 2);
     }
 
-    :global(html.js) .can-pin .list {
+    :global(html.js) .is-pinned .list {
       grid-template-columns: repeat(3, 1fr);
       border-left: 0;
       border-bottom: 1px solid var(--line);
     }
 
-    :global(html.js) .can-pin .tab {
+    :global(html.js) .is-pinned .tab {
       grid-template-columns: auto;
       justify-content: center;
       padding: 14px 0;
     }
 
-    :global(html.js) .can-pin .tab-num {
+    :global(html.js) .is-pinned .tab-num {
       font-size: 13px;
     }
 
-    :global(html.js) .can-pin .tab-name {
+    :global(html.js) .is-pinned .tab-name {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -312,7 +310,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       white-space: nowrap;
     }
 
-    :global(html.js) .can-pin .bar {
+    :global(html.js) .is-pinned .bar {
       top: auto;
       bottom: -1px;
       left: 0;
@@ -322,15 +320,15 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       transform: scaleX(0);
     }
 
-    :global(html.js) .can-pin .tab[aria-selected='true'] .bar {
+    :global(html.js) .is-pinned .tab[aria-selected='true'] .bar {
       transform: scaleX(var(--page-progress, 0));
     }
 
-    :global(html.js) .can-pin .count {
+    :global(html.js) .is-pinned .count {
       display: none;
     }
 
-    :global(html.js) .can-pin h3 {
+    :global(html.js) .is-pinned h3 {
       position: static;
       width: auto;
       height: auto;
@@ -346,12 +344,12 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       color: var(--sig);
     }
 
-    :global(html.js) .can-pin .subtitle {
+    :global(html.js) .is-pinned .subtitle {
       font-size: 30px;
       line-height: 1.1;
     }
 
-    :global(html.js) .can-pin .detail {
+    :global(html.js) .is-pinned .detail {
       margin-top: 18px;
       font-size: 14px;
     }

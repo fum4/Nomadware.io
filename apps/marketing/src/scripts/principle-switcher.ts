@@ -1,19 +1,23 @@
 import { FINE_POINTER_QUERY, MOBILE_QUERY, PRINCIPLE_SWITCHER } from '../constants';
 import { nextPage } from './principle-page';
+import { canPinAt } from './principle-pin';
 
-// How we work (how-we-work.astro): where the viewport is tall enough (PRINCIPLE_SWITCHER.pinQuery)
-// the section is a scroll track whose stage is the band: it scrolls in, pins at the viewport's
-// top while the scroll moves through one page per principle, then scrolls out. Scroll picks the
-// principle, the current tab's bar shows how far through its page the visitor is, and a tab
-// click or ↑↓ / Home / End scrolls to that page, so scroll and selection never disagree. This
-// also lays the stage onto the page's grid paper: its top on a grid line (--snap, a margin under
-// one cell) and its painted background across the paper's full width (--bleed-*), so the grid
-// lines it paints are the page's. It also sizes the stage and the track in px (--stage-h,
-// --visible-h, --track-room): on a touch browser the toolbars show and hide as the visitor scrolls
-// (every iOS browser, and Arc resizes its whole web view), which changes the viewport's height,
-// and with it every viewport unit, mid-scroll; there the sizes hold until the width changes (a
-// rotation), the stage tall enough for the screen with its toolbars gone. Scrolling itself only
-// switches classes and the current bar's transform, never a size. Elsewhere (short viewports, no JS) the CSS stacks the
+// How we work (how-we-work.astro): where the viewport is tall enough (principle-pin.ts; this sets
+// the track's `is-pinned` class, which the CSS keys on) the section is a scroll track whose stage
+// is the band: it scrolls in, pins at the viewport's top while the scroll moves through one page
+// per principle, then scrolls out. Scroll picks the principle, the current tab's bar shows how far
+// through its page the visitor is, and a tab click or ↑↓ / Home / End scrolls to that page, so
+// scroll and selection never disagree. This also lays the stage onto the page's grid paper: its
+// top on a grid line (--snap, a margin under one cell) and its painted background across the
+// paper's full width (--bleed-*), so the grid lines it paints are the page's. It also sizes the
+// stage and the track in px (--stage-h, --visible-h, --track-room): on a touch browser the
+// toolbars show and hide as the visitor scrolls (every iOS browser, and Arc resizes its whole web
+// view), which changes the viewport's height, and with it every viewport unit, mid-scroll; there
+// the sizes hold until the width changes (a rotation), the stage tall enough for the screen with
+// its toolbars gone, and so does the choice to pin: an on-screen keyboard that shrinks the
+// viewport below the pinning height must not unpin the stage (reflowing the page above the form
+// being typed in) and re-pin it, re-measured, on close. Scrolling itself only switches classes and
+// the current bar's transform, never a size. Elsewhere (short viewports, no JS) the CSS stacks the
 // principles and this stands down.
 
 /** The stage's scroll position as pages: 0 where it pins, `pages` where it lets go. */
@@ -35,7 +39,6 @@ export function initPrincipleSwitcher(): void {
   const pages = tabs.length;
   if (pages === 0 || pages !== panels.length) return;
   const bars = tabs.map((tab) => tab.querySelector<HTMLElement>('[data-principle-bar]'));
-  const pinned = window.matchMedia(PRINCIPLE_SWITCHER.pinQuery);
   const mobile = window.matchMedia(MOBILE_QUERY);
   const finePointer = window.matchMedia(FINE_POINTER_QUERY);
   const paper = document.querySelector<HTMLElement>('[data-grid-paper]');
@@ -53,10 +56,11 @@ export function initPrincipleSwitcher(): void {
     panels.forEach((panel, index) => panel.classList.toggle('is-active', index === page));
   };
 
+  let pinned = false;
   let queued = false;
   const update = (): void => {
     queued = false;
-    if (!pinned.matches) return;
+    if (!pinned) return;
     const position = pagePosition(track, stage, pages);
     const page = nextPage(position, current, pages, PRINCIPLE_SWITCHER.hysteresis);
     if (page !== current) show(page);
@@ -74,7 +78,7 @@ export function initPrincipleSwitcher(): void {
   // grows the paper, which calls this again) sets the same values and the observer settles.
   const layOnPaper = (): void => {
     if (!paper) return;
-    if (!pinned.matches) {
+    if (!pinned) {
       track.style.removeProperty('--snap');
       return;
     }
@@ -101,6 +105,12 @@ export function initPrincipleSwitcher(): void {
     if (!(grid > 0) || (!finePointer.matches && width === sizedWidth)) return;
     sizedWidth = width;
     const visible = window.innerHeight;
+    const pin = canPinAt(width, visible);
+    if (pin !== pinned) {
+      pinned = pin;
+      track.classList.toggle('is-pinned', pin);
+      layOnPaper();
+    }
     const sides = [window.screen.width, window.screen.height];
     const screenTall = visible >= width ? Math.max(...sides) : Math.min(...sides);
     const cover = finePointer.matches ? visible : Math.max(visible, screenTall);
@@ -145,11 +155,11 @@ export function initPrincipleSwitcher(): void {
     sizeToViewport();
     queue();
   });
-  const modeChange = (): void => {
+  // Once more when the page has loaded (and on a back/forward restore): the first pass runs while
+  // the page is still parsing, when a touch browser's toolbars may not have settled.
+  window.addEventListener('pageshow', () => {
     sizedWidth = 0;
     sizeToViewport();
-    layOnPaper();
-  };
-  pinned.addEventListener('change', modeChange);
-  mobile.addEventListener('change', modeChange);
+    queue();
+  });
 }
