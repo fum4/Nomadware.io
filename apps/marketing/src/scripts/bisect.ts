@@ -11,7 +11,8 @@ export type BisectSwitch =
   | 'grain'
   | 'halo'
   | 'keyboard'
-  | 'intro';
+  | 'intro'
+  | 'consent';
 
 /** The switches a query string turns off (server render and client share it). */
 export function parseOff(search: string): ReadonlySet<string> {
@@ -32,7 +33,13 @@ const CSS_OFF: Partial<Record<BisectSwitch, string>> = {
   smooth: 'html { scroll-behavior: auto !important; }',
   grain: '.frame::after { display: none !important; }',
   halo: '.frame::before { display: none !important; }',
+  // The consent card: fixed, with a backdrop blur, shown on the first scroll of every new origin.
+  consent: '[data-consent] { display: none !important; }',
 };
+
+/** `?probe`: the live viewport readout (scripts/viewport-probe.ts). */
+export const probeOn = (search: string): boolean =>
+  import.meta.env.DEV && new URLSearchParams(search).has('probe');
 
 export function applyBisectStyles(): void {
   const rules = Object.entries(CSS_OFF)
