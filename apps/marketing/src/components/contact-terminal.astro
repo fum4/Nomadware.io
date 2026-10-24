@@ -73,7 +73,10 @@ import PageSection from './page-section.astro';
 
 <script>
   import { initContactForm } from '../scripts/contact/contact-form';
+  import { initKeyboardFollow } from '../scripts/contact/keyboard-follow';
   import { initSendHint } from '../scripts/contact/send-hint';
   initContactForm();
   initSendHint();
+  const form = document.querySelector<HTMLElement>('[data-contact]');
+  if (form) initKeyboardFollow(form);
 </script>

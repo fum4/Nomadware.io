@@ -315,6 +315,14 @@ export const CONTACT = {
   endpoint: '/api/contact',
   /** How long "send" waits for the Turnstile token before giving up. */
   challengeTimeoutMs: 15_000,
+  /**
+   * Touch devices: with the on-screen keyboard up, the page scrolls the whole terminal into the
+   * visible area above it (scripts/contact/keyboard-follow.ts, math in keyboard-fit.ts). The
+   * keyboard counts as up once the visual viewport is keyboardMinPx shorter than when focus
+   * entered the form; marginPx is kept clear above and below; corrections within tolerancePx are
+   * skipped; one more pass runs settleMs after the viewport's last resize (the keyboard's slide).
+   */
+  keyboard: { keyboardMinPx: 120, marginPx: 12, tolerancePx: 2, settleMs: 320 },
 } as const;
 
 /** The contact endpoint's server-side tunables (src/contact/, src/pages/api/contact.ts). */
