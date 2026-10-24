@@ -97,10 +97,13 @@ a {
     transparent calc(50% + var(--column-core) + var(--column-fade))
   );
 
+  /* No overflow clip here, nor on anything else between the root and How we work's pinned
+     stage: under one, iOS WebKit jitters the stage while the toolbars resize the viewport
+     (how-we-work.astro). So nothing may reach past the page sideways: the bands' full bleed is a
+     spread shadow and a clip-path (paint, not overflow), the hero's dots are --page-width wide
+     (scripts/page-width.ts) and its text halo stops at the page's edge (hero.astro). */
   position: relative;
   isolation: isolate;
-  /* Halos and bands reach past the column; the page never scrolls sideways for them. */
-  overflow-x: clip;
   background-image:
     linear-gradient(var(--grid-color) var(--grid-line), transparent var(--grid-line)),
     linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
@@ -142,16 +145,20 @@ a {
 }
 
 .wrap {
+  --wrap-pad-x: 44px;
+
   position: relative;
   z-index: 2;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 26px 44px 32px;
+  padding: 26px var(--wrap-pad-x) 32px;
 }
 
 @media (max-width: 640px) {
   .wrap {
-    padding: 18px 20px 24px;
+    --wrap-pad-x: 20px;
+
+    padding: 18px var(--wrap-pad-x) 24px;
   }
 }
 
