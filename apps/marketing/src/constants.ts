@@ -214,6 +214,42 @@ export const DOT_FIELD = {
 } as const;
 
 /**
+ * Phones and tablets (no fine pointer): tilting the device lets the hero dots drift toward its
+ * lower side, as if they had weight (scripts/dot-tilt.ts). Only *changes* of tilt push: the pose
+ * the phone is held in is the neutral one, re-learnt continuously. Tilt is measured as gravity's
+ * component in the screen's plane (in g: 0 flat, 1 upright), so 0.0123 g ≈ 1° at a 45° hold.
+ */
+export const DOT_TILT = {
+  /** Sensor noise: the reading is low-passed with this time constant. */
+  smoothingMs: 100,
+  /**
+   * The readings this long after the first one (or a new grip: regripChange, a turn of the
+   * screen) set the neutral pose; no push meanwhile.
+   */
+  calibrationMs: 500,
+  /**
+   * The neutral pose follows the reading with this time constant, so a phone held at a new angle
+   * stops pushing: a full-saturation step fades below the dead zone in ≈ 2 × recentreMs (5 s).
+   */
+  recentreMs: 2_500,
+  /**
+   * A change bigger than this (g: from a 45° hold, ≈ 50° of roll, laying it nearly flat, or a
+   * quarter turn toward landscape) is a new grip, not a tilt: calibration starts over there
+   * instead of the dots being shoved for seconds.
+   */
+  regripChange: 0.55,
+  /** Changes smaller than this (g, ≈ 3° at a 45° hold) are hand tremor: no push. */
+  deadZone: 0.04,
+  /** The push saturates at this change (g, ≈ 24° at a 45° hold; ≈ 20° held at 30°). */
+  saturation: 0.3,
+  /**
+   * Canvas px per frame² at saturation, in the field's frame-time scaling (DOT_FIELD.frameMs):
+   * with DOT_FIELD.friction a dot tops out at 25 × this per frame, a few CSS px a second.
+   */
+  accel: 0.02,
+} as const;
+
+/**
  * The black hole that forms where the cursor rests over the hero (scripts/black-hole.ts), drawn
  * on the dot canvas. Mouse-first desktops only, like the dots. Times in ms, lengths in CSS px.
  */
