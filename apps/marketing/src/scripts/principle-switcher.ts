@@ -28,7 +28,8 @@ function pagePosition(track: HTMLElement, stage: HTMLElement, pages: number): nu
 export function initPrincipleSwitcher(): void {
   const track = document.querySelector<HTMLElement>('[data-principles]');
   const stage = track?.querySelector<HTMLElement>('[data-principles-stage]');
-  if (!track || !stage) return;
+  // `can-pin`: the server rendered the pinnable track (how-we-work.astro).
+  if (!track || !stage || !track.classList.contains('can-pin')) return;
   const tabs = [...track.querySelectorAll<HTMLButtonElement>('[data-principle-tab]')];
   const panels = [...track.querySelectorAll<HTMLElement>('[data-principle-panel]')];
   const pages = tabs.length;

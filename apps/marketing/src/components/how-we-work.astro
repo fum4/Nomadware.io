@@ -1,5 +1,6 @@
 ---
 import { PRINCIPLE_SWITCHER } from '../constants';
+import { bisectOff, parseOff } from '../scripts/bisect';
 import PageSection from './page-section.astro';
 
 // `detail` is a list of runs; every second run (odd index) is set in italics.
@@ -33,6 +34,9 @@ const PRINCIPLES = [
   },
 ];
 
+// TEMPORARY (NWARE-82): `?off=switcher` (dev only) renders the stacked layout.
+const canPin = !bisectOff('switcher', parseOff(Astro.url.search));
+
 const number = (index: number): string => String(index + 1).padStart(2, '0');
 // Fallback scroll per page until principle-switcher.ts sizes the track in px.
 const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_SWITCHER.pageSvh.wide * 100}svh`;
@@ -40,7 +44,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
 
 <!-- One extra cell above: more air under the stats card. -->
 <PageSection id="how-we-work" title="How we work" band extraCells={1}>
-  <div class="track" data-principles style={trackStyle}>
+  <div class:list={['track', { 'can-pin': canPin }]} data-principles style={trackStyle}>
     <div class="stage" data-principles-stage>
       <div class="list" role="tablist" aria-label="Principles" aria-orientation="vertical">
         {
@@ -146,7 +150,8 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
     }
   }
 
-  /* Pinned: same query as PRINCIPLE_SWITCHER.pinQuery (constants.ts), with JS only. The stage IS
+  /* Pinned: same query as PRINCIPLE_SWITCHER.pinQuery (constants.ts), with JS only, on a
+     `can-pin` track. The stage IS
      the band: the section's own band (page-section.astro) is off, and the stage paints the page
      behind a band itself, opaque, full-bleed (::before): ink, grid paper, column halo (global.css
      --column-halo), band tint. Its top sits on a grid line (principle-switcher.ts: --snap), so
@@ -156,21 +161,21 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
      While pinned nothing behind it shows, the desktop's grid canvas included; at release the
      stage's lines are on the page's again. */
   @media (min-width: 641px) and (min-height: 600px), (max-width: 640px) and (min-height: 500px) {
-    :global(html.js #how-we-work.is-band::before) {
+    :global(html.js #how-we-work.is-band:has(.can-pin)::before) {
       display: none;
     }
 
-    :global(html.js) .track {
+    :global(html.js) .track.can-pin {
       margin-top: var(--snap, 0px);
     }
 
-    :global(html.js) .track::after {
+    :global(html.js) .track.can-pin::after {
       content: '';
       display: block;
       height: var(--track-room, calc(var(--pages) * var(--page-fallback)));
     }
 
-    :global(html.js) .stage {
+    :global(html.js) .can-pin .stage {
       position: sticky;
       top: 0;
       display: grid;
@@ -182,7 +187,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       padding-bottom: calc(var(--stage-h, 100lvh) - var(--visible-h, 100svh));
     }
 
-    :global(html.js) .stage::before {
+    :global(html.js) .can-pin .stage::before {
       content: '';
       position: absolute;
       top: 0;
@@ -203,17 +208,17 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
         var(--grid) var(--grid);
     }
 
-    :global(html.js) .list {
+    :global(html.js) .can-pin .list {
       display: grid;
       border-left: 1px solid var(--line);
     }
 
-    :global(html.js) .panels {
+    :global(html.js) .can-pin .panels {
       gap: 0;
     }
 
     /* All three in one cell: the stage is as tall as the tallest, whichever shows. */
-    :global(html.js) .panel {
+    :global(html.js) .can-pin .panel {
       grid-area: 1 / 1;
       visibility: hidden;
       opacity: 0;
@@ -224,7 +229,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
         visibility 0s 0.2s;
     }
 
-    :global(html.js) .panel.is-active {
+    :global(html.js) .can-pin .panel.is-active {
       visibility: visible;
       opacity: 1;
       transform: none;
@@ -233,7 +238,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
         transform 0.28s 0.06s;
     }
 
-    :global(html.js) .count {
+    :global(html.js) .can-pin .count {
       display: block;
       margin-bottom: 20px;
       font: 400 11px/var(--leading) var(--mono);
@@ -241,12 +246,12 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       color: var(--dim);
     }
 
-    :global(html.js) .count span {
+    :global(html.js) .can-pin .count span {
       color: var(--sig);
     }
 
     /* The tab names the principle; screen readers still get it in the panel. */
-    :global(html.js) h3 {
+    :global(html.js) .can-pin h3 {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -255,7 +260,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       white-space: nowrap;
     }
 
-    :global(html.js) .subtitle {
+    :global(html.js) .can-pin .subtitle {
       max-width: 18ch;
       font-weight: 500;
       font-size: 48px;
@@ -264,7 +269,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       color: var(--fg);
     }
 
-    :global(html.js) .detail {
+    :global(html.js) .can-pin .detail {
       max-width: 56ch;
       margin-top: 24px;
       font-size: 15px;
@@ -275,30 +280,30 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
   /* Phones, pinned: the tabs as a row of numbers near the top (the title shows in the panel), the
      current one's bar along its bottom. */
   @media (max-width: 640px) and (min-height: 500px) {
-    :global(html.js) .stage {
+    :global(html.js) .can-pin .stage {
       grid-template-columns: minmax(0, 1fr);
       gap: 40px;
       align-content: start;
       padding-top: calc(var(--grid) * 2);
     }
 
-    :global(html.js) .list {
+    :global(html.js) .can-pin .list {
       grid-template-columns: repeat(3, 1fr);
       border-left: 0;
       border-bottom: 1px solid var(--line);
     }
 
-    :global(html.js) .tab {
+    :global(html.js) .can-pin .tab {
       grid-template-columns: auto;
       justify-content: center;
       padding: 14px 0;
     }
 
-    :global(html.js) .tab-num {
+    :global(html.js) .can-pin .tab-num {
       font-size: 13px;
     }
 
-    :global(html.js) .tab-name {
+    :global(html.js) .can-pin .tab-name {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -307,7 +312,7 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       white-space: nowrap;
     }
 
-    :global(html.js) .bar {
+    :global(html.js) .can-pin .bar {
       top: auto;
       bottom: -1px;
       left: 0;
@@ -317,15 +322,15 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       transform: scaleX(0);
     }
 
-    :global(html.js) .tab[aria-selected='true'] .bar {
+    :global(html.js) .can-pin .tab[aria-selected='true'] .bar {
       transform: scaleX(var(--page-progress, 0));
     }
 
-    :global(html.js) .count {
+    :global(html.js) .can-pin .count {
       display: none;
     }
 
-    :global(html.js) h3 {
+    :global(html.js) .can-pin h3 {
       position: static;
       width: auto;
       height: auto;
@@ -341,12 +346,12 @@ const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_
       color: var(--sig);
     }
 
-    :global(html.js) .subtitle {
+    :global(html.js) .can-pin .subtitle {
       font-size: 30px;
       line-height: 1.1;
     }
 
-    :global(html.js) .detail {
+    :global(html.js) .can-pin .detail {
       margin-top: 18px;
       font-size: 14px;
     }
