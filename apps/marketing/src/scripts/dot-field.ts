@@ -7,14 +7,17 @@ import { NO_POINTER, trackPointer } from './dot-pointer';
 import { SeparationGrid } from './dot-separation';
 import type { Dot, Home } from './dot-spawn';
 import { appearAlpha, spawnDots } from './dot-spawn';
+import { NO_TILT, trackTilt } from './dot-tilt';
 import { hasFinePointer, isMobileViewport } from './motion';
+import type { Vec } from './tilt-gravity';
 
 /**
  * Drifting dots behind the hero. On a mouse-first desktop the cursor gathers the dots near it;
  * when it stops they settle into an even ring around it, and when it rests a small black hole
  * seeps in at its centre, inside the ring (scripts/black-hole.ts); when it leaves the clump
- * diffuses slowly back into the drift. The loop runs only while the hero is on screen and the tab
- * is visible.
+ * diffuses slowly back into the drift. On phones and tablets, tilting the device lets the dots
+ * drift toward its lower side (scripts/dot-tilt.ts). The loop runs only while the hero is on
+ * screen and the tab is visible.
  */
 export function initDotField(): void {
   const canvas = document.querySelector<HTMLCanvasElement>('[data-dot-field]');
@@ -26,6 +29,7 @@ export function initDotField(): void {
   const scale = DOT_FIELD.canvasScale;
   const tracked = chase ? trackPointer(host, canvas, scale) : NO_POINTER;
   const pointer = tracked.position;
+  const tilt = hasFinePointer() ? NO_TILT : trackTilt();
   const grid = new SeparationGrid();
   let dots: Dot[] = [];
   // Its collapse is a blast: the dots near it fly out, then drift home (scripts/dot-burst.ts).
@@ -64,7 +68,7 @@ export function initDotField(): void {
   };
 
   // `dt` = frames of DOT_FIELD.frameMs this step covers: the same motion at 30, 60 or 120 Hz.
-  const move = (dot: Dot, now: number, still: boolean, dt: number): void => {
+  const move = (dot: Dot, now: number, still: boolean, dt: number, tiltPull: Vec): void => {
     const dx = dot.x - pointer.x;
     const dy = dot.y - pointer.y;
     const distance = Math.hypot(dx, dy);
@@ -82,6 +86,8 @@ export function initDotField(): void {
     const clampY = Math.min(home.bottom, Math.max(home.top, dot.y));
     dot.vx += (clampX - dot.x) * DOT_FIELD.homePull * dt;
     dot.vy += (clampY - dot.y) * DOT_FIELD.homePull * dt;
+    dot.vx += tiltPull.x * dt;
+    dot.vy += tiltPull.y * dt;
     // Settling round a still pointer: heavy damping, no jitter, so the disc comes to rest.
     // Just released: extra jitter that fades, a random walk that mixes the clump back in.
     // And the settle's damping eases off over the release ramp: the packed disc loosens slowly
@@ -124,6 +130,7 @@ export function initDotField(): void {
     const still = active && stillFor > DOT_FIELD.stillMs;
     const reach = CURSOR_FIELD.radiusPx * scale;
     hole?.update(now, active ? pointer : null, active ? stillFor : 0);
+    const tiltPull = tilt.pull(now);
     for (const dot of dots) {
       const captured = active && Math.hypot(dot.x - pointer.x, dot.y - pointer.y) < reach;
       if (dot.captured && !captured) dot.releasedAt = now;
@@ -135,7 +142,7 @@ export function initDotField(): void {
       DOT_FIELD.releaseSpacingPx * scale,
       DOT_FIELD.separationForce * dt,
     );
-    for (const dot of dots) move(dot, now, still, dt);
+    for (const dot of dots) move(dot, now, still, dt, tiltPull);
   };
 
   const draw = (now: number): void => {
