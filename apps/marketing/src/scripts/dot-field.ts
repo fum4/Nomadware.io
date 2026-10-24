@@ -1,4 +1,4 @@
-import { CURSOR_FIELD, DOT_FIELD } from '../constants';
+import { CURSOR_FIELD, DOT_FIELD, DOT_TILT } from '../constants';
 import type { BlackHole } from './black-hole';
 import { createBlackHole } from './black-hole';
 import { burst, isFlung } from './dot-burst';
@@ -9,15 +9,14 @@ import type { Dot, Home } from './dot-spawn';
 import { appearAlpha, spawnDots } from './dot-spawn';
 import { NO_TILT, trackTilt } from './dot-tilt';
 import { hasFinePointer, isMobileViewport } from './motion';
-import type { Vec } from './tilt-gravity';
 
 /**
  * Drifting dots behind the hero. On a mouse-first desktop the cursor gathers the dots near it;
  * when it stops they settle into an even ring around it, and when it rests a small black hole
  * seeps in at its centre, inside the ring (scripts/black-hole.ts); when it leaves the clump
- * diffuses slowly back into the drift. On phones and tablets, tilting the device lets the dots
- * drift toward its lower side (scripts/dot-tilt.ts). The loop runs only while the hero is on
- * screen and the tab is visible.
+ * diffuses slowly back into the drift. On phones and tablets, tilting the device shifts the
+ * whole field the other way, a parallax (scripts/dot-tilt.ts): drawn offset only, so the drift's
+ * physics never feel it. The loop runs only while the hero is on screen and the tab is visible.
  */
 export function initDotField(): void {
   const canvas = document.querySelector<HTMLCanvasElement>('[data-dot-field]');
@@ -68,7 +67,7 @@ export function initDotField(): void {
   };
 
   // `dt` = frames of DOT_FIELD.frameMs this step covers: the same motion at 30, 60 or 120 Hz.
-  const move = (dot: Dot, now: number, still: boolean, dt: number, tiltPull: Vec): void => {
+  const move = (dot: Dot, now: number, still: boolean, dt: number): void => {
     const dx = dot.x - pointer.x;
     const dy = dot.y - pointer.y;
     const distance = Math.hypot(dx, dy);
@@ -86,8 +85,6 @@ export function initDotField(): void {
     const clampY = Math.min(home.bottom, Math.max(home.top, dot.y));
     dot.vx += (clampX - dot.x) * DOT_FIELD.homePull * dt;
     dot.vy += (clampY - dot.y) * DOT_FIELD.homePull * dt;
-    dot.vx += tiltPull.x * dt;
-    dot.vy += tiltPull.y * dt;
     // Settling round a still pointer: heavy damping, no jitter, so the disc comes to rest.
     // Just released: extra jitter that fades, a random walk that mixes the clump back in.
     // And the settle's damping eases off over the release ramp: the packed disc loosens slowly
@@ -130,7 +127,6 @@ export function initDotField(): void {
     const still = active && stillFor > DOT_FIELD.stillMs;
     const reach = CURSOR_FIELD.radiusPx * scale;
     hole?.update(now, active ? pointer : null, active ? stillFor : 0);
-    const tiltPull = tilt.pull(now);
     for (const dot of dots) {
       const captured = active && Math.hypot(dot.x - pointer.x, dot.y - pointer.y) < reach;
       if (dot.captured && !captured) dot.releasedAt = now;
@@ -142,19 +138,23 @@ export function initDotField(): void {
       DOT_FIELD.releaseSpacingPx * scale,
       DOT_FIELD.separationForce * dt,
     );
-    for (const dot of dots) move(dot, now, still, dt, tiltPull);
+    for (const dot of dots) move(dot, now, still, dt);
   };
 
   const draw = (now: number): void => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     hole?.draw(context);
     const sinceFirst = now - firstFrame;
+    // The tilt's shift, canvas px at full depth: lime dots take all of it, grey ones less.
+    const shift = tilt.offset(now);
+    const reach = DOT_TILT.amplitudePx * scale;
     for (const dot of dots) {
+      const depth = reach * (dot.highlight ? 1 : DOT_TILT.greyDepth);
       const size = dot.highlight ? DOT_FIELD.highlightSize : DOT_FIELD.size;
       const alpha = appearAlpha(dot, sinceFirst);
       if (alpha !== null) context.globalAlpha = alpha;
       context.fillStyle = dot.highlight ? DOT_FIELD.highlightColor : DOT_FIELD.color;
-      context.fillRect(dot.x, dot.y, size, size);
+      context.fillRect(dot.x + shift.x * depth, dot.y + shift.y * depth, size, size);
     }
     context.globalAlpha = 1;
   };
