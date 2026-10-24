@@ -34,16 +34,13 @@ const PRINCIPLES = [
 ];
 
 const number = (index: number): string => String(index + 1).padStart(2, '0');
-const pageScroll = `${PRINCIPLE_SWITCHER.pageVh * 100}vh`;
+// Fallback scroll per page until principle-switcher.ts sizes the track in px.
+const trackStyle = `--pages: ${PRINCIPLES.length}; --page-fallback: ${PRINCIPLE_SWITCHER.pageSvh.wide * 100}svh`;
 ---
 
 <!-- One extra cell above: more air under the stats card. -->
 <PageSection id="how-we-work" title="How we work" band extraCells={1}>
-  <div
-    class="track"
-    data-principles
-    style={`--pages: ${PRINCIPLES.length}; --page-scroll: ${pageScroll}`}
-  >
+  <div class="track" data-principles style={trackStyle}>
     <div class="stage" data-principles-stage>
       <div class="list" role="tablist" aria-label="Principles" aria-orientation="vertical">
         {
@@ -60,7 +57,7 @@ const pageScroll = `${PRINCIPLE_SWITCHER.pageVh * 100}vh`;
             >
               <span class="tab-num">{number(index)}</span>
               <span class="tab-name">{title}</span>
-              <span class="bar" aria-hidden="true" />
+              <span class="bar" aria-hidden="true" data-principle-bar />
             </button>
           ))
         }
@@ -97,7 +94,7 @@ const pageScroll = `${PRINCIPLE_SWITCHER.pageVh * 100}vh`;
 </script>
 
 <style>
-  /* Stacked (phones, short viewports, no JS): no tab list, each principle with its own title,
+  /* Stacked (no JS, short viewports): no tab list, each principle with its own title,
      title → one-liner → the longer why, each a step quieter. */
   .list,
   .count {
@@ -149,26 +146,61 @@ const pageScroll = `${PRINCIPLE_SWITCHER.pageVh * 100}vh`;
     }
   }
 
-  /* Pinned: same query as PRINCIPLE_SWITCHER.pinQuery (constants.ts), with JS only. The track is
-     the stage plus one page of scroll per principle; the stage sticks centred in the viewport
-     (--stage-h, measured by principle-switcher.ts) while the track scrolls past, and never leaves
-     the track, so it stays inside the band. */
-  @media (min-width: 641px) and (min-height: 600px) {
-    /* The scroll room is content (a sticky box only moves within its parent's content box,
-       never into its padding). */
+  /* Pinned: same query as PRINCIPLE_SWITCHER.pinQuery (constants.ts), with JS only. The stage IS
+     the band: the section's own band (page-section.astro) is off, and the stage paints the page
+     behind a band itself, opaque, full-bleed (::before): ink, grid paper, column halo (global.css
+     --column-halo), band tint. Its top sits on a grid line (principle-switcher.ts: --snap), so
+     its grid lines are the page's. Its height (--stage-h: the viewport, phones the screen,
+     rounded up to whole cells) and the track's scroll (--track-room: whole cells) are px set by
+     principle-switcher.ts, never viewport units: a phone's toolbars change those mid-scroll.
+     While pinned nothing behind it shows, the desktop's grid canvas included; at release the
+     stage's lines are on the page's again. */
+  @media (min-width: 641px) and (min-height: 600px), (max-width: 640px) and (min-height: 500px) {
+    :global(html.js #how-we-work.is-band::before) {
+      display: none;
+    }
+
+    :global(html.js) .track {
+      margin-top: var(--snap, 0px);
+    }
+
     :global(html.js) .track::after {
       content: '';
       display: block;
-      height: calc(var(--pages) * var(--page-scroll));
+      height: var(--track-room, calc(var(--pages) * var(--page-fallback)));
     }
 
     :global(html.js) .stage {
       position: sticky;
-      top: calc(50vh - var(--stage-h, 384px) / 2);
+      top: 0;
       display: grid;
       grid-template-columns: calc(var(--grid) * 5) minmax(0, 1fr);
       gap: calc(var(--grid) * 1.5);
       align-items: center;
+      align-content: center;
+      height: var(--stage-h, 100lvh);
+      padding-bottom: calc(var(--stage-h, 100lvh) - var(--visible-h, 100svh));
+    }
+
+    :global(html.js) .stage::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: var(--bleed-left, calc(50% - 50vw));
+      z-index: -1;
+      width: var(--bleed-width, 100vw);
+      height: 100%;
+      background-color: var(--ink);
+      background-image:
+        linear-gradient(var(--band), var(--band)),
+        var(--column-halo),
+        linear-gradient(var(--grid-color) var(--grid-line), transparent var(--grid-line)),
+        linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
+      background-size:
+        auto,
+        auto,
+        var(--grid) var(--grid),
+        var(--grid) var(--grid);
     }
 
     :global(html.js) .list {
@@ -240,6 +272,86 @@ const pageScroll = `${PRINCIPLE_SWITCHER.pageVh * 100}vh`;
     }
   }
 
+  /* Phones, pinned: the tabs as a row of numbers near the top (the title shows in the panel), the
+     current one's bar along its bottom. */
+  @media (max-width: 640px) and (min-height: 500px) {
+    :global(html.js) .stage {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+      align-content: start;
+      padding-top: calc(var(--grid) * 2);
+    }
+
+    :global(html.js) .list {
+      grid-template-columns: repeat(3, 1fr);
+      border-left: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    :global(html.js) .tab {
+      grid-template-columns: auto;
+      justify-content: center;
+      padding: 14px 0;
+    }
+
+    :global(html.js) .tab-num {
+      font-size: 13px;
+    }
+
+    :global(html.js) .tab-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    :global(html.js) .bar {
+      top: auto;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+
+    :global(html.js) .tab[aria-selected='true'] .bar {
+      transform: scaleX(var(--page-progress, 0));
+    }
+
+    :global(html.js) .count {
+      display: none;
+    }
+
+    :global(html.js) h3 {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+      margin-bottom: 14px;
+      font-size: 13px;
+      font-family: var(--mono);
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sig);
+    }
+
+    :global(html.js) .subtitle {
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    :global(html.js) .detail {
+      margin-top: 18px;
+      font-size: 14px;
+    }
+  }
+
   .tab {
     position: relative;
     display: grid;
@@ -294,6 +406,8 @@ const pageScroll = `${PRINCIPLE_SWITCHER.pageVh * 100}vh`;
     box-shadow: 0 0 8px var(--sig-glow);
     transform-origin: top;
     transform: scaleY(0);
+    /* Its own layer: the scroll moves it every frame without repainting the stage. */
+    will-change: transform;
   }
 
   .tab[aria-selected='true'] .bar {

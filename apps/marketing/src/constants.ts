@@ -383,14 +383,16 @@ export const STATS_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
 
 /**
- * The How-we-work switcher (scripts/principle-switcher.ts): on a desktop tall enough, the section
- * is a scroll track with the switcher pinned in it, one "page" of scroll per principle.
+ * The How-we-work switcher (scripts/principle-switcher.ts): where the viewport is tall enough the
+ * section is a scroll track whose stage, one viewport tall, is the band: it scrolls in, pins
+ * while the scroll moves through one "page" per principle, then scrolls out.
  */
 export const PRINCIPLE_SWITCHER = {
-  /** Pinned only from this up (and above MOBILE_QUERY); shorter, the principles simply stack. */
-  pinQuery: '(min-width: 641px) and (min-height: 600px)',
-  /** Scroll per principle, as a share of the viewport height. */
-  pageVh: 0.7,
+  /** Pinned only here (same as the CSS in how-we-work.astro); elsewhere the principles stack. */
+  pinQuery:
+    '(min-width: 641px) and (min-height: 600px), (max-width: 640px) and (min-height: 500px)',
+  /** Scroll per principle, as a share of the viewport height (on touch: as first measured): desktop, phones. */
+  pageSvh: { wide: 0.7, phone: 0.5 },
   /** How far (share of a page) the scroll must pass a boundary before the page switches back. */
   hysteresis: 0.06,
   /** Where (share of a page) a tab click or arrow key lands in its page: past the hysteresis. */

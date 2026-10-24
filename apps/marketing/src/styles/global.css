@@ -72,6 +72,28 @@ a {
 .frame {
   --column-core: calc(var(--content-width) / 2);
   --column-fade: 320px;
+  /* The column halo's veil (::before below), across the frame's width; how-we-work.astro paints
+     the same one behind its pinned switcher. Eased (smoothstep) sides: a linear ramp shows its two
+     kinks as faint vertical edges. */
+  --column-halo: linear-gradient(
+    90deg,
+    transparent calc(50% - var(--column-core) - var(--column-fade)),
+    color-mix(in srgb, var(--halo-column) 15.6%, transparent)
+      calc(50% - var(--column-core) - var(--column-fade) * 0.75),
+    color-mix(in srgb, var(--halo-column) 50%, transparent)
+      calc(50% - var(--column-core) - var(--column-fade) * 0.5),
+    color-mix(in srgb, var(--halo-column) 84.4%, transparent)
+      calc(50% - var(--column-core) - var(--column-fade) * 0.25),
+    var(--halo-column) calc(50% - var(--column-core)),
+    var(--halo-column) calc(50% + var(--column-core)),
+    color-mix(in srgb, var(--halo-column) 84.4%, transparent)
+      calc(50% + var(--column-core) + var(--column-fade) * 0.25),
+    color-mix(in srgb, var(--halo-column) 50%, transparent)
+      calc(50% + var(--column-core) + var(--column-fade) * 0.5),
+    color-mix(in srgb, var(--halo-column) 15.6%, transparent)
+      calc(50% + var(--column-core) + var(--column-fade) * 0.75),
+    transparent calc(50% + var(--column-core) + var(--column-fade))
+  );
 
   position: relative;
   isolation: isolate;
@@ -104,27 +126,7 @@ a {
   z-index: 1;
   pointer-events: none;
   background-image:
-    radial-gradient(1200px 400px at 85% -10%, var(--glow), transparent 60%),
-    /* Eased (smoothstep) sides: a linear ramp shows its two kinks as faint vertical edges. */
-    linear-gradient(
-      90deg,
-      transparent calc(50% - var(--column-core) - var(--column-fade)),
-      color-mix(in srgb, var(--halo-column) 15.6%, transparent)
-        calc(50% - var(--column-core) - var(--column-fade) * 0.75),
-      color-mix(in srgb, var(--halo-column) 50%, transparent)
-        calc(50% - var(--column-core) - var(--column-fade) * 0.5),
-      color-mix(in srgb, var(--halo-column) 84.4%, transparent)
-        calc(50% - var(--column-core) - var(--column-fade) * 0.25),
-      var(--halo-column) calc(50% - var(--column-core)),
-      var(--halo-column) calc(50% + var(--column-core)),
-      color-mix(in srgb, var(--halo-column) 84.4%, transparent)
-        calc(50% + var(--column-core) + var(--column-fade) * 0.25),
-      color-mix(in srgb, var(--halo-column) 50%, transparent)
-        calc(50% + var(--column-core) + var(--column-fade) * 0.5),
-      color-mix(in srgb, var(--halo-column) 15.6%, transparent)
-        calc(50% + var(--column-core) + var(--column-fade) * 0.75),
-      transparent calc(50% + var(--column-core) + var(--column-fade))
-    );
+    radial-gradient(1200px 400px at 85% -10%, var(--glow), transparent 60%), var(--column-halo);
 }
 
 .frame::after {
