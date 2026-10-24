@@ -14,7 +14,7 @@ import { canPinAt } from './principle-pin';
 // toolbars show and hide as the visitor scrolls (every iOS browser, and Arc resizes its whole web
 // view), which changes the viewport's height, and with it every viewport unit, mid-scroll; there
 // the sizes hold until the width changes (a rotation), the stage tall enough for the screen with
-// its toolbars gone, and so does the choice to pin: an on-screen keyboard that shrinks the
+// its toolbars gone (100lvh, rounded up to whole cells), and so does the choice to pin: an on-screen keyboard that shrinks the
 // viewport below the pinning height must not unpin the stage (reflowing the page above the form
 // being typed in) and re-pin it, re-measured, on close. Scrolling itself only switches classes and
 // the current bar's transform, never a size. Elsewhere (short viewports, no JS) the CSS stacks the
@@ -28,6 +28,16 @@ function pagePosition(track: HTMLElement, stage: HTMLElement, pages: number): nu
   const scrolled = stickyTop - track.getBoundingClientRect().top;
   return Math.min(pages, Math.max(0, (scrolled / scrollable) * pages));
 }
+
+/** CSS `100lvh` in px: the viewport with the browser's toolbars retracted. */
+const largeViewportHeight = (): number => {
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:absolute;visibility:hidden;height:100lvh;width:0';
+  document.body.append(probe);
+  const height = probe.offsetHeight;
+  probe.remove();
+  return height;
+};
 
 export function initPrincipleSwitcher(): void {
   const track = document.querySelector<HTMLElement>('[data-principles]');
@@ -110,9 +120,9 @@ export function initPrincipleSwitcher(): void {
       track.classList.toggle('is-pinned', pin);
       layOnPaper();
     }
-    const sides = [window.screen.width, window.screen.height];
-    const screenTall = visible >= width ? Math.max(...sides) : Math.min(...sides);
-    const cover = finePointer.matches ? visible : Math.max(visible, screenTall);
+    // Touch: the largest the viewport gets (toolbars retracted, CSS `lvh`), not the whole screen —
+    // the band is the viewport rounded up to whole grid cells, never more than a cell taller.
+    const cover = finePointer.matches ? visible : Math.max(visible, largeViewportHeight());
     const { wide, phone } = PRINCIPLE_SWITCHER.pageSvh;
     const room = pages * (mobile.matches ? phone : wide) * visible;
     track.style.setProperty('--stage-h', `${Math.ceil(cover / grid) * grid}px`);
