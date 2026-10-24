@@ -35,6 +35,15 @@ describe('a form that fits above the keyboard', () => {
     expect(fit({ view, form: { top: 450, bottom: 750 } })).toBe(92);
   });
 
+  it('after iOS has panned the focused field into view, lifts only the rest of the form', () => {
+    // The visual viewport panned 300 px down the layout viewport; the field is in view, the send
+    // row is not: one correction, measured from the panned view.
+    const view = { top: 300, bottom: 770 };
+    expect(fit({ view, form: { top: 420, bottom: 800 }, focus: { top: 600, bottom: 630 } })).toBe(
+      42,
+    );
+  });
+
   it('ignores corrections within the tolerance (no back-and-forth)', () => {
     expect(fit({ form: { top: 100, bottom: 460 } })).toBe(0);
     expect(fit({ form: { top: 100, bottom: 461 } })).toBe(3);
