@@ -1,5 +1,5 @@
 ---
-// A titled band: small mono label in the left column, content on the right (stacked on phones).
+// A page section. Its title is for screen readers and the outline only (visually hidden); the content takes the column.
 // `band`: a full-bleed darker background whose edges sit on the page's grid lines
 // (scripts/grid-band.ts snaps them; without JS the band is drawn unsnapped).
 // `extraCells`: whole grid cells of extra space above the section, on top of the usual gap
@@ -20,7 +20,7 @@ const { id, title, band = false, extraCells = 0 } = Astro.props;
   data-grid-band={band ? '' : undefined}
   style={extraCells > 0 ? `--extra-cells: ${extraCells}` : undefined}
 >
-  <h2 class="title" id={`${id}-title`}>{title}</h2>
+  <h2 class="sr-only" id={`${id}-title`}>{title}</h2>
   <div><slot /></div>
 </section>
 
@@ -31,14 +31,11 @@ const { id, title, band = false, extraCells = 0 } = Astro.props;
 
 <style>
   /* Sections are separated by space alone (the grid paper draws the lines): three grid cells
-     from the previous section to this one's title, two on phones. */
+     from the previous section to this one's content, two on phones. */
   .section {
     --section-gap: calc(var(--grid) * 3);
     --band-pad: var(--grid);
 
-    display: grid;
-    grid-template-columns: 160px 1fr;
-    gap: 24px;
     margin-top: calc(var(--section-gap) + var(--grid) * var(--extra-cells, 0));
     padding-bottom: 8px;
     scroll-margin-top: 24px;
@@ -73,20 +70,11 @@ const { id, title, band = false, extraCells = 0 } = Astro.props;
     margin-top: calc(var(--section-gap) - var(--band-pad));
   }
 
-  .title {
-    margin: 4px 0;
-    font: 400 11px/var(--leading) var(--mono);
-    color: var(--dim);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
 
   @media (max-width: 640px) {
     .section {
       --section-gap: calc(var(--grid) * 2);
 
-      grid-template-columns: 1fr;
-      gap: 16px;
       padding-bottom: 4px;
     }
 
