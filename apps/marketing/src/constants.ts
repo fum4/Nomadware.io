@@ -4,7 +4,8 @@ import type { StatWindow } from '@nomadware/site-stats';
 // script also cycles through, like HERO_TAGS); identity in config/site.ts; data in data/.
 
 /** Same breakpoint as the CSS `@media (max-width: 640px)` in styles/. */
-export const MOBILE_QUERY = '(max-width: 640px)';
+export const MOBILE_MAX_WIDTH = 640;
+export const MOBILE_QUERY = `(max-width: ${MOBILE_MAX_WIDTH}px)`;
 /** A device where hovering a mouse is the primary input (no auto-focus, no cursor effects otherwise). */
 export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
 
@@ -317,12 +318,19 @@ export const CONTACT = {
   challengeTimeoutMs: 15_000,
   /**
    * Touch devices: with the on-screen keyboard up, the page scrolls the whole terminal into the
-   * visible area above it (scripts/contact/keyboard-follow.ts, math in keyboard-fit.ts), once:
-   * settleMs after the last focus move, keyboard resize, form resize or browser pan. The keyboard
-   * counts as up once the visual viewport is keyboardMinPx shorter than when focus entered the
-   * form; marginPx is kept clear above and below; corrections within tolerancePx are skipped.
+   * visible area above it (scripts/contact/keyboard-follow.ts, math in keyboard-fit.ts), at most
+   * once per visit to the form, after the browser's own scroll-to-focus is done: the visual
+   * viewport unchanged for settle.viewportFrames frames and the scroll for settle.scrollQuietMs
+   * (settle-watch.ts; past settle.maxWaitMs it corrects anyway). The keyboard counts as up once
+   * the visual viewport is keyboardMinPx shorter than before focus entered the form; marginPx is
+   * kept clear above and below; corrections within tolerancePx are skipped.
    */
-  keyboard: { keyboardMinPx: 120, marginPx: 12, tolerancePx: 2, settleMs: 150 },
+  keyboard: {
+    keyboardMinPx: 120,
+    marginPx: 12,
+    tolerancePx: 2,
+    settle: { viewportFrames: 2, scrollQuietMs: 300, maxWaitMs: 2000 },
+  },
 } as const;
 
 /** The contact endpoint's server-side tunables (src/contact/, src/pages/api/contact.ts). */
@@ -396,9 +404,13 @@ export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revali
  * while the scroll moves through one "page" per principle, then scrolls out.
  */
 export const PRINCIPLE_SWITCHER = {
-  /** Pinned only here (same as the CSS in how-we-work.astro); elsewhere the principles stack. */
-  pinQuery:
-    '(min-width: 641px) and (min-height: 600px), (max-width: 640px) and (min-height: 500px)',
+  /**
+   * Pinned only where the viewport is at least this tall (px): phones (MOBILE_MAX_WIDTH and
+   * narrower), anything wider; elsewhere the principles stack (scripts/principle-pin.ts). On touch
+   * devices judged when the width changes, not on every height change: an on-screen keyboard
+   * that shrinks the viewport must not unpin the stage under the visitor.
+   */
+  pinMinHeight: { phone: 500, wide: 600 },
   /** Scroll per principle, as a share of the viewport height (on touch: as first measured): desktop, phones. */
   pageSvh: { wide: 0.7, phone: 0.5 },
   /** How far (share of a page) the scroll must pass a boundary before the page switches back. */

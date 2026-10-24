@@ -33,13 +33,13 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 </section>
 
 <script>
-  import { bisectOff } from '../scripts/bisect';
   import { initDotField } from '../scripts/dot-field';
   import { initHeroSpread } from '../scripts/hero-spread';
+  import { trackPageWidth } from '../scripts/page-width';
   // Straight away, not when idle: the field fades in from the first frame.
-  // TEMPORARY (NWARE-82): bisect switches.
-  if (!bisectOff('dots')) initDotField();
-  if (!bisectOff('spread')) initHeroSpread();
+  trackPageWidth();
+  initDotField();
+  initHeroSpread();
 </script>
 
 <style>
@@ -48,8 +48,8 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
     padding: 96px 0 60px;
   }
 
-  /* Full bleed (the frame clips the overhang sideways), reaching up behind the nav and down past
-     the hero, faded out at both ends so the field never stops at an edge. Absolutely positioned,
+  /* Full bleed (--page-width: the page without its scrollbar, scripts/page-width.ts; 100vw
+     without JS), reaching up behind the nav and down past the hero, faded out at both ends so the field never stops at an edge. Absolutely positioned,
      so it never affects layout. A canvas is a replaced element: insets alone don't size it (it
      would fall back to its intrinsic size), so width and height are explicit. */
   .dots {
@@ -58,9 +58,9 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 
     position: absolute;
     top: calc(var(--dots-above) * -1);
-    left: calc(50% - 50vw);
+    left: calc(50% - var(--page-width, 100vw) / 2);
     z-index: -1;
-    width: 100vw;
+    width: var(--page-width, 100vw);
     height: calc(100% + var(--dots-above) + var(--dots-below));
     mask-image: linear-gradient(
       transparent,
@@ -73,7 +73,10 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
   /* The text halo: an ink veil hugging the copy (fit-content: the widest line, so the text sets
      exactly as without it), fading out over --halo-fade beyond it, so the dots drawn underneath
      recede behind the words. Two intersected linear masks make a soft-cornered rectangle with
-     no edge anywhere; painted once, no blur, no layout. */
+     no edge anywhere; painted once, no blur, no layout. Its right side stops at the page's edge
+     (where copy fills a phone's column), so it never overflows the page: nothing on the way to
+     How we work's pinned stage may clip (global.css .frame). --halo-left: where the copy starts
+     on the page (the column's centring plus the wrap's padding). */
   .copy {
     --halo-fade: 140px;
 
@@ -83,8 +86,13 @@ const PAIRS = [SLOTS.slice(0, 2), SLOTS.slice(2)];
 
   .copy::before {
     content: '';
+    --halo-left: calc(
+      max(0px, (var(--page-width, 100vw) - var(--content-width)) / 2) + var(--wrap-pad-x)
+    );
+
     position: absolute;
     inset: calc(var(--halo-fade) * -1);
+    right: calc(-1 * min(var(--halo-fade), var(--page-width, 100vw) - var(--halo-left) - 100%));
     z-index: -1;
     pointer-events: none;
     background: var(--halo-text);
