@@ -1,6 +1,7 @@
 // TEMPORARY (NWARE-82): dev-only switches to bisect the iOS scroll jitter on a real phone.
-// `?off=a,b` turns suspects off (`all` = every one); read once at startup. Production builds
-// ignore the parameter: import.meta.env.DEV is false there, so every switch reads "on".
+// `?off=a,b` turns suspects off (`all` = every one); `?jx=a,b` tries a fix (a `jx-<name>` class
+// on <html> plus its rules); both read once at startup. Production builds ignore the parameters:
+// import.meta.env.DEV is false there, so every switch reads "on" and no experiment runs.
 
 export type BisectSwitch =
   | 'switcher'
@@ -14,12 +15,18 @@ export type BisectSwitch =
   | 'intro'
   | 'consent';
 
-/** The switches a query string turns off (server render and client share it). */
-export function parseOff(search: string): ReadonlySet<string> {
+/** The experiments `?jx=` turns on. */
+export type Experiment = 'nosticky' | 'fit' | 'noclip' | 'layer';
+
+/** The comma-separated names in query parameter `key` (dev only). */
+function parseList(search: string, key: string): ReadonlySet<string> {
   if (!import.meta.env.DEV) return new Set();
-  const value = new URLSearchParams(search).get('off') ?? '';
+  const value = new URLSearchParams(search).get(key) ?? '';
   return new Set(value.split(',').map((name) => name.trim()));
 }
+
+/** The switches a query string turns off (server render and client share it). */
+export const parseOff = (search: string): ReadonlySet<string> => parseList(search, 'off');
 
 const OFF = typeof location === 'undefined' ? new Set<string>() : parseOff(location.search);
 
@@ -52,10 +59,34 @@ export const measureCounts = (): ReadonlyMap<string, number> => measures;
 export const probeOn = (search: string): boolean =>
   import.meta.env.DEV && new URLSearchParams(search).has('probe');
 
+const STAGE = '[data-principles-stage]';
+const TRACK = '[data-principles]';
+
+/** Each experiment's rules (!important: the components' scoped rules are more specific). */
+const EXPERIMENTS: Record<Experiment, string> = {
+  // Sticky or not: the stage just scrolls with the page.
+  nosticky: `${STAGE} { position: relative !important; }`,
+  // Not overconstrained: the stage no taller than the smallest visible height (the toolbars up),
+  // so it fits its sticky area whatever the toolbars do; what doesn't fit is clipped.
+  fit: `${STAGE} { height: calc(var(--visible-h) - 48px) !important; padding-bottom: 0 !important; overflow: hidden !important; }`,
+  // No clipping ancestor: the frame's sideways clip moves to the hero (the halo's overhang) and
+  // the stage itself.
+  noclip: `.frame { overflow-x: visible !important; } .hero { overflow-x: clip; } ${STAGE} { overflow-x: clip; }`,
+  // Its own compositing layer: the stage and the track it sticks in.
+  layer: `${TRACK}, ${STAGE} { transform: translateZ(0); backface-visibility: hidden; }`,
+};
+
+const JX = typeof location === 'undefined' ? new Set<string>() : parseList(location.search, 'jx');
+
+const isExperiment = (name: string): name is Experiment => Object.hasOwn(EXPERIMENTS, name);
+
 export function applyBisectStyles(): void {
+  const experiments = [...JX].filter(isExperiment);
+  experiments.forEach((name) => document.documentElement.classList.add(`jx-${name}`));
   const rules = Object.entries(CSS_OFF)
     .filter(([name]) => OFF.has(name) || OFF.has('all'))
-    .map(([, rule]) => rule);
+    .map(([, rule]) => rule)
+    .concat(experiments.map((name) => EXPERIMENTS[name]));
   if (rules.length === 0) return;
   const style = document.createElement('style');
   style.textContent = rules.join('\n');
