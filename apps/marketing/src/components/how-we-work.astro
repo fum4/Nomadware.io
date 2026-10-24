@@ -1,51 +1,42 @@
 ---
+import { HWW_LAYOUT } from '../constants';
+import DetailText from './how-we-work/detail-text.astro';
+import HwwCircuit from './how-we-work/hww-circuit.astro';
+import HwwConfig from './how-we-work/hww-config.astro';
+import HwwIndex from './how-we-work/hww-index.astro';
+import HwwStatements from './how-we-work/hww-statements.astro';
+import HwwTabs from './how-we-work/hww-tabs.astro';
+import { PRINCIPLES } from './how-we-work/principles';
 import PageSection from './page-section.astro';
 
-// `detail` is a list of runs; every second run (odd index) is set in italics.
-const PRINCIPLES = [
-  {
-    title: 'Product mindset',
-    subtitle: 'We build for our users. We ship what moves the needle.',
-    detail: [
-      "A feature only matters if it makes someone's day easier, so that's what we measure our work by. The best products disappear into someone's routine. They feel obvious, they just work — that kind of ",
-      'simple',
-      ' is never an accident.',
-    ],
-  },
-  {
-    title: 'Always in motion',
-    subtitle: 'Agents work around the clock. Every morning starts with progress.',
-    detail: [
-      "Most projects don't fail, they ",
-      'stall',
-      ", so our agents keep the work moving around the clock. We build the pipelines, workflows and guardrails that keep them in check. Our harness delivers continuously and ensures every change is proven before it gets out of our lab.",
-    ],
-  },
-  {
-    title: 'Zero friction',
-    subtitle: 'Every change goes from idea to production in one continuous, elegant flow.',
-    detail: [
-      'Most delays live in the ',
-      'gaps',
-      ' between people. We closed them with knowledge and tools: every decision, rule and piece of context sits within our agents\' reach — they never wait on an answer. The same trail lets us observe, step in and steer, with the right information a glance away.',
-    ],
-  },
-];
+// TEMPORARY (NWARE-82): `?hww=1..5` renders one of the layout directions under review; anything
+// else renders today's stacked rows.
+const requested = Number(Astro.url.searchParams.get(HWW_LAYOUT.param));
+const variant = Number.isInteger(requested) && requested >= 1 && requested <= HWW_LAYOUT.count ? requested : 0;
 ---
 
 <!-- One extra cell above: more air under the stats card. -->
 <PageSection id="how-we-work" title="How we work" band extraCells={1}>
-  <ul class="rows">
-    {
-      PRINCIPLES.map(({ title, subtitle, detail }) => (
-        <li>
-          <h3>{title}</h3>
-          <p class="subtitle">{subtitle}</p>
-          <p class="detail">{detail.map((run, index) => (index % 2 === 1 ? <em>{run}</em> : run))}</p>
-        </li>
-      ))
-    }
-  </ul>
+  {variant === 1 && <HwwIndex />}
+  {variant === 2 && <HwwTabs />}
+  {variant === 3 && <HwwConfig />}
+  {variant === 4 && <HwwCircuit />}
+  {variant === 5 && <HwwStatements />}
+  {
+    variant === 0 && (
+      <ul class="rows">
+        {PRINCIPLES.map(({ title, subtitle, detail }) => (
+          <li>
+            <h3>{title}</h3>
+            <p class="subtitle">{subtitle}</p>
+            <p class="detail">
+              <DetailText runs={detail} />
+            </p>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 </PageSection>
 
 <style>

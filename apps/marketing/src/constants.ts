@@ -381,3 +381,22 @@ export const STATS_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
  * a visitor never waits on a render (stats only move every 5 minutes anyway).
  */
 export const STATS_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
+
+/**
+ * TEMPORARY (NWARE-82): the How-we-work layout directions under review
+ * (components/how-we-work/), picked with `?hww=1..count`; no param renders today's layout.
+ */
+export const HWW_LAYOUT = {
+  param: 'hww',
+  count: 5,
+  /** Direction 2 (switcher): how long each principle shows before the next one takes over. */
+  tabsAdvanceMs: 8_000,
+  /** Direction 3 (config file): the stagger between lines as the file "prints" into view. */
+  configLineStaggerMs: 45,
+  /**
+   * Direction 5 (statements): a statement lights from where its top crosses this share of the
+   * viewport's height down to `litEnd`.
+   */
+  litStart: 0.9,
+  litEnd: 0.45,
+} as const;

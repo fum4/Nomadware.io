@@ -1,0 +1,176 @@
+---
+// TEMPORARY (NWARE-82) direction 4, "Circuit": the three principles cascade diagonally across
+// the band (left, centre, right, each two cells lower), every block five cells wide with its top
+// left on a grid intersection, joined by one lime trace that runs along the grid lines — across
+// each block's top edge, then down to the next one's corner — with a pulse of light travelling it
+// (scripts/how-we-work/circuit.ts). The one-liner is the display
+// line; title as a mono label over it. Phones: blocks stacked, the trace a straight line down
+// their left edge with a node at each.
+import DetailText from './detail-text.astro';
+import { PRINCIPLES, principleNumber } from './principles';
+---
+
+<div class="circuit" data-hww-circuit>
+  <svg class="trace" aria-hidden="true" data-hww-trace>
+    <path class="wire" data-hww-wire></path>
+    <path class="pulse" data-hww-pulse></path>
+  </svg>
+  <ul class="blocks">
+    {
+      PRINCIPLES.map(({ title, subtitle, detail }, index) => (
+        <li data-hww-block>
+          <span class="node" aria-hidden="true" />
+          <h3>
+            <span class="num">{principleNumber(index)}</span>
+            {title}
+          </h3>
+          <p class="subtitle">{subtitle}</p>
+          <p class="detail">
+            <DetailText runs={detail} />
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  import { initCircuit } from '../../scripts/how-we-work/circuit';
+  initCircuit();
+</script>
+
+<style>
+  /* circuit.ts pads the box onto the grid lines (--snap-x / --snap-y, < one cell each). */
+  .circuit {
+    position: relative;
+    padding: var(--snap-y, 0px) 0 0 var(--snap-x, 0px);
+  }
+
+  /* 15 whole cells; on a narrower desktop the cells shrink and the corners leave the lines. */
+  .blocks {
+    display: grid;
+    grid-template-columns: repeat(15, minmax(0, var(--grid)));
+    align-items: start;
+    margin: 0;
+    padding: 0 0 var(--grid);
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    grid-row: 1;
+    grid-column: 1 / span 5;
+    padding: 28px 28px 0 24px;
+  }
+
+  li:nth-child(2) {
+    grid-column: 6 / span 5;
+    margin-top: calc(var(--grid) * 2);
+  }
+
+  li:nth-child(3) {
+    grid-column: 11 / span 5;
+    margin-top: calc(var(--grid) * 4);
+  }
+
+  /* On the block's corner, which sits on a grid intersection: centred on the 1px line. */
+  .node {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 7px;
+    height: 7px;
+    background: var(--sig);
+    box-shadow: 0 0 10px var(--sig-glow);
+  }
+
+  .trace {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .wire,
+  .pulse {
+    fill: none;
+    stroke-width: 1px;
+  }
+
+  .wire {
+    stroke: color-mix(in srgb, var(--sig) 32%, transparent);
+  }
+
+  .pulse {
+    stroke: var(--sig);
+    stroke-width: 2px;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px var(--sig-glow));
+  }
+
+  h3 {
+    display: flex;
+    gap: 12px;
+    margin: 0 0 14px;
+    font: 400 11px/var(--leading) var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .num {
+    color: var(--sig);
+  }
+
+  p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  .subtitle {
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    color: var(--fg);
+  }
+
+  .detail {
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--subdued);
+  }
+
+  @media (max-width: 640px) {
+    .circuit {
+      padding: 0;
+    }
+
+    .trace {
+      display: none;
+    }
+
+    .blocks {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 56px;
+      padding: 0;
+      border-left: 1px solid color-mix(in srgb, var(--sig) 32%, transparent);
+    }
+
+    li,
+    li:nth-child(2),
+    li:nth-child(3) {
+      grid-row: auto;
+      grid-column: 1;
+      margin-top: 0;
+      padding: 0 0 0 24px;
+    }
+
+    .subtitle {
+      font-size: 24px;
+    }
+  }
+</style>

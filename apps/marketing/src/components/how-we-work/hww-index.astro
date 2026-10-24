@@ -1,0 +1,152 @@
+---
+// TEMPORARY (NWARE-82) direction 1, "Index rail": each principle a full-width row — a big
+// outlined numeral, the title and its one-liner, the detail on the right — strung on a rail that
+// fills lime as the visitor scrolls past (scripts/how-we-work/index-rail.ts); a numeral lights
+// when the fill reaches it. Phones: numeral above the title, one column, the rail down the left.
+import DetailText from './detail-text.astro';
+import { PRINCIPLES, principleNumber } from './principles';
+---
+
+<ol class="index" data-hww-index>
+  {
+    PRINCIPLES.map(({ title, subtitle, detail }, index) => (
+      <li data-hww-index-row>
+        <span class="num" aria-hidden="true">
+          {principleNumber(index)}
+        </span>
+        <div class="lead">
+          <h3>{title}</h3>
+          <p class="subtitle">{subtitle}</p>
+        </div>
+        <p class="detail">
+          <DetailText runs={detail} />
+        </p>
+      </li>
+    ))
+  }
+</ol>
+
+<script>
+  import { initIndexRail } from '../../scripts/how-we-work/index-rail';
+  initIndexRail();
+</script>
+
+<style>
+  /* The rail: a hairline down the numerals' right edge; ::after is its lime fill (--rail 0 → 1). */
+  .index {
+    --num-col: calc(var(--grid) * 3);
+    --rail: 1;
+
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .index::before,
+  .index::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(var(--num-col) - 32px);
+    width: 1px;
+    height: 100%;
+    background: var(--line);
+  }
+
+  .index::after {
+    background: linear-gradient(transparent, var(--sig));
+    box-shadow: 0 0 8px var(--sig-soft);
+    transform-origin: top;
+    transform: scaleY(var(--rail));
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: var(--num-col) minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 0 40px;
+    align-items: start;
+    padding: 40px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  li:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Outlined until the rail's fill reaches it, then lit lime. */
+  .num {
+    margin-top: -14px;
+    font: 500 112px/1 var(--mono);
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--fg) 26%, transparent);
+    transition:
+      -webkit-text-stroke-color 0.5s,
+      color 0.5s,
+      text-shadow 0.5s;
+  }
+
+  li:global(.is-reached) .num {
+    color: color-mix(in srgb, var(--sig) 8%, transparent);
+    -webkit-text-stroke-color: var(--sig);
+    text-shadow: 0 0 24px var(--sig-soft);
+  }
+
+  h3 {
+    margin: 0 0 12px;
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--soft);
+  }
+
+  .detail {
+    padding-top: 6px;
+    font-size: 14px;
+    color: var(--subdued);
+  }
+
+  @media (max-width: 640px) {
+    .index {
+      --num-col: 0px;
+
+      padding-left: 24px;
+    }
+
+    .index::before,
+    .index::after {
+      left: 0;
+    }
+
+    li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      padding: 32px 0;
+    }
+
+    .num {
+      margin: 0 0 12px;
+      font-size: 56px;
+    }
+
+    h3 {
+      font-size: 24px;
+    }
+
+    .detail {
+      padding-top: 12px;
+    }
+  }
+</style>
