@@ -124,6 +124,22 @@
   cursor: text;
 }
 
+/* iOS (the only engine with -webkit-touch-callout) zooms the page into any focused field set
+   under 16px, which also leaves the form half off-screen above the keyboard
+   (scripts/contact/keyboard-follow.ts stands down when zoomed). The invisible control is set at
+   16px and scaled back to the painted 14px (.term-body): iOS lays text out unhinted, so taps still
+   land on the same characters of the monospaced copy (engines that round glyph advances drift). */
+@supports (-webkit-touch-callout: none) {
+  html.js .term-field input,
+  html.js .term-field textarea {
+    width: calc(100% * 16 / 14);
+    height: calc(100% * 16 / 14);
+    font-size: 16px;
+    transform: scale(calc(14 / 16));
+    transform-origin: 0 0;
+  }
+}
+
 /* No JS: the real controls, plainly. */
 html:not(.js) .term-vis {
   display: none;
